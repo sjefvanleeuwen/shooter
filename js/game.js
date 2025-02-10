@@ -145,30 +145,24 @@ class Game {
                 this.player.x + this.player.width/2,
                 this.player.y + this.player.height
             );
-            
-            // Draw player with radiosity effect
-            this.ctx.save();
-            
-            // Draw base sprite
+
+            // Draw player with radiosity effect applied directly on the player's image
+            // Create an offscreen canvas to tint the image
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = this.player.img.width;
+            offCanvas.height = this.player.img.height;
+            const offCtx = offCanvas.getContext('2d');
+            offCtx.drawImage(this.player.img, 0, 0);
+            offCtx.globalCompositeOperation = 'source-atop';
+            offCtx.fillStyle = `rgba(${bgColor.r}, ${bgColor.g}, ${bgColor.b}, 0.33)`;
+            offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
             this.ctx.drawImage(
-                this.player.img,
+                offCanvas,
                 this.player.x,
                 this.player.y,
                 this.player.width,
                 this.player.height
             );
-            
-            // Apply color influence using source-atop to respect transparency
-            this.ctx.globalCompositeOperation = 'source-atop';
-            this.ctx.fillStyle = `rgba(${bgColor.r}, ${bgColor.g}, ${bgColor.b}, 0.6)`;
-            this.ctx.fillRect(
-                this.player.x,
-                this.player.y,
-                this.player.width,
-                this.player.height
-            );
-            
-            this.ctx.restore();
         }
 
         // 4. Draw effects
