@@ -2,6 +2,7 @@ import Alien from './alien.js';
 import { patterns } from './patterns/formationPatterns.js';
 import SplineCurve from './math/SplineCurve.js';
 import BezierPath from './math/BezierPath.js';
+import AlienLaser from './LaserParticle.js';
 
 class PatternFormation {
     constructor(ctx, options = {}) {
@@ -20,7 +21,8 @@ class PatternFormation {
             pathPoints: 100, // number of points to draw on path
             formationRadius: 150,  // New separate radius for formation
             pulseIntensity: 0,  // Add pulse intensity control
-            pulseSpeed: 1       // Add pulse speed control
+            pulseSpeed: 1,       // Add pulse speed control
+            shootingEnabled: true // Add shooting enabled control
         };
 
         this.aliens = [];
@@ -53,6 +55,10 @@ class PatternFormation {
             this.virtualHeight * 0.3,    // centerY
             this.virtualWidth * 0.3      // radius
         );
+
+        this.lasers = [];
+        this.shootTimer = 0;
+        this.shootInterval = 1.0; // Time between shots
 
         // Delay GUI setup to ensure dat.GUI is loaded
         setTimeout(() => this.setupGUI(), 100);
@@ -114,6 +120,9 @@ class PatternFormation {
                 
             folder.add(this.config, 'pulseSpeed', 0.1, 2)
                 .name('Pulse Speed');
+            
+            folder.add(this.config, 'shootingEnabled')
+                .name('Alien Shooting');
             
             // Force the folder to be open
             folder.open();
@@ -249,6 +258,29 @@ class PatternFormation {
                 alien.y = targetY;
             }
         });
+
+        // Update shooting
+        if (this.config.shootingEnabled && this.aliens.length > 0) {
+            this.shootTimer += delta;
+            if (this.shootTimer >= this.shootInterval) {
+                this.shootTimer = 0;
+                this.shoot();
+            }
+        }
+
+        // Update lasers
+        this.lasers = this.lasers.filter(laser => laser.life > 0);
+        this.lasers.forEach(laser => laser.update(delta));
+    }
+
+    shoot() {
+        // Random alien shoots
+        const shooter = this.aliens[Math.floor(Math.random() * this.aliens.length)];
+        const laser = new AlienLaser(
+            shooter.x + shooter.width/2,
+            shooter.y + shooter.height
+        );
+        this.lasers.push(laser);
     }
 
     getPatternPosition(angle, centerX, centerY, radiusX, radiusY) {
@@ -290,6 +322,9 @@ class PatternFormation {
 
         // Draw aliens
         this.aliens.forEach(alien => alien.draw());
+
+        // Draw lasers
+        this.lasers.forEach(laser => laser.draw(this.ctx));
     }
 
     drawPath() {
@@ -306,6 +341,19 @@ class PatternFormation {
             }
         }
         return false;
+    }
+
+    checkPlayerCollision(playerX, playerY, playerWidth, playerHeight) {
+        return this.lasers.some(laser => {
+            const hit = (laser.x >= playerX && 
+                        laser.x <= playerX + playerWidth &&
+                        laser.y >= playerY &&
+                        laser.y <= playerY + playerHeight);
+            if (hit) {
+                laser.life = 0; // Remove laser on hit
+            }
+            return hit;
+        });
     }
 }
 

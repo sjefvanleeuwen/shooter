@@ -57,6 +57,11 @@ class Game {
         this.reset();
         // Start the game loop.
         this.startGameLoop();
+
+        this.playerHit = false;
+        this.playerInvulnerable = false;
+        this.invulnerabilityTime = 2.0;
+        this.invulnerabilityTimer = 0;
     }
 
     setupCanvas() {
@@ -123,6 +128,28 @@ class Game {
         this.laserEngineRight.update(delta);
         
         this.formation.update(delta);
+
+        // Check player collision with alien lasers
+        if (!this.playerInvulnerable && 
+            this.formation.checkPlayerCollision(
+                this.player.x, 
+                this.player.y,
+                this.player.width,
+                this.player.height
+            )) {
+            this.playerHit = true;
+            this.playerInvulnerable = true;
+            console.log('Player hit!');
+        }
+
+        // Handle invulnerability
+        if (this.playerInvulnerable) {
+            this.invulnerabilityTimer += delta;
+            if (this.invulnerabilityTimer >= this.invulnerabilityTime) {
+                this.playerInvulnerable = false;
+                this.invulnerabilityTimer = 0;
+            }
+        }
     }
 
     draw() {
@@ -165,6 +192,10 @@ class Game {
             offCtx.globalCompositeOperation = 'source-atop';
             offCtx.fillStyle = `rgba(${bgColor.r}, ${bgColor.g}, ${bgColor.b}, 0.33)`;
             offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+            this.ctx.save();
+            if (this.playerInvulnerable) {
+                this.ctx.globalAlpha = 0.5 + Math.sin(this.invulnerabilityTimer * 10) * 0.3;
+            }
             this.ctx.drawImage(
                 offCanvas,
                 this.player.x,
@@ -172,6 +203,7 @@ class Game {
                 this.player.width,
                 this.player.height
             );
+            this.ctx.restore();
         }
 
         // Draw formation after background but before particles
