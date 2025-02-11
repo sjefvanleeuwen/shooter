@@ -2,6 +2,7 @@ import BackgroundScroller from './backgroundScroller.js';
 import Player from './player.js';
 import { ParticleEngine, LaserEngine } from './particleEngine.js';
 import ImageBackgroundScroller from './imageBackgroundScroller.js';
+import PatternFormation from './PatternFormation.js';  // Add this import
 
 class Game {
     constructor() {
@@ -46,6 +47,12 @@ class Game {
         // Create laser engines for left and right guns
         this.laserEngineLeft = new LaserEngine(this.ctx);
         this.laserEngineRight = new LaserEngine(this.ctx);
+        // Create the formation
+        this.formation = new PatternFormation(this.ctx, {
+            virtualWidth: this.virtualWidth,
+            virtualHeight: this.virtualHeight,
+            pattern: 'infinity'  // Use the infinity pattern
+        });
         // Reset overall game positions.
         this.reset();
         // Start the game loop.
@@ -114,6 +121,8 @@ class Game {
         
         this.laserEngineLeft.update(delta);
         this.laserEngineRight.update(delta);
+        
+        this.formation.update(delta);
     }
 
     draw() {
@@ -164,6 +173,9 @@ class Game {
                 this.player.height
             );
         }
+
+        // Draw formation after background but before particles
+        this.formation.draw();
 
         // 4. Draw effects
         this.laserEngineLeft.draw();
