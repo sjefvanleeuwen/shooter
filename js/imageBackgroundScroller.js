@@ -4,28 +4,29 @@ class ImageBackgroundScroller {
         this.virtualWidth = options.virtualWidth || 1080;
         this.virtualHeight = options.virtualHeight || 1080;
         this.scrollSpeed = options.scrollSpeed || 100;
-        this.offsetY = options.offsetY || 0;
-        this.scrollY = 0;
 
-        // Load both background images
-        this.images = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),new Image(), new Image()];
-        this.images[0].src = './backgrounds/4.png';
-        this.images[1].src = './backgrounds/7.png';
-        this.images[2].src = './backgrounds/3.png';
-        this.images[3].src = './backgrounds/4.png';                
-        this.images[4].src = './backgrounds/5.png';        
-        this.images[5].src = './backgrounds/6.png';        
-        this.images[6].src = './backgrounds/7.png';        
-        this.images[7].src = './backgrounds/8.png';        
-        this.images[8].src = './backgrounds/9.png';                
-        this.images[9].src = './backgrounds/10.png';                
+        // Load all background images
+        this.images = [
+            './backgrounds/1.png',
+            './backgrounds/3.png',
+            './backgrounds/4.png',
+            './backgrounds/5.png',
+            './backgrounds/6.png',
+            './backgrounds/7.png',
+            './backgrounds/8.png',
+            './backgrounds/9.png',
+            './backgrounds/10.png'
+        ].map(src => {
+            const img = new Image();
+            img.src = src;
+            return img;
+        });
+
         this.currentImageIndex = 0;
-        this.currentImage = this.images[0];
-
-        // Track two image positions
+        this.nextImageIndex = 1;
         this.position1 = 0;
         this.position2 = -this.virtualHeight;
-        this.activeImage = 0;  // Track which image is currently visible
+        this.transitionPoint = this.virtualHeight;
     }
     
     update(delta) {
@@ -33,42 +34,42 @@ class ImageBackgroundScroller {
         this.position1 += this.scrollSpeed * delta;
         this.position2 += this.scrollSpeed * delta;
         
-        // When the first image moves completely out of view
-        if (this.position1 >= this.virtualHeight) {
+        // When first image moves out of view
+        if (this.position1 >= this.transitionPoint) {
             this.position1 = this.position2 - this.virtualHeight;
-            this.activeImage = 1;
+            this.currentImageIndex = (this.currentImageIndex + 1) % this.images.length;
         }
         
-        // When the second image moves completely out of view
-        if (this.position2 >= this.virtualHeight) {
+        // When second image moves out of view
+        if (this.position2 >= this.transitionPoint) {
             this.position2 = this.position1 - this.virtualHeight;
-            this.activeImage = 0;
+            this.nextImageIndex = (this.nextImageIndex + 1) % this.images.length;
         }
     }
     
-    draw(scale) {
-        if (!this.images[0].complete || !this.images[1].complete) return;
+    draw() {
+        if (!this.images[this.currentImageIndex]?.complete || 
+            !this.images[this.nextImageIndex]?.complete) return;
 
-        const ctx = this.ctx;
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(0, 0, this.virtualWidth, this.virtualHeight);
-        ctx.clip();
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.rect(0, 0, this.virtualWidth, this.virtualHeight);
+        this.ctx.clip();
         
-        // Draw both images at their current positions
-        ctx.drawImage(
-            this.images[0],
+        // Draw current and next images
+        this.ctx.drawImage(
+            this.images[this.currentImageIndex],
             0, this.position1,
             this.virtualWidth, this.virtualHeight
         );
         
-        ctx.drawImage(
-            this.images[1],
+        this.ctx.drawImage(
+            this.images[this.nextImageIndex],
             0, this.position2,
             this.virtualWidth, this.virtualHeight
         );
         
-        ctx.restore();
+        this.ctx.restore();
     }
 
     getColorAt(x, y) {
@@ -79,8 +80,8 @@ class ImageBackgroundScroller {
         tempCanvas.height = 20;
         
         // Draw the currently visible portion of background
-        const activeImg = this.images[this.activeImage];
-        const activePos = this.activeImage === 0 ? this.position1 : this.position2;
+        const activeImg = this.images[this.currentImageIndex];
+        const activePos = this.currentImageIndex === 0 ? this.position1 : this.position2;
         
         tempCtx.drawImage(
             activeImg,

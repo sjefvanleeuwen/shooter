@@ -137,7 +137,7 @@ class LaserEngine {
 
     async loadShootSound() {
         try {
-            const response = await fetch('./audio/player-shoot.flac');
+            const response = await fetch('./audio/player-shoot.wav');
             const arrayBuffer = await response.arrayBuffer();
             this.shootBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
         } catch (error) {
@@ -164,15 +164,15 @@ class LaserEngine {
         pannerNode.pan.value = normalizedX;
 
         // Random pitch variation (smaller range than explosion)
-        const pitchVariation = 1 + (Math.random() * 0.05); // Half semitone variation
+        const pitchVariation = 1 + (Math.random() * 0.09); // Half semitone variation
         source.playbackRate.value = pitchVariation;
 
         // Quick fade out
-        const fadeDuration = 0.1; // 100ms fade
+        const fadeDuration = (Math.random() * 0.5); // 100ms fade
         
         // Start playing
         source.start();
-        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime); // Lower volume for rapid fire
+        gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime); // Lower volume for rapid fire
         gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + fadeDuration);
         source.stop(this.audioContext.currentTime + fadeDuration);
     }
