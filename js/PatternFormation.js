@@ -11,20 +11,33 @@ class PatternFormation {
         this.virtualWidth = options.virtualWidth || 1080;
         this.virtualHeight = options.virtualHeight || 1080;
         
-        // Initialize config first
+        // Initialize config with new starting values
         this.config = {
             speed: 0.3,
             radius: 80,
             patternType: 'infinity',
             loopDuration: 10,
-            alienCount: 5,
-            showPath: false, // Changed from true to false
+            alienCount: 10, // Increased from 5 to 10
+            showPath: false,
             pathPoints: 100, // number of points to draw on path
             formationRadius: 150,  // New separate radius for formation
             pulseIntensity: 0,  // Add pulse intensity control
             pulseSpeed: 1,       // Add pulse speed control
             shootingEnabled: true // Add shooting enabled control
         };
+
+        // Add difficulty progression parameters
+        this.difficulty = options.difficulty || 1;
+        this.maxDifficulty = 10; // After this, reset and speed up
+        this.baseFormationRadius = 150;
+        this.radiusIncrease = 20; // Amount to increase per level
+        this.basePulseIntensity = 0;
+        this.pulseIntensityIncrease = 0.5;
+        this.basePulseSpeed = 1;
+        this.pulseSpeedIncrease = 0.2;
+
+        // Apply difficulty modifiers
+        this.applyDifficultyModifiers();
 
         this.aliens = [];
         this.pattern = patterns[options.pattern || 'circle'];
@@ -64,9 +77,6 @@ class PatternFormation {
         this.shootTimer = 0;
         this.shootInterval = 1.0; // Time between shots
 
-        // Delay GUI setup to ensure dat.GUI is loaded
-        setTimeout(() => this.setupGUI(), 100);
-
         this.difficulty = options.difficulty || 1;
         this.shootInterval = Math.max(0.3, 1.0 - (this.difficulty * 0.1)); // Shoot faster with higher difficulty
         this.config.speed = Math.min(2.0, 0.3 + (this.difficulty * 0.1)); // Move faster with higher difficulty
@@ -76,77 +86,31 @@ class PatternFormation {
         this.explosionEffect = new ExplosionEffect(ctx);
     }
 
-    setupGUI() {
-        if (!window.dat || !window.dat.GUI) {
-            console.error('dat.GUI not loaded, retrying...');
-            setTimeout(() => this.setupGUI(), 100);
-            return;
-        }
+    applyDifficultyModifiers() {
+        // Calculate actual difficulty level (cycles through 1-10)
+        const cycleDifficulty = ((this.difficulty - 1) % this.maxDifficulty) + 1;
+        
+        // Increase formation radius with difficulty
+        this.config.formationRadius = this.baseFormationRadius + 
+            (cycleDifficulty - 1) * this.radiusIncrease;
 
-        try {
-            this.gui = new dat.GUI({
-                width: 300,
-                autoPlace: true,
-                closed: false
-            });
-            
-            // Add controls to the GUI
-            const folder = this.gui.addFolder('Formation Controls');
-            
-            // Update speed control to affect loopDuration
-            folder.add(this.config, 'speed', 0.1, 2.0)
-                .name('Speed')
-                .onChange(value => {
-                    this.loopDuration = 10 / value; // Adjust base duration by speed
-                });
+        // Increase pulse intensity and speed
+        this.config.pulseIntensity = this.basePulseIntensity + 
+            (cycleDifficulty - 1) * this.pulseIntensityIncrease;
+        this.config.pulseSpeed = this.basePulseSpeed + 
+            (cycleDifficulty - 1) * this.pulseSpeedIncrease;
 
-            // Formation radius control
-            folder.add(this.config, 'formationRadius', 50, 300)
-                .name('Formation Radius')
-                .onChange(value => {
-                    this.calculateFormationParameters();
-                });
+        // Adjust base shooting speed based on cycle count
+        const cycleCount = Math.floor((this.difficulty - 1) / this.maxDifficulty);
+        this.shootInterval = Math.max(0.3, 1.0 - (cycleCount * 0.1) - (cycleDifficulty * 0.05));
+        
+        // Adjust movement speed
+        this.config.speed = Math.min(2.0, 0.3 + (cycleCount * 0.1) + (cycleDifficulty * 0.05));
 
-            folder.add(this.config, 'alienCount', 3, 10)
-                .step(1)
-                .name('Alien Count')
-                .onChange(value => {
-                    // Recreate formation with new count
-                    this.createFormation();
-                });
-            folder.add(this.config, 'loopDuration', 5, 20).name('Loop Duration');
-            folder.add(this.config, 'showPath').name('Show Path').onChange((value) => {
-                this.config.showPath = value;
-            });
-            
-            folder.add(this.path, 'smoothingFactor', 0.8, 0.99)
-                .name('Path Smoothing')
-                .onChange(value => {
-                    this.path.smoothingFactor = value;
-                });
-            
-            // Add pulse controls
-            folder.add(this.config, 'pulseIntensity', 0, 10)
-                .name('Pulse Intensity')
-                .onChange(() => this.calculateFormationParameters());
-                
-            folder.add(this.config, 'pulseSpeed', 0.1, 2)
-                .name('Pulse Speed');
-            
-            folder.add(this.config, 'shootingEnabled')
-                .name('Alien Shooting');
-            
-            // Force the folder to be open
-            folder.open();
-            
-            // Ensure GUI is visible
-            this.gui.domElement.style.zIndex = '10000';
-            document.body.appendChild(this.gui.domElement);
-            
-            console.log('GUI setup complete');
-        } catch (error) {
-            console.error('Error setting up GUI:', error);
-        }
+        console.log(`Level ${this.difficulty} (Cycle ${cycleCount + 1}, Difficulty ${cycleDifficulty})`);
+        console.log(`Formation Radius: ${this.config.formationRadius}`);
+        console.log(`Pulse Intensity: ${this.config.pulseIntensity}`);
+        console.log(`Pulse Speed: ${this.config.pulseSpeed}`);
     }
 
     calculateFormationParameters() {
@@ -158,7 +122,11 @@ class PatternFormation {
         this.formationSpacing = Math.max(minSpacing, this.config.formationRadius * 0.8);
     }
 
+    // Modify createFormation to apply current difficulty settings
     createFormation() {
+        // Apply new difficulty modifiers before creating formation
+        this.applyDifficultyModifiers();
+
         this.aliens = [];
         this.alienSlots = [];  // Reset slots
         const count = Math.floor(this.config.alienCount);
@@ -303,6 +271,9 @@ class PatternFormation {
             shooter.y + shooter.height
         );
         this.lasers.push(laser);
+
+        // Play shoot sound with position
+        AlienLaser.playShootSound(shooter.x + shooter.width/2, this.virtualWidth);
     }
 
     getPatternPosition(angle, centerX, centerY, radiusX, radiusY) {

@@ -11,28 +11,14 @@
         }
         canvas {
             display: block;
-            border: 5px solid #ffffff; /* Added border */
-        }
-        .dg.ac {
-            z-index: 1000 !important;
-        }
-        .dg {
-            position: fixed !important;
-            top: 0 !important;
-            right: 0 !important;
-            z-index: 9999 !important;
-        }
-        .dg.main {
-            margin-right: 0 !important;
+            border: 5px solid #ffffff;
         }
         * { font-family: 'Press Start 2P', cursive; }
     </style>
-    <!-- Load dat.GUI with CORS enabled -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js" crossorigin="anonymous"></script>
+    <!-- Remove dat.GUI script -->
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
-    <!-- Make sure module script loads after dat.GUI -->
     <script type="module" src="js/game.js"></script>
 </body>
 </html>

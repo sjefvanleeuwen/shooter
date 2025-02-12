@@ -126,8 +126,57 @@ class LaserEngine {
         this.emitterX = 0;
         this.emitterY = 0;
         this.firing = false;
+        this.virtualWidth = ctx.canvas.width;
+        this.setupAudio();
     }
     
+    setupAudio() {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.loadShootSound();
+    }
+
+    async loadShootSound() {
+        try {
+            const response = await fetch('./audio/player-shoot.flac');
+            const arrayBuffer = await response.arrayBuffer();
+            this.shootBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        } catch (error) {
+            console.error('Error loading shoot sound:', error);
+        }
+    }
+
+    playShootSound(x) {
+        if (!this.shootBuffer) return;
+
+        // Create audio nodes
+        const source = this.audioContext.createBufferSource();
+        const gainNode = this.audioContext.createGain();
+        const pannerNode = this.audioContext.createStereoPanner();
+        
+        // Connect nodes
+        source.buffer = this.shootBuffer;
+        source.connect(pannerNode);
+        pannerNode.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        // Calculate pan based on x position (-1 to 1)
+        const normalizedX = (x / this.virtualWidth) * 2 - 1;
+        pannerNode.pan.value = normalizedX;
+
+        // Random pitch variation (smaller range than explosion)
+        const pitchVariation = 1 + (Math.random() * 0.05); // Half semitone variation
+        source.playbackRate.value = pitchVariation;
+
+        // Quick fade out
+        const fadeDuration = 0.1; // 100ms fade
+        
+        // Start playing
+        source.start();
+        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime); // Lower volume for rapid fire
+        gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + fadeDuration);
+        source.stop(this.audioContext.currentTime + fadeDuration);
+    }
+
     setEmitter(x, y) {
         this.emitterX = x;
         this.emitterY = y;
@@ -145,6 +194,10 @@ class LaserEngine {
             this.emissionAccumulator = toEmit - count;
             for (let i = 0; i < count; i++) {
                 this.particles.push(new LaserParticle(this.emitterX, this.emitterY));
+            }
+            
+            if (count > 0) {
+                this.playShootSound(this.emitterX);
             }
         }
         

@@ -4,6 +4,8 @@ import { ParticleEngine, LaserEngine } from './particleEngine.js';
 import ImageBackgroundScroller from './imageBackgroundScroller.js';
 import PatternFormation from './PatternFormation.js';  // Add this import
 import IntroScreen from './screens/IntroScreen.js';
+import MusicPlayer from './audio/MusicPlayer.js';
+import StartupScreen from './screens/StartupScreen.js';
 
 class Game {
     constructor() {
@@ -38,8 +40,12 @@ class Game {
             offsetY: this.offsetY
         });
 
-        // Initialize screens
+        // Initialize screens with startup screen
         this.screens = {
+            startup: new StartupScreen(this.ctx, {
+                virtualWidth: this.virtualWidth,
+                virtualHeight: this.virtualHeight
+            }),
             intro: new IntroScreen(this.ctx, {
                 virtualWidth: this.virtualWidth,
                 virtualHeight: this.virtualHeight,
@@ -48,7 +54,7 @@ class Game {
             game: null // Will be initialized when switching to game state
         };
         
-        this.currentScreen = 'intro';
+        this.currentScreen = 'startup';
         
         // Move game-specific initialization to initGameScreen method
         this.initGameScreen();
@@ -66,6 +72,9 @@ class Game {
         this.score = 0;
         this.highScore = parseInt(localStorage.getItem('highScore')) || 0;
         this.lives = 3;
+
+        // Initialize music player without starting it
+        this.musicPlayer = new MusicPlayer();
     }
 
     initGameScreen() {
@@ -155,6 +164,18 @@ class Game {
     }
 
     switchScreen(screenName) {
+        // Start music when transitioning from startup to intro
+        if (this.currentScreen === 'startup' && screenName === 'intro') {
+            this.musicPlayer.start().then(() => {
+                this.musicPlayer.fadeIn(3);
+            });
+        }
+
+        // Fade out music when going to game over
+        if (screenName === 'intro' && this.screens[this.currentScreen]?.isGameOver) {
+            this.musicPlayer.fadeOut(2);
+        }
+
         // Cleanup current screen if it exists
         if (this.screens[this.currentScreen]?.cleanup) {
             this.screens[this.currentScreen].cleanup();
@@ -170,8 +191,13 @@ class Game {
         const delta = (timestamp - (this.lastTime || timestamp)) / 1000;
         this.lastTime = timestamp;
 
-        // Update current screen
-        if (this.currentScreen === 'intro') {
+        // Check if startup screen is complete
+        if (this.currentScreen === 'startup') {
+            this.screens.startup.update(delta);
+            if (this.screens.startup.complete) {
+                this.switchScreen('intro');
+            }
+        } else if (this.currentScreen === 'intro') {
             this.screens.intro.update(delta);
         } else if (this.currentScreen === 'game') {
             this.bgScroller.update(delta);
@@ -265,7 +291,9 @@ class Game {
         this.ctx.setTransform(this.scale, 0, 0, this.scale, this.offsetX, this.offsetY);
 
         // Draw current screen
-        if (this.currentScreen === 'intro') {
+        if (this.currentScreen === 'startup') {
+            this.screens.startup.draw();
+        } else if (this.currentScreen === 'intro') {
             this.screens.intro.draw();
         } else if (this.currentScreen === 'game') {
             // 1. Draw background

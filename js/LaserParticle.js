@@ -7,6 +7,51 @@ class AlienLaser {
         this.vy = 600;  // Moving downward
         this.life = 2.0;
         this.maxLife = this.life;
+
+        // Set up audio if it hasn't been initialized yet
+        if (!AlienLaser.audioContext) {
+            AlienLaser.setupAudio();
+        }
+    }
+
+    static async setupAudio() {
+        AlienLaser.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        try {
+            const response = await fetch('./audio/alien-shoot.mp3');
+            const arrayBuffer = await response.arrayBuffer();
+            AlienLaser.shootBuffer = await AlienLaser.audioContext.decodeAudioData(arrayBuffer);
+        } catch (error) {
+            console.error('Error loading alien shoot sound:', error);
+        }
+    }
+
+    static playShootSound(x, virtualWidth) {
+        if (!AlienLaser.shootBuffer || !AlienLaser.audioContext) return;
+
+        const source = AlienLaser.audioContext.createBufferSource();
+        const gainNode = AlienLaser.audioContext.createGain();
+        const pannerNode = AlienLaser.audioContext.createStereoPanner();
+
+        source.buffer = AlienLaser.shootBuffer;
+        source.connect(pannerNode);
+        pannerNode.connect(gainNode);
+        gainNode.connect(AlienLaser.audioContext.destination);
+
+        // Pan based on position
+        const normalizedX = (x / virtualWidth) * 2 - 1;
+        pannerNode.pan.value = normalizedX;
+
+        // Slightly randomize pitch
+        const pitchVariation = 1 + (Math.random() * 0.1 - 0.05); // ±5% variation
+        source.playbackRate.value = pitchVariation;
+
+        // Quick fade out
+        const fadeDuration = 0.2;
+        gainNode.gain.setValueAtTime(0.3, AlienLaser.audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0, AlienLaser.audioContext.currentTime + fadeDuration);
+
+        source.start();
+        source.stop(AlienLaser.audioContext.currentTime + fadeDuration);
     }
 
     update(delta) {
