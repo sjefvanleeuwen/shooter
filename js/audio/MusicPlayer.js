@@ -1,7 +1,9 @@
 class MusicPlayer {
     constructor() {
         this.tracks = [
+            './audio/music/XENOWAR - Overclocked Fury.mp3',
             './audio/music/XENOWAR - Dark Matter Protocol.mp3',
+            './audio/music/XENOWAR - Plasma Rain.mp3',
             './audio/music/XENOWAR - Galactic Outlaws.mp3'
         ];
         
