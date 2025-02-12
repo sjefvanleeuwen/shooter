@@ -1,17 +1,33 @@
 class MusicPlayer {
     constructor() {
         this.tracks = [
-            './audio/music/XENOWAR - Dark Matter Protocol.mp3'
+            './audio/music/XENOWAR - Dark Matter Protocol.mp3',
+            './audio/music/XENOWAR - Galactic Outlaws.mp3'
         ];
+        
+        // Add playlist management
+        this.playlist = [...this.tracks]; // Copy tracks for shuffling
         this.currentTrack = 0;
         this.audioElement = new Audio();
-        this.audioElement.volume = 0.4; // Start at 40% volume
+        this.audioElement.volume = 0.4;
         this.isPlaying = false;
+
+        // Shuffle initial playlist
+        this.shufflePlaylist();
 
         // Setup track ending handler
         this.audioElement.addEventListener('ended', () => {
             this.playNext();
         });
+    }
+
+    shufflePlaylist() {
+        // Fisher-Yates shuffle algorithm
+        for (let i = this.playlist.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.playlist[i], this.playlist[j]] = [this.playlist[j], this.playlist[i]];
+        }
+        this.currentTrack = 0;
     }
 
     async start() {
@@ -23,21 +39,26 @@ class MusicPlayer {
     }
 
     async playTrack(index) {
-        if (index >= 0 && index < this.tracks.length) {
-            this.currentTrack = index;
-            this.audioElement.src = this.tracks[index];
+        if (index >= 0 && index < this.playlist.length) {
+            const trackPath = this.playlist[index];
+            this.audioElement.src = trackPath;
             try {
                 await this.audioElement.play();
                 this.isPlaying = true;
+                console.log('Now playing:', trackPath.split('/').pop());
             } catch (error) {
                 console.error('Error playing track:', error);
             }
         }
     }
 
-    playNext() {
-        this.currentTrack = (this.currentTrack + 1) % this.tracks.length;
-        this.playTrack(this.currentTrack);
+    async playNext() {
+        this.currentTrack++;
+        // If we've reached the end, shuffle and start over
+        if (this.currentTrack >= this.playlist.length) {
+            this.shufflePlaylist();
+        }
+        await this.playTrack(this.currentTrack);
     }
 
     pause() {

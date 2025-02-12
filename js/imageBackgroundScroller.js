@@ -7,6 +7,10 @@ class ImageBackgroundScroller {
 
         // Load all background images
         this.images = [
+            // './backgrounds/level3/1.png',
+            // './backgrounds/level3/2.png',
+            // './backgrounds/level3/3.png',
+            // './backgrounds/level3/4.png',
             './backgrounds/1.png',
             './backgrounds/3.png',
             './backgrounds/4.png',
@@ -27,23 +31,26 @@ class ImageBackgroundScroller {
         this.position1 = 0;
         this.position2 = -this.virtualHeight;
         this.transitionPoint = this.virtualHeight;
+
+        // Track flip states for each position instead of toggling
+        this.position1Flipped = false;
+        this.position2Flipped = true; // Start second position flipped for alternating pattern
     }
     
     update(delta) {
-        // Move both positions down
         this.position1 += this.scrollSpeed * delta;
         this.position2 += this.scrollSpeed * delta;
         
-        // When first image moves out of view
         if (this.position1 >= this.transitionPoint) {
             this.position1 = this.position2 - this.virtualHeight;
             this.currentImageIndex = (this.currentImageIndex + 1) % this.images.length;
+            // Keep the flip state consistent for this position
         }
         
-        // When second image moves out of view
         if (this.position2 >= this.transitionPoint) {
             this.position2 = this.position1 - this.virtualHeight;
             this.nextImageIndex = (this.nextImageIndex + 1) % this.images.length;
+            // Keep the flip state consistent for this position
         }
     }
     
@@ -56,18 +63,41 @@ class ImageBackgroundScroller {
         this.ctx.rect(0, 0, this.virtualWidth, this.virtualHeight);
         this.ctx.clip();
         
-        // Draw current and next images
-        this.ctx.drawImage(
-            this.images[this.currentImageIndex],
-            0, this.position1,
-            this.virtualWidth, this.virtualHeight
-        );
+        // Draw first position with its fixed flip state
+        this.ctx.save();
+        if (this.position1Flipped) {
+            this.ctx.scale(1, -1);
+            this.ctx.drawImage(
+                this.images[this.currentImageIndex],
+                0, -this.position1 - this.virtualHeight,
+                this.virtualWidth, this.virtualHeight
+            );
+        } else {
+            this.ctx.drawImage(
+                this.images[this.currentImageIndex],
+                0, this.position1,
+                this.virtualWidth, this.virtualHeight
+            );
+        }
+        this.ctx.restore();
         
-        this.ctx.drawImage(
-            this.images[this.nextImageIndex],
-            0, this.position2,
-            this.virtualWidth, this.virtualHeight
-        );
+        // Draw second position with its fixed flip state
+        this.ctx.save();
+        if (this.position2Flipped) {
+            this.ctx.scale(1, -1);
+            this.ctx.drawImage(
+                this.images[this.nextImageIndex],
+                0, -this.position2 - this.virtualHeight,
+                this.virtualWidth, this.virtualHeight
+            );
+        } else {
+            this.ctx.drawImage(
+                this.images[this.nextImageIndex],
+                0, this.position2,
+                this.virtualWidth, this.virtualHeight
+            );
+        }
+        this.ctx.restore();
         
         this.ctx.restore();
     }

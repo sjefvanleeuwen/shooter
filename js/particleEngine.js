@@ -92,6 +92,29 @@ class ParticleEngine {
         // Default emitter position.
         this.emitterX = 0;
         this.emitterY = 0;
+
+        // Add particle pooling
+        this.particlePool = [];
+        this.poolSize = 200;
+        for (let i = 0; i < this.poolSize; i++) {
+            this.particlePool.push(new EngineParticle(0, 0));
+        }
+
+        // Setup cached particle image
+        this.particleCanvas = document.createElement('canvas');
+        this.particleCanvas.width = 10;
+        this.particleCanvas.height = 10;
+        const pCtx = this.particleCanvas.getContext('2d');
+        
+        // Pre-render particle
+        const gradient = pCtx.createRadialGradient(5, 5, 0, 5, 5, 5);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0.5, 'rgba(255, 140, 0, 0.5)');
+        gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+        pCtx.fillStyle = gradient;
+        pCtx.beginPath();
+        pCtx.arc(5, 5, 5, 0, Math.PI * 2);
+        pCtx.fill();
     }
     
     setEmitter(x, y) {
@@ -99,6 +122,10 @@ class ParticleEngine {
         this.emitterY = y;
     }
     
+    getParticle() {
+        return this.particlePool.pop() || new EngineParticle(0, 0);
+    }
+
     update(delta) {
         const toEmit = this.emissionRate * delta + this.emissionAccumulator;
         const count = Math.floor(toEmit);
@@ -110,10 +137,31 @@ class ParticleEngine {
         
         this.particles.forEach(p => p.update(delta));
         this.particles = this.particles.filter(p => p.life > 0);
+
+        // Return dead particles to pool
+        const activeParticles = this.particles.filter(p => p.life > 0);
+        this.particles.forEach(p => {
+            if (p.life <= 0) {
+                this.particlePool.push(p);
+            }
+        });
+        this.particles = activeParticles;
     }
     
     draw() {
-        this.particles.forEach(p => p.draw(this.ctx));
+        this.ctx.save();
+        this.ctx.globalCompositeOperation = 'screen';
+        
+        this.particles.forEach(p => {
+            const alpha = p.life / p.maxLife;
+            this.ctx.globalAlpha = alpha;
+            this.ctx.drawImage(
+                this.particleCanvas,
+                p.x - 5, p.y - 5
+            );
+        });
+        
+        this.ctx.restore();
     }
 }
 

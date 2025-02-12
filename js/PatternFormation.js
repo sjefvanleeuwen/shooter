@@ -29,12 +29,13 @@ class PatternFormation {
         // Add difficulty progression parameters
         this.difficulty = options.difficulty || 1;
         this.maxDifficulty = 10; // After this, reset and speed up
-        this.baseFormationRadius = 150;
-        this.radiusIncrease = 20; // Amount to increase per level
-        this.basePulseIntensity = 0;
-        this.pulseIntensityIncrease = 0.5;
-        this.basePulseSpeed = 1;
-        this.pulseSpeedIncrease = 0.2;
+        this.baseFormationRadius = 120; // Reduced from 150
+        this.config.formationRadius = this.baseFormationRadius;
+        this.radiusIncrease = 15; // Reduced from 20 to maintain proportion
+        this.basePulseIntensity = 0.75; // Increased from 0.5
+        this.pulseIntensityIncrease = 0.75; // Increased from 0.5
+        this.basePulseSpeed = 0.5; // Reduced from 1.0
+        this.pulseSpeedIncrease = 0.1; // Reduced from 0.2 to maintain ratio
 
         // Apply difficulty modifiers
         this.applyDifficultyModifiers();
@@ -66,16 +67,22 @@ class PatternFormation {
         this.respawnTimer = 0;
         this.isRespawning = false;
 
-        // Create path instead of spline
+        // Adjust vertical position to be higher and stay higher
+        this.verticalOffset = this.virtualHeight * 0.2; // 20% from top
+        this.maxVerticalPosition = this.virtualHeight * 0.4; // Don't go below 40% of screen height
+
+        // Create path with new height constraints
         this.path = new BezierPath(
             this.virtualWidth * 0.5,    // centerX
-            this.virtualHeight * 0.3,    // centerY
-            this.virtualWidth * 0.3      // radius
+            this.verticalOffset,        // centerY - higher position
+            this.virtualWidth * 0.25    // radius
         );
 
         this.lasers = [];
         this.shootTimer = 0;
-        this.shootInterval = 1.0; // Time between shots
+        this.baseShootInterval = 3.0; // Increased from 2.6
+        this.minShootInterval = 1.2; // Increased from 0.8 (50% slower minimum interval)
+        this.shootInterval = this.baseShootInterval;
 
         this.difficulty = options.difficulty || 1;
         this.shootInterval = Math.max(0.3, 1.0 - (this.difficulty * 0.1)); // Shoot faster with higher difficulty
@@ -84,6 +91,28 @@ class PatternFormation {
         this.pointsBase = 100; // Base points per alien
 
         this.explosionEffect = new ExplosionEffect(ctx);
+
+        // Enhanced rotation parameters
+        this.baseRotationSpeed = 1.0;  // Increased from 0.5
+        this.rotationSpeedIncrease = 0.4; // Increased from 0.3
+        this.maxRotationSpeed = 6.0; // Increased from 5.0
+        this.currentRotation = 0;
+        this.rotationSpeed = this.baseRotationSpeed;
+        this.rotationDirection = 1; // 1 or -1 for direction
+        
+        // Add rotation boost per cycle
+        this.rotationCycleBonus = 0.4; // Additional rotation speed per cycle
+
+        // Enhanced diving parameters
+        this.baseDiveChance = 0.005; // Increased from 0.002 - more frequent dives
+        this.diveChanceIncrease = 0.002; // Doubled for more aggressive scaling
+        this.diveSpeed = 600; // Increased base dive speed
+        this.diveSpeedIncrease = 100; // More speed increase per level
+        this.maxDiveSpeed = 1200; // Higher maximum dive speed
+        this.diveAcceleration = 1000; // Faster acceleration during dive
+        this.diveCurveIntensity = 0.8; // How much they curve toward player
+        this.currentDiveChance = this.baseDiveChance;
+        this.currentDiveSpeed = this.diveSpeed;
     }
 
     applyDifficultyModifiers() {
@@ -91,8 +120,10 @@ class PatternFormation {
         const cycleDifficulty = ((this.difficulty - 1) % this.maxDifficulty) + 1;
         
         // Increase formation radius with difficulty
-        this.config.formationRadius = this.baseFormationRadius + 
-            (cycleDifficulty - 1) * this.radiusIncrease;
+        this.config.formationRadius = Math.min(
+            this.virtualHeight * 0.25, // Cap at 25% of screen height
+            this.baseFormationRadius + (cycleDifficulty - 1) * this.radiusIncrease
+        );
 
         // Increase pulse intensity and speed
         this.config.pulseIntensity = this.basePulseIntensity + 
@@ -102,7 +133,10 @@ class PatternFormation {
 
         // Adjust base shooting speed based on cycle count
         const cycleCount = Math.floor((this.difficulty - 1) / this.maxDifficulty);
-        this.shootInterval = Math.max(0.3, 1.0 - (cycleCount * 0.1) - (cycleDifficulty * 0.05));
+        this.shootInterval = Math.max(
+            this.minShootInterval, // Use new minimum interval
+            this.baseShootInterval - (cycleCount * 0.1) - (cycleDifficulty * 0.05) // Reduced scaling rates
+        );
         
         // Adjust movement speed
         this.config.speed = Math.min(2.0, 0.3 + (cycleCount * 0.1) + (cycleDifficulty * 0.05));
@@ -111,6 +145,25 @@ class PatternFormation {
         console.log(`Formation Radius: ${this.config.formationRadius}`);
         console.log(`Pulse Intensity: ${this.config.pulseIntensity}`);
         console.log(`Pulse Speed: ${this.config.pulseSpeed}`);
+
+        // Enhanced rotation speed calculation with direction changes
+        const baseIncrease = (cycleDifficulty - 1) * this.rotationSpeedIncrease;
+        const cycleBonus = cycleCount * this.rotationCycleBonus;
+        
+        // Calculate new rotation speed
+        this.rotationSpeed = Math.min(
+            this.maxRotationSpeed,
+            this.baseRotationSpeed + baseIncrease + cycleBonus
+        );
+
+        // Change rotation direction every other level
+        if (this.difficulty % 2 === 0) {
+            this.rotationDirection = -1;
+        } else {
+            this.rotationDirection = 1;
+        }
+
+        console.log(`Rotation Speed: ${this.rotationSpeed.toFixed(2)} rad/s`);
     }
 
     calculateFormationParameters() {
@@ -214,36 +267,89 @@ class PatternFormation {
         this.time = (this.time + delta) % this.loopDuration;
         const progress = this.time / this.loopDuration;
 
-        // Get current position and direction from path
+        // Get current position and clamp vertical position
         const pos = this.path.getPoint(progress);
-        const tangent = this.path.getTangent(progress);
+        pos.y = Math.min(pos.y, this.maxVerticalPosition);
+        pos.y = Math.max(pos.y, this.verticalOffset);
 
-        // Calculate pulse effect
+        // Increase pulse amplitude by 50%
         const pulseAmount = Math.sin(this.time * this.config.pulseSpeed * Math.PI * 2) * 
-                          (this.config.pulseIntensity * 5);
+                          (this.config.pulseIntensity * 7.5); // Increased from 5 to 7.5
         const currentRadius = this.config.formationRadius + pulseAmount;
+
+        // Update rotation
+        this.currentRotation += this.rotationSpeed * delta;
+        this.currentRotation = this.currentRotation % (Math.PI * 2);
 
         // Position aliens in formation based on their slots
         this.aliens.forEach(alien => {
-            const slot = this.alienSlots[alien.slotIndex];
-            const formationAngle = slot.angle;
-            const rotationOffset = Math.atan2(this.velocity.y, this.velocity.x);
-            
-            const targetX = pos.x + Math.cos(formationAngle + rotationOffset) * currentRadius;
-            const targetY = pos.y + Math.sin(formationAngle + rotationOffset) * currentRadius;
-            
-            // Smooth transition if we have last positions
-            if (alien.lastX !== undefined) {
-                const t = Math.min(1, this.time * 2); // Transition over 0.5 seconds
-                alien.x = this.lerp(alien.lastX, targetX, t);
-                alien.y = this.lerp(alien.lastY, targetY, t);
-                if (t === 1) {
-                    delete alien.lastX;
-                    delete alien.lastY;
+            if (!alien.isDiving) {
+                // Normal formation movement
+                const slot = this.alienSlots[alien.slotIndex];
+                const rotatedAngle = slot.angle + this.currentRotation;
+                
+                const targetX = pos.x + Math.cos(rotatedAngle) * currentRadius;
+                const targetY = pos.y + Math.sin(rotatedAngle) * currentRadius;
+                
+                // Enhanced dive chance check with spacing
+                if (Math.random() < this.currentDiveChance * delta && 
+                    !this.aliens.some(a => a.isDiving && Math.abs(a.x - targetX) < 100)) {
+                    alien.isDiving = true;
+                    alien.diveVelocityY = this.currentDiveSpeed;
+                    alien.diveVelocityX = 0;
+                    alien.diveStartX = targetX;
+                    alien.diveStartY = targetY;
+                    alien.lastFormationX = targetX;
+                    alien.lastFormationY = targetY;
+                    
+                    // Target player with prediction if available
+                    if (this.player) {
+                        const dx = this.player.x - targetX;
+                        const dy = this.player.y - targetY;
+                        const angle = Math.atan2(dy, dx);
+                        alien.diveTargetX = this.player.x + (this.player.velocity?.x || 0) * 0.5;
+                        alien.diveVelocityX = Math.cos(angle) * this.currentDiveSpeed * this.diveCurveIntensity;
+                    }
+                } else {
+                    // Normal position update
+                    // Smooth transition if we have last positions
+                    if (alien.lastX !== undefined) {
+                        const t = Math.min(1, this.time * 2); // Transition over 0.5 seconds
+                        alien.x = this.lerp(alien.lastX, targetX, t);
+                        alien.y = this.lerp(alien.lastY, targetY, t);
+                        if (t === 1) {
+                            delete alien.lastX;
+                            delete alien.lastY;
+                        }
+                    } else {
+                        alien.x = targetX;
+                        alien.y = targetY;
+                    }
                 }
             } else {
-                alien.x = targetX;
-                alien.y = targetY;
+                // Enhanced diving movement
+                alien.diveVelocityY += this.diveAcceleration * delta;
+                alien.y += alien.diveVelocityY * delta;
+
+                // Curved path toward player
+                if (alien.diveVelocityX) {
+                    if (this.player) {
+                        // Update dive direction toward player
+                        const dx = this.player.x - alien.x;
+                        const angle = Math.atan2(0, dx); // Only track X movement
+                        alien.diveVelocityX += Math.cos(angle) * this.diveAcceleration * delta * 0.5;
+                    }
+                    alien.x += alien.diveVelocityX * delta;
+                }
+
+                // Return to formation when out of bounds
+                if (alien.y > this.virtualHeight + 50 || 
+                    alien.x < -50 || 
+                    alien.x > this.virtualWidth + 50) {
+                    alien.isDiving = false;
+                    alien.x = alien.lastFormationX;
+                    alien.y = -50;
+                }
             }
         });
 

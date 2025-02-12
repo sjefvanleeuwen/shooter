@@ -4,7 +4,7 @@ class AlienLaser {
         this.y = y;
         this.width = 4;
         this.height = 16;
-        this.vy = 600;  // Moving downward
+        this.vy = 420;  // Reduced from 600 by 30%
         this.life = 2.0;
         this.maxLife = this.life;
 

@@ -40,7 +40,7 @@ class Game {
             offsetY: this.offsetY
         });
 
-        // Initialize screens with startup screen
+        // Initialize screens BEFORE setting up input handlers
         this.screens = {
             startup: new StartupScreen(this.ctx, {
                 virtualWidth: this.virtualWidth,
@@ -56,11 +56,11 @@ class Game {
         
         this.currentScreen = 'startup';
         
-        // Move game-specific initialization to initGameScreen method
-        this.initGameScreen();
-        
-        // Setup input handling for screens
+        // Setup input handling for screens AFTER screens are initialized
         window.addEventListener('keydown', (e) => this.handleInput(e));
+
+        // Move initGameScreen AFTER screens initialization
+        this.initGameScreen();
         
         // Start the game loop
         this.startGameLoop();
@@ -157,9 +157,12 @@ class Game {
     }
 
     handleInput(e) {
-        const nextScreen = this.screens[this.currentScreen].handleInput(e.key);
-        if (nextScreen) {
-            this.switchScreen(nextScreen);
+        // Add null check for current screen
+        if (this.screens[this.currentScreen] && this.screens[this.currentScreen].handleInput) {
+            const nextScreen = this.screens[this.currentScreen].handleInput(e.key);
+            if (nextScreen) {
+                this.switchScreen(nextScreen);
+            }
         }
     }
 
@@ -235,14 +238,22 @@ class Game {
             
             this.formation.update(delta);
 
-            // Check player collision with alien lasers
-            if (this.formation.checkPlayerCollision(
-                this.player.x, 
-                this.player.y,
-                this.player.width,
-                this.player.height
-            )) {
-                this.handlePlayerHit();
+            // Check player collision with alien lasers with pixel-perfect detection
+            const alienLasers = this.formation.lasers;
+            for (const laser of alienLasers) {
+                // Only check collision if laser is within player bounds
+                if (laser.x >= this.player.x && 
+                    laser.x <= this.player.x + this.player.width &&
+                    laser.y >= this.player.y && 
+                    laser.y <= this.player.y + this.player.height) {
+                    
+                    // Do pixel-perfect collision test
+                    if (this.player.checkPixelCollision(laser.x, laser.y)) {
+                        this.handlePlayerHit();
+                        laser.life = 0; // Destroy laser
+                        break; // Exit loop after hit
+                    }
+                }
             }
 
             // Check laser collisions with aliens
@@ -286,7 +297,7 @@ class Game {
 
     draw() {
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.fillStyle = '#333333';
+        this.ctx.fillStyle = '#000000'; // Changed from #333333 to pure black
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.setTransform(this.scale, 0, 0, this.scale, this.offsetX, this.offsetY);
 
@@ -361,11 +372,20 @@ class Game {
     drawHUD() {
         this.ctx.save();
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.font = '16px "Press Start 2P"';  // Smaller size due to pixel font
+        this.ctx.font = '16px "Press Start 2P"';
+
+        // Lives at bottom left
         this.ctx.textAlign = 'left';
-        this.ctx.fillText(`LIVES: ${this.lives}`, 20, 30);
-        this.ctx.fillText(`SCORE: ${this.score}`, 20, 60);
-        this.ctx.fillText(`HIGH SCORE: ${this.highScore}`, 20, 90);
+        this.ctx.fillText(`LIVES: ${this.lives}`, 20, this.virtualHeight - 20);
+
+        // High Score at bottom center
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(`HIGH SCORE: ${this.highScore}`, this.virtualWidth / 2, this.virtualHeight - 20);
+
+        // Score at bottom right
+        this.ctx.textAlign = 'right';
+        this.ctx.fillText(`SCORE: ${this.score}`, this.virtualWidth - 20, this.virtualHeight - 20);
+
         this.ctx.restore();
     }
 

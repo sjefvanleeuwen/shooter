@@ -19,6 +19,13 @@ class Player {
         this.movingRight = false;
         this.isFiring = false;
         this.setupInput();
+
+        // Add collision mask
+        this.collisionMask = document.createElement('canvas');
+        this.collisionMask.width = this.width;
+        this.collisionMask.height = this.height;
+        this.maskCtx = this.collisionMask.getContext('2d');
+        this.createCollisionMask();
     }
 
     setupInput() {
@@ -32,6 +39,37 @@ class Player {
             if (e.key === 'ArrowRight') this.movingRight = false;
             if (e.key === ' ') this.isFiring = false; // Spacebar
         });
+    }
+
+    createCollisionMask() {
+        // Wait for image to load
+        if (!this.img.complete) {
+            this.img.addEventListener('load', () => this.createCollisionMask());
+            return;
+        }
+
+        // Draw image to collision mask
+        this.maskCtx.drawImage(this.img, 0, 0, this.width, this.height);
+        // Get pixel data for collision detection
+        this.maskData = this.maskCtx.getImageData(0, 0, this.width, this.height).data;
+    }
+
+    checkPixelCollision(x, y) {
+        // Convert world coordinates to local sprite coordinates
+        const localX = Math.floor(x - this.x);
+        const localY = Math.floor(y - this.y);
+
+        // Check bounds first
+        if (localX < 0 || localX >= this.width || localY < 0 || localY >= this.height) {
+            return false;
+        }
+
+        // Get pixel alpha value from mask
+        const pixelIndex = (localY * this.width + localX) * 4 + 3;
+        const alpha = this.maskData[pixelIndex];
+
+        // Consider hit if alpha is above threshold (e.g., 50)
+        return alpha > 50;
     }
 
     update(delta) {

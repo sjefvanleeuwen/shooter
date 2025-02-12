@@ -1,5 +1,9 @@
 class ExplosionParticle {
     constructor(x, y, config) {
+        this.reset(x, y, config);
+    }
+
+    reset(x, y, config) {
         this.x = x;
         this.y = y;
         const angle = Math.random() * Math.PI * 2;
@@ -9,17 +13,13 @@ class ExplosionParticle {
         this.life = Math.random() * config.lifeVariation + config.baseLife;
         this.maxLife = this.life;
         this.radius = Math.random() * config.radiusVariation + config.baseRadius;
-
-        // Color settings from config
         this.hue = Math.random() * config.hueVariation + config.hueBase;
         this.saturation = 100;
         this.brightness = Math.random() * config.brightnessVariation + config.brightness;
-        
         this.pulseSpeed = Math.random() * 10 + 8;
         this.glowSize = Math.random() * config.glowVariation + config.glowSize;
-        
-        // Store config for update
         this.config = config;
+        return this;
     }
 
     update(delta) {
@@ -93,6 +93,55 @@ class ExplosionEffect {
         // Add virtual width for position calculations
         this.virtualWidth = ctx.canvas.width;
         this.setupAudio();
+
+        // Add performance optimizations
+        this.maxExplosions = 5; // Limit concurrent explosions
+        this.maxParticlesPerExplosion = 12; // Reduced from 15
+        this.useOffscreenCanvas = typeof OffscreenCanvas !== 'undefined';
+        
+        // Create particle pool
+        this.particlePool = [];
+        this.poolSize = 100;
+        for (let i = 0; i < this.poolSize; i++) {
+            this.particlePool.push(new ExplosionParticle(0, 0, this.config));
+        }
+
+        // Setup cached canvas for particle drawing
+        if (this.useOffscreenCanvas) {
+            this.particleCanvas = new OffscreenCanvas(32, 32);
+        } else {
+            this.particleCanvas = document.createElement('canvas');
+            this.particleCanvas.width = 32;
+            this.particleCanvas.height = 32;
+        }
+        this.particleCtx = this.particleCanvas.getContext('2d');
+        this.preRenderParticle();
+    }
+
+    preRenderParticle() {
+        // Pre-render particle gradient
+        const ctx = this.particleCtx;
+        const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0.5, 'rgba(255, 140, 0, 0.5)');
+        gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+        
+        ctx.clearRect(0, 0, 32, 32);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(16, 16, 16, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    getParticle(x, y, config) {
+        // Reuse particle from pool or create new one
+        let particle = this.particlePool.pop();
+        if (!particle) {
+            particle = new ExplosionParticle(x, y, config);
+        } else {
+            particle.reset(x, y, config);
+        }
+        return particle;
     }
 
     setupAudio() {
@@ -143,39 +192,60 @@ class ExplosionEffect {
     }
 
     createExplosion(x, y) {
-        // Play sound with position
-        this.playExplosionSound(x);
-        
-        const particles = [];
-        // Use config values for main particles
-        for (let i = 0; i < this.config.particleCount; i++) {
-            const p = new ExplosionParticle(x, y, this.config);
-            particles.push(p);
+        // Limit concurrent explosions
+        if (this.explosions.length >= this.maxExplosions) {
+            return;
         }
-        // Highlight particles
-        for (let i = 0; i < this.config.highlightCount; i++) {
-            const p = new ExplosionParticle(x, y, this.config);
-            p.radius *= 1.5;
-            p.life *= 1.2;
-            particles.push(p);
+
+        const particles = [];
+        for (let i = 0; i < this.maxParticlesPerExplosion; i++) {
+            particles.push(this.getParticle(x, y, this.config));
         }
         this.explosions.push(particles);
+        
+        // Play sound with position
+        this.playExplosionSound(x);
     }
 
     update(delta) {
         this.explosions.forEach(particles => {
             particles.forEach(p => p.update(delta));
         });
-        // Remove finished explosions
-        this.explosions = this.explosions.filter(particles => 
-            particles.some(p => p.life > 0)
-        );
+
+        // Recycle finished particles and explosions
+        this.explosions = this.explosions.filter(particles => {
+            const activeParticles = particles.filter(p => p.life > 0);
+            // Return inactive particles to pool
+            particles.forEach(p => {
+                if (p.life <= 0) {
+                    this.particlePool.push(p);
+                }
+            });
+            return activeParticles.length > 0;
+        });
     }
 
     draw() {
+        this.ctx.save();
+        this.ctx.globalCompositeOperation = 'screen';
+        
         this.explosions.forEach(particles => {
-            particles.forEach(p => p.draw(this.ctx));
+            particles.forEach(p => {
+                if (p.life <= 0) return;
+                
+                const alpha = p.life / p.maxLife;
+                this.ctx.globalAlpha = alpha;
+                
+                // Use pre-rendered particle
+                this.ctx.drawImage(
+                    this.particleCanvas,
+                    p.x - 16, p.y - 16,
+                    32, 32
+                );
+            });
         });
+        
+        this.ctx.restore();
     }
 }
 
