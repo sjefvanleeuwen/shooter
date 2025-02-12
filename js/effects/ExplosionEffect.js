@@ -164,7 +164,7 @@ class ExplosionEffect {
 
         // Create audio nodes
         const source = this.audioContext.createBufferSource();
-        const gainNode = this.audioContext.createGain();;
+        const gainNode = this.audioContext.createGain();
         const pannerNode = this.audioContext.createStereoPanner();
         
         // Connect nodes: source -> panner -> gain -> destination
@@ -186,7 +186,7 @@ class ExplosionEffect {
         
         // Start playing
         source.start();
-        gainNode.gain.setValueAtTime(1, this.audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.4, this.audioContext.currentTime); // Reduced gain by 30%
         gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + fadeDuration);
         source.stop(this.audioContext.currentTime + fadeDuration);
     }
