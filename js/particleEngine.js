@@ -120,7 +120,7 @@ class ParticleEngine {
 class LaserEngine {
     constructor(ctx) {
         this.ctx = ctx;
-        this.particles = [];
+        this.particles = []; // Make particles accessible
         this.emissionRate = 4;    // Reduced from 20 to 4 shots per second
         this.emissionAccumulator = 0;
         this.emitterX = 0;
