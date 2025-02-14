@@ -6,6 +6,7 @@ import PatternFormation from './PatternFormation.js';  // Add this import
 import IntroScreen from './screens/IntroScreen.js';
 import MusicPlayer from './audio/MusicPlayer.js';
 import StartupScreen from './screens/StartupScreen.js';
+import DebugWindow from './DebugWindow.js';
 
 class Game {
     constructor() {
@@ -75,6 +76,9 @@ class Game {
 
         // Initialize music player without starting it
         this.musicPlayer = new MusicPlayer();
+        // Create persistent offscreen canvas for player tinting effects
+        this.offCanvasCache = document.createElement('canvas');
+        this.debugWindow = new DebugWindow();
     }
 
     initGameScreen() {
@@ -146,7 +150,13 @@ class Game {
     }
 
     bindEvents() {
-        window.addEventListener('resize', () => this.setupCanvas());
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                this.setupCanvas();
+            }, 100);
+        });
     }
     
     reset() {
@@ -157,6 +167,10 @@ class Game {
     }
 
     handleInput(e) {
+        // Toggle debug window when d is pressed
+        if(e.key === 'd' || e.key === 'D'){
+            this.debugWindow.visible = !this.debugWindow.visible;
+        }
         // Add null check for current screen
         if (this.screens[this.currentScreen] && this.screens[this.currentScreen].handleInput) {
             const nextScreen = this.screens[this.currentScreen].handleInput(e.key);
@@ -193,98 +207,77 @@ class Game {
     update(timestamp) {
         const delta = (timestamp - (this.lastTime || timestamp)) / 1000;
         this.lastTime = timestamp;
-
-        // Check if startup screen is complete
-        if (this.currentScreen === 'startup') {
-            this.screens.startup.update(delta);
-            if (this.screens.startup.complete) {
-                this.switchScreen('intro');
-            }
-        } else if (this.currentScreen === 'intro') {
-            this.screens.intro.update(delta);
-        } else if (this.currentScreen === 'game') {
+        
+        if (this.currentScreen === 'game') {
+            // Cache properties to avoid repeated lookups
+            const player = this.player;
+            const formation = this.formation;
+            
             this.bgScroller.update(delta);
-            this.player.update(delta);
-            // Update emitter positions relative to the player's sprite.
-            const engine1X = this.player.x + this.player.width / 2;
-            const engine1Y = this.player.y + this.player.height - 25; // was 50
-            // For engine 2 and 3, adjust: 10px down and 8px inward.
-            const engine2X = engine1X - 25 + 4;  // was 50+8
-            const engine2Y = engine1Y - 25 + 5;  // was 50+10
-            const engine3X = engine1X + 25 - 4;  // was 50-8
-            const engine3Y = engine1Y - 25 + 5;  // was 50+10
+            player.update(delta);
+            
+            // Update emitter positions with local variables
+            const engine1X = player.x + player.width / 2;
+            const engine1Y = player.y + player.height - 25;
+            const engine2X = engine1X - 21;   // simplified math
+            const engine2Y = engine1Y - 20;
+            const engine3X = engine1X + 21;
+            const engine3Y = engine1Y - 20;
+            
             this.particleEngine.setEmitter(engine1X, engine1Y);
             this.particleEngine2.setEmitter(engine2X, engine2Y);
             this.particleEngine3.setEmitter(engine3X, engine3Y);
-            // Update particle engines with the new emitter positions.
             this.particleEngine.update(delta);
             this.particleEngine2.update(delta);
             this.particleEngine3.update(delta);
             
-            // Update laser firing state
-            this.laserEngineLeft.setFiring(this.player.isFiring);
-            this.laserEngineRight.setFiring(this.player.isFiring);
-            
-            // Update laser emitter positions (from top of sprite, spread apart)
-            const laserLeftX = this.player.x + this.player.width * 0.3; // 30% from left
-            const laserRightX = this.player.x + this.player.width * 0.7; // 70% from left
-            const laserY = this.player.y; // Top of sprite
-            
+            // Update lasers using cached firing state
+            const firing = player.isFiring;
+            this.laserEngineLeft.setFiring(firing);
+            this.laserEngineRight.setFiring(firing);
+            const laserLeftX = player.x + player.width * 0.3;
+            const laserRightX = player.x + player.width * 0.7;
+            const laserY = player.y;
             this.laserEngineLeft.setEmitter(laserLeftX, laserY);
             this.laserEngineRight.setEmitter(laserRightX, laserY);
             
             this.laserEngineLeft.update(delta);
             this.laserEngineRight.update(delta);
             
-            this.formation.update(delta);
-
-            // Check player collision with alien lasers with pixel-perfect detection
-            const alienLasers = this.formation.lasers;
-            for (const laser of alienLasers) {
-                // Only check collision if laser is within player bounds
-                if (laser.x >= this.player.x && 
-                    laser.x <= this.player.x + this.player.width &&
-                    laser.y >= this.player.y && 
-                    laser.y <= this.player.y + this.player.height) {
-                    
-                    // Do pixel-perfect collision test
-                    if (this.player.checkPixelCollision(laser.x, laser.y)) {
+            formation.update(delta);
+            
+            // Collision detection using cached player bounds
+            const px = player.x, py = player.y, pw = player.width, ph = player.height;
+            for (const laser of formation.lasers) {
+                if (laser.x >= px && laser.x <= px + pw &&
+                    laser.y >= py && laser.y <= py + ph) {
+                    if (player.checkPixelCollision(laser.x, laser.y)) {
                         this.handlePlayerHit();
-                        laser.life = 0; // Destroy laser
-                        break; // Exit loop after hit
+                        laser.life = 0;
+                        break;
                     }
                 }
             }
-
-            // Check laser collisions with aliens
-            if (this.laserEngineLeft) {
-                this.laserEngineLeft.particles.forEach(laser => {
-                    if (this.formation.checkCollision(laser.x, laser.y)) {
-                        laser.life = 0; // Destroy laser on hit
+            
+            // Check collisions for player lasers
+            [this.laserEngineLeft, this.laserEngineRight].forEach(engine => {
+                engine.particles.forEach(laser => {
+                    if (formation.checkCollision(laser.x, laser.y)) {
+                        laser.life = 0;
                     }
                 });
-            }
-            if (this.laserEngineRight) {
-                this.laserEngineRight.particles.forEach(laser => {
-                    if (this.formation.checkCollision(laser.x, laser.y)) {
-                        laser.life = 0; // Destroy laser on hit
-                    }
-                });
-            }
-
-            // Check if all aliens are destroyed
-            if (this.formation.aliens.length === 0) {
-                // Create new formation with increased difficulty
+            });
+            
+            if (formation.aliens.length === 0) {
                 this.formation = new PatternFormation(this.ctx, {
                     virtualWidth: this.virtualWidth,
                     virtualHeight: this.virtualHeight,
                     pattern: 'infinity',
                     bgScroller: this.bgScroller,
-                    difficulty: this.formation.difficulty + 1
+                    difficulty: formation.difficulty + 1
                 });
             }
-
-            // Handle invulnerability
+            
             if (this.playerInvulnerable) {
                 this.invulnerabilityTimer += delta;
                 if (this.invulnerabilityTimer >= this.invulnerabilityTime) {
@@ -292,6 +285,20 @@ class Game {
                     this.invulnerabilityTimer = 0;
                 }
             }
+        } else {
+            // ...existing screen update code...
+            // Check if startup screen is complete
+            if (this.currentScreen === 'startup') {
+                this.screens.startup.update(delta);
+                if (this.screens.startup.complete) {
+                    this.switchScreen('intro');
+                }
+            } else if (this.currentScreen === 'intro') {
+                this.screens.intro.update(delta);
+            }
+        }
+        if(this.debugWindow.visible){
+            this.debugWindow.update(delta);
         }
     }
 
@@ -331,11 +338,12 @@ class Game {
                 );
 
                 // Draw player with radiosity effect applied directly on the player's image
-                // Create an offscreen canvas to tint the image
-                const offCanvas = document.createElement('canvas');
+                // Use offCanvasCache instead of creating a new canvas each frame
+                const offCanvas = this.offCanvasCache;
                 offCanvas.width = this.player.img.width;
                 offCanvas.height = this.player.img.height;
                 const offCtx = offCanvas.getContext('2d');
+                offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
                 offCtx.drawImage(this.player.img, 0, 0);
                 offCtx.globalCompositeOperation = 'source-atop';
                 offCtx.fillStyle = `rgba(${bgColor.r}, ${bgColor.g}, ${bgColor.b}, 0.33)`;
@@ -366,6 +374,11 @@ class Game {
 
             // Draw HUD if in game screen
             this.drawHUD();
+        }
+        
+        // Draw debug window if enabled
+        if(this.debugWindow.visible){
+            this.debugWindow.draw(this.ctx);
         }
     }
 

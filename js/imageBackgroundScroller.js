@@ -35,6 +35,15 @@ class ImageBackgroundScroller {
         // Track flip states for each position instead of toggling
         this.position1Flipped = false;
         this.position2Flipped = true; // Start second position flipped for alternating pattern
+
+        // Create a reusable temporary canvas for sampling background color.
+        this.tempCanvas = document.createElement('canvas');
+        this.tempCanvas.width = 20;
+        this.tempCanvas.height = 20;
+        // Cache the 2D context once
+        this.tempCtx = this.tempCanvas.getContext('2d');
+
+        this.lastColorSample = { x: null, y: null, color: null, time: 0 };
     }
     
     update(delta) {
@@ -103,40 +112,42 @@ class ImageBackgroundScroller {
     }
 
     getColorAt(x, y) {
-        // Create a small temporary canvas for sampling
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCanvas.width = 20;  // Sample area size
-        tempCanvas.height = 20;
+        const now = performance.now();
+        // Increase threshold to 100ms to reduce frequent sampling
+        if (
+            this.lastColorSample.x === x &&
+            this.lastColorSample.y === y &&
+            now - this.lastColorSample.time < 100
+        ) {
+            return this.lastColorSample.color;
+        }
         
-        // Draw the currently visible portion of background
+        const tempCtx = this.tempCtx;
+        tempCtx.clearRect(0, 0, 20, 20);
         const activeImg = this.images[this.currentImageIndex];
         const activePos = this.currentImageIndex === 0 ? this.position1 : this.position2;
         
         tempCtx.drawImage(
             activeImg,
-            x - 10, y - 10 - activePos,  // Center the sampling area
-            20, 20,                       // Source size
-            0, 0,                         // Dest position
-            20, 20                        // Dest size
+            x - 10, y - 10 - activePos, 20, 20,
+            0, 0, 20, 20
         );
         
-        // Get average color
         const data = tempCtx.getImageData(0, 0, 20, 20).data;
         let r = 0, g = 0, b = 0, count = 0;
-        
         for (let i = 0; i < data.length; i += 4) {
             r += data[i];
             g += data[i + 1];
             b += data[i + 2];
             count++;
         }
-        
-        return {
+        const color = {
             r: r / count,
             g: g / count,
             b: b / count
         };
+        this.lastColorSample = { x, y, color, time: now };
+        return color;
     }
 }
 
