@@ -40,8 +40,8 @@ class ImageBackgroundScroller {
         this.tempCanvas = document.createElement('canvas');
         this.tempCanvas.width = 20;
         this.tempCanvas.height = 20;
-        // Cache the 2D context once
-        this.tempCtx = this.tempCanvas.getContext('2d');
+        // Use willReadFrequently to improve getImageData performance.
+        this.tempCtx = this.tempCanvas.getContext('2d', { willReadFrequently: true });
 
         this.lastColorSample = { x: null, y: null, color: null, time: 0 };
     }
