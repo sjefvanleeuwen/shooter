@@ -113,6 +113,8 @@ class PatternFormation {
         this.diveCurveIntensity = 0.8; // How much they curve toward player
         this.currentDiveChance = this.baseDiveChance;
         this.currentDiveSpeed = this.diveSpeed;
+
+        this.onPointsScored = options.onPointsScored || (() => {});
     }
 
     applyDifficultyModifiers() {
@@ -453,11 +455,8 @@ class PatternFormation {
                 const pointsMultiplier = this.difficulty * (1 + (this.initialAlienCount - this.aliens.length) * 0.1);
                 const points = Math.floor(this.pointsBase * pointsMultiplier);
                 
-                // Add points to game score using window.game
-                if (window.game) {
-                    console.log('Alien destroyed, adding points:', points); // Debug log
-                    window.game.addPoints(points);
-                }
+                // Replace direct call with callback
+                this.onPointsScored(points);
                 return true;
             }
         }

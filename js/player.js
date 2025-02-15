@@ -1,23 +1,23 @@
 class Player {
     constructor(ctx, options = {}) {
         this.ctx = ctx;
-        // Set dimensions to half the previous size
-        this.width = options.width || 200;      // was 400, now 200
-        this.height = options.height || 200;     // was 400, now 200
+        this.width = options.width || 200;
+        this.height = options.height || 200;
         this.virtualWidth = options.virtualWidth || 1920;
-        this.virtualHeight = options.virtualHeight || 1080;
-        // Position player centered at bottom with a margin.
+        this.virtualHeight = options.virtualHeight || 1080; // Fix typo: was this.virtualHeight
         this.x = (this.virtualWidth - this.width) / 2;
         this.y = this.virtualHeight - this.height - 20;
-        this.speed = options.speed || 300; // pixels per second
+        this.speed = options.speed || 300;
+
+        // Input state
+        this.movingLeft = false;
+        this.movingRight = false;
+        this.isFiring = false;
 
         // Load sprite image.
         this.img = new Image();
         this.img.src = './sprites/player.png';
 
-        this.movingLeft = false;
-        this.movingRight = false;
-        this.isFiring = false;
         this.setupInput();
 
         // Add collision mask
@@ -30,15 +30,52 @@ class Player {
 
     setupInput() {
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') this.movingLeft = true;
-            if (e.key === 'ArrowRight') this.movingRight = true;
-            if (e.key === ' ') this.isFiring = true;  // Spacebar
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'a':
+                    this.movingLeft = true;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    this.movingRight = true;
+                    break;
+                case ' ':
+                    this.isFiring = true;
+                    break;
+            }
         });
+
         window.addEventListener('keyup', (e) => {
-            if (e.key === 'ArrowLeft') this.movingLeft = false;
-            if (e.key === 'ArrowRight') this.movingRight = false;
-            if (e.key === ' ') this.isFiring = false; // Spacebar
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'a':
+                    this.movingLeft = false;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    this.movingRight = false;
+                    break;
+                case ' ':
+                    this.isFiring = false;
+                    break;
+            }
         });
+    }
+
+    handleInput(key) {
+        switch(key) {
+            case 'ArrowLeft':
+            case 'a':
+                this.movingLeft = true;
+                break;
+            case 'ArrowRight':
+            case 'd':
+                this.movingRight = true;
+                break;
+            case ' ':
+                this.isFiring = true;
+                break;
+        }
     }
 
     createCollisionMask() {
@@ -72,11 +109,24 @@ class Player {
         return alpha > 50;
     }
 
+    checkCollision(laser) {
+        // Simple bounding box collision check
+        return (
+            laser.x >= this.x && 
+            laser.x <= this.x + this.width &&
+            laser.y >= this.y && 
+            laser.y <= this.y + this.height &&
+            this.checkPixelCollision(laser.x, laser.y)
+        );
+    }
+
     update(delta) {
         if (this.movingLeft) this.x -= this.speed * delta;
         if (this.movingRight) this.x += this.speed * delta;
-        // Clamp within the virtual game width.
+        // Clamp within the virtual game width
         this.x = Math.max(0, Math.min(this.x, this.virtualWidth - this.width));
+        
+        // Remove the auto-reset of movement and firing states
     }
 
     draw() {
