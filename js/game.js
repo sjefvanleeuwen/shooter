@@ -71,7 +71,9 @@ class Game {
         this.invulnerabilityTime = 2.0;
         this.invulnerabilityTimer = 0;
         this.score = 0;
-        this.highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        this.highScore = localStorage.getItem('highScore') 
+            ? parseInt(localStorage.getItem('highScore'), 10)
+            : 0;
         this.lives = 3;
 
         // Initialize music player without starting it
@@ -407,7 +409,7 @@ class Game {
         this.score += points;
         if (this.score > this.highScore) {
             this.highScore = this.score;
-            localStorage.setItem('highScore', this.highScore.toString());
+            localStorage.setItem('highScore', this.highScore.toString()); // Store high score to local storage
         }
     }
 
