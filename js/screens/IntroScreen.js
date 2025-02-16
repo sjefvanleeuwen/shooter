@@ -113,7 +113,10 @@ class IntroScreen {
 
     handleInput(key) {
         if (key === ' ' && this.pressSpaceVisible) {
-            return 'game'; // Signal to switch to game screen
+            // Always reset game state when starting a new game
+            window.game.gameState.reset();
+            this.cleanup();
+            return 'game';
         }
         return null;
     }

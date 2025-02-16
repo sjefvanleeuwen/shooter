@@ -114,7 +114,7 @@ class Game {
     }
 
     gameOver() {
-        // Switch to intro screen with game over flag
+        // Create new intro screen with game over state
         this.screens.intro = new IntroScreen(this.ctx, {
             virtualWidth: this.virtualWidth,
             virtualHeight: this.virtualHeight,
@@ -123,7 +123,7 @@ class Game {
             finalScore: this.gameState.score,
             highScore: this.gameState.highScore
         });
-        this.currentScreen = 'intro';
+        this.switchScreen('intro');
     }
 
     reset() {
@@ -133,26 +133,29 @@ class Game {
     }
 
     switchScreen(screenName) {
-        // Start music when transitioning from startup to intro
+        // Cleanup current screen
+        if (this.screens[this.currentScreen]?.cleanup) {
+            this.screens[this.currentScreen].cleanup();
+        }
+
+        // Special handling for game screen
+        if (screenName === 'game') {
+            // Always create a new game screen instance
+            this.screens.game = new GameScreen(this.ctx, {
+                virtualWidth: this.virtualWidth,
+                virtualHeight: this.virtualHeight,
+                bgScroller: this.bgScroller,
+                gameState: this.gameState
+            });
+        }
+
+        // Handle music transitions
         if (this.currentScreen === 'startup' && screenName === 'intro') {
             this.musicPlayer.start().then(() => {
                 this.musicPlayer.fadeIn(3);
             });
         }
 
-        // Fade out music when going to game over
-        if (screenName === 'intro' && this.screens[this.currentScreen]?.isGameOver) {
-            this.musicPlayer.fadeOut(2);
-        }
-
-        // Cleanup current screen if it exists
-        if (this.screens[this.currentScreen]?.cleanup) {
-            this.screens[this.currentScreen].cleanup();
-        }
-
-        if (screenName === 'game' && !this.screens.game) {
-            this.initGameScreen();
-        }
         this.currentScreen = screenName;
         this.inputManager.setCurrentScreen(screenName);
     }
