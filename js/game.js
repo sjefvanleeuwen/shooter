@@ -1,7 +1,7 @@
 import Player from './player.js';
 import { ParticleEngine, LaserEngine } from './particleEngine.js';
 import ImageBackgroundScroller from './imageBackgroundScroller.js';
-import PatternFormation from './PatternFormation.js';  // Add this import
+import PatternFormation from './PatternFormation.js';
 import IntroScreen from './screens/IntroScreen.js';
 import MusicPlayer from './audio/MusicPlayer.js';
 import StartupScreen from './screens/StartupScreen.js';
@@ -11,21 +11,47 @@ import InputManager from './InputManager.js';
 import HUDManager from './managers/HUDManager.js';
 import GameStateManager from './managers/GameStateManager.js';
 import GameScreen from './screens/GameScreen.js';
+import CRTEffect from './effects/CRTEffect.js';  // Add this import
 
 class Game {
     constructor() {
+        // Create container div for centering
+        this.container = document.createElement('div');
+        this.container.style.position = 'fixed';
+        this.container.style.width = '100%';
+        this.container.style.height = '100%';
+        this.container.style.display = 'flex';
+        this.container.style.justifyContent = 'center';
+        this.container.style.alignItems = 'center';
+        this.container.style.background = '#000';
+        document.body.appendChild(this.container);
+
+        // Fixed dimensions
+        this.virtualWidth = 1024;
+        this.virtualHeight = 1024;
+
+        // Setup main canvas
+        this.canvas = document.getElementById('gameCanvas');
+        if (!this.canvas) throw new Error('Canvas not found');
+        this.canvas.width = this.virtualWidth;
+        this.canvas.height = this.virtualHeight;
+        this.canvas.style.display = 'none';
+
+        // Initialize managers with fixed dimensions
+        this.canvasManager = new CanvasManager(this.canvas);
+        this.ctx = this.canvasManager.getContext();
+
+        // Initialize CRT effect with fixed dimensions
+        this.crtEffect = new CRTEffect(this.canvas, this.container);
+
+        // Then initialize other managers that need the context
+        this.inputManager = new InputManager();
+        this.gameState = new GameStateManager();
+        this.hudManager = new HUDManager(this.ctx, this.virtualWidth, this.virtualHeight);
+
         // Make the game instance globally accessible
         window.game = this;
 
-        this.virtualWidth = 1080;  // Changed from 1920 to match height
-        this.virtualHeight = 1080; // Keeping this the same
-
-        // Initialize managers
-        this.canvasManager = new CanvasManager('gameCanvas', this.virtualWidth, this.virtualHeight);
-        this.inputManager = new InputManager();
-        this.gameState = new GameStateManager();
-        this.hudManager = new HUDManager(this.canvasManager.getContext(), this.virtualWidth, this.virtualHeight);
-        
         this.ctx = this.canvasManager.getContext();
         
         // Remove setupCanvas() and bindEvents() calls
@@ -37,7 +63,7 @@ class Game {
         this.offsetX = 0;
         this.offsetY = 0;
         
-        this.viewportWidth = 1080;  // Changed from 1920 to match new virtual width
+        this.viewportWidth = 1024;  // Changed from 1920 to match new virtual width
         this.checkerSize = 64;
         
         this.lastTime = 0;
@@ -111,6 +137,17 @@ class Game {
         // Create persistent offscreen canvas for player tinting effects
         this.offCanvasCache = document.createElement('canvas');
         this.debugWindow = new DebugWindow();
+    }
+
+    resize() {
+        // Get scale to fit screen while maintaining 1:1 ratio
+        const minDimension = Math.min(window.innerWidth, window.innerHeight) - 40;
+        const scale = minDimension / 1024;
+
+        // Update CRT effect scale only
+        if (this.crtEffect) {
+            this.crtEffect.setScale(scale);
+        }
     }
 
     gameOver() {
@@ -190,6 +227,9 @@ class Game {
         if(this.debugWindow.visible) {
             this.debugWindow.draw(this.ctx);
         }
+
+        // Render CRT effect last
+        this.crtEffect.render(performance.now());
     }
 
     startGameLoop() {
