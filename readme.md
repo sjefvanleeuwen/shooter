@@ -12,138 +12,208 @@ The battle for Earth had begun, and the fate of humanity rested in the hands of 
 ## Overview
 XENOWAR is a modern HTML5 Canvas-based space shooter game engine built with vanilla JavaScript, featuring a component-based architecture, particle systems, formation patterns, and dynamic audio management.
 
-## Architecture
+# XENOWAR Engine Documentation
 
-### Core Systems
-- **Game Loop**: Implements a request animation frame-based game loop with delta time
-- **Virtual Resolution**: Uses a 1080x1080 virtual resolution with dynamic scaling
-- **State Management**: Screen-based state system (Startup, Intro, Game)
-- **Event System**: DOM-based event handling for input
-- **Asset Management**: Dynamic loading of images and audio
+## Build Pipeline and Development Flow
 
-### Key Components
+```mermaid
+graph TD
+    A[Source Code] --> B[Vite Dev Server]
+    B --> C[Hot Module Replacement]
+    A --> D[Build Process]
+    D --> E[JavaScript Minification]
+    D --> F[Asset Optimization]
+    D --> G[Shader Compilation]
+    E & F & G --> H[Production Bundle]
+    H --> I[GitHub Pages Deploy]
+```
 
-#### Rendering System
-- Canvas-based rendering with hardware acceleration
-- Multiple render layers (Background, Entities, Particles, HUD)
-- Screen space transformation and scaling
-- Offscreen canvas for performance optimization
-- Particle pre-rendering
+## Development Setup
 
-#### Audio System
-- Dynamic audio loading and playback
+### Prerequisites
+```bash
+# Required software
+- Node.js 18+
+- npm 9+
+- Modern web browser with WebGL2 support
+
+# Installation
+npm install    # Install dependencies
+npm run dev    # Start development server
+npm run build  # Create production build
+```
+
+## Core Systems Architecture
+
+### Rendering Pipeline
+```mermaid
+graph LR
+    A[Game State] --> B[Entity Renderer]
+    B --> C[Particle System]
+    C --> D[Post-Processing]
+    D --> E[CRT Shader]
+    E --> F[Screen Output]
+```
+
+### CRT Shader System
+```javascript
+// Configurable shader parameters
+{
+  "scanline": {
+    "intensity": 0.28,    // Scanline strength
+    "count": 1024.0,      // Number of scanlines
+    "rollingSpeed": 10.3  // Rolling speed
+  },
+  "screenEffects": {
+    "vignetteStrength": 0.22,
+    "brightness": 1.1,
+    "curvature": 0.1
+  }
+}
+```
+
+## Asset Pipeline
+
+### Image Processing
+- Automatic sprite optimization
+- Background texture processing
+- Dimension verification
+- Palette optimization
+- Compression profiles
+
+### Audio System
 - Web Audio API integration
-- Spatial audio with panning
-- Music playlist management with shuffling
-- Sound effects with pitch variation
+- Spatial audio support
+- Dynamic music system
+- Sound effect manager
+- Audio pooling
 
-#### Particle Systems
-- Pooled particle management
-- Multiple particle types (Engine, Laser, Explosion)
-- Hardware-accelerated rendering
-- Performance-optimized with pre-rendering
+## Performance Optimizations
+
+### Memory Management
+- Object pooling for particles
+- Texture atlasing
+- Asset preloading
+- Garbage collection optimization
+- Memory monitoring
+
+### Rendering Optimizations
+- WebGL2 acceleration
+- Batch rendering
+- Shader-based effects
+- Double-buffered rendering
 - Screen-space culling
 
-#### Formation System
-- Dynamic pattern-based formations
-- Spline-based movement paths
-- Bezier curve interpolation
-- Pattern switching with smooth transitions
-- Difficulty-based scaling
+## Technical Architecture
 
-### Technical Features
-
-#### Performance Optimizations
-- Object pooling for particles
-- Pre-rendered particle effects
-- Offscreen canvas usage
-- Efficient collision detection
-- Memory management for disposable objects
-
-#### Visual Effects
-- Dynamic lighting and glow effects
-- Screen-space composition
-- Particle trails and explosions
-- Background parallax scrolling
-- Screen shake and flash effects
-
-#### Audio Features
-- Dynamic music system
-- Positional audio effects
-- Volume fading and transitions
-- Multiple audio channels
-- Pitch shifting for variety
-
-#### Input Handling
-- Keyboard input management
-- Event debouncing
-- Screen-specific input handlers
-- Input state tracking
-
-### File Structure
-```
-/shooter
-├── index.html           # Main entry point
-├── js/
-│   ├── game.js         # Core game engine
-│   ├── player.js       # Player entity
-│   ├── alien.js        # Enemy entities
-│   ├── patterns/       # Formation patterns
-│   ├── screens/        # Game screens
-│   ├── effects/        # Visual effects
-│   ├── audio/         # Audio management
-│   └── math/          # Math utilities
-├── audio/             # Audio assets
-├── sprites/           # Image assets
-└── backgrounds/       # Background images
+### Core Components
+```mermaid
+graph TD
+    A[Game Core] --> B[Renderer]
+    A --> C[Audio System]
+    A --> D[Input Manager]
+    B --> E[Particle Engine]
+    B --> F[Post-Processing]
+    C --> G[Music Player]
+    C --> H[SFX Manager]
 ```
 
-### Core Classes
+### Component Communication
+- Event-based messaging
+- Component lifecycle management
+- State synchronization
+- Update hierarchy
+- Resource sharing
 
-#### Game Class
-- Main game loop management
-- State management
-- Resource management
-- Input handling
-- Screen management
+## Debug Features
 
-#### ParticleEngine
-- Particle pool management
-- Particle updating
-- Efficient rendering
-- Performance optimization
+### Performance Monitoring
+```javascript
+// Enable debug mode
+engine.debug.enableProfiling();
+engine.debug.showStats();
+```
 
-#### Formation System
-- Pattern-based movement
-- Enemy formation management
-- Difficulty scaling
-- Collision detection
+### Debug Commands
+- `debug.showColliders()` - Show collision bounds
+- `debug.showFPS()` - Display FPS counter
+- `debug.profile()` - Start performance profiling
+- `debug.showPoolStats()` - Display object pool stats
 
-#### AudioManager
-- Music playlist management
-- Sound effect handling
-- Spatial audio
-- Volume control
+## Asset Requirements
 
-### Building and Running
+### Sprites
+- Format: PNG with transparency
+- Dimensions: Power of 2 recommended
+- Maximum size: 2048x2048
+- Color depth: 32-bit RGBA
 
-1. Clone the repository
-2. Serve with any HTTP server (e.g., `python -m http.server`)
-3. Open in a modern browser
+### Audio
+- Format: MP3/M4A
+- Sample rate: 44.1kHz
+- Bit depth: 16-bit
+- Channels: Stereo
 
-### Performance Considerations
-- Uses requestAnimationFrame for smooth animation
-- Implements object pooling for particles
-- Pre-renders common visual effects
-- Optimizes canvas state changes
-- Implements efficient collision detection
+## Build Configuration
 
-### Future Improvements
-- WebGL rendering pipeline
-- Additional formation patterns
-- Enhanced particle effects
-- More audio features
-- Mobile support
+### Development Build
+```bash
+npm run dev
+# Starts development server with:
+# - Hot module replacement
+# - Source maps
+# - Debug tools
+# - Uncompressed assets
+```
 
-## License
-MIT License
+### Production Build
+```bash
+npm run build
+# Creates optimized build with:
+# - Minified JavaScript
+# - Compressed assets
+# - Dead code elimination
+# - Bundled modules
+```
+
+## Performance Guidelines
+
+### Best Practices
+1. Use object pooling for frequent allocations
+2. Batch WebGL draw calls
+3. Minimize garbage collection
+4. Pre-render static elements
+5. Implement efficient collision detection
+
+### Memory Management
+- Monitor heap usage
+- Implement dispose patterns
+- Cache frequently used objects
+- Clear unused resources
+- Manage texture memory
+
+## Contributing Guidelines
+
+### Code Style
+```javascript
+// Use ES6+ features for modern JavaScript
+class Component {
+    constructor() {
+        this.pool = new Pool();
+    }
+    
+    update(deltaTime) {
+        // Use object pooling
+        this.pool.forEach(entity => {
+            // Entity updates
+        });
+    }
+}
+```
+
+### Pull Request Process
+1. Fork repository
+2. Create feature branch
+3. Follow code style guide
+4. Update documentation
+5. Submit pull request
