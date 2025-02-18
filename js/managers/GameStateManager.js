@@ -43,6 +43,7 @@ class GameStateManager {
         this.playerHit = false;
         this.playerInvulnerable = false;
         this.invulnerabilityTimer = 0;
+        // Don't reset highScore as it should persist
     }
 
     getInvulnerabilityAlpha() {
