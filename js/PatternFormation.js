@@ -10,6 +10,7 @@ class PatternFormation {
         this.ctx = ctx;
         this.virtualWidth = options.virtualWidth || 1080;
         this.virtualHeight = options.virtualHeight || 1080;
+        this.audioManager = options.audioManager; // Add this
         
         // Initialize config with new starting values
         this.config = {
@@ -90,7 +91,7 @@ class PatternFormation {
         this.initialAlienCount = this.config.alienCount; // Store initial count
         this.pointsBase = 100; // Base points per alien
 
-        this.explosionEffect = new ExplosionEffect(ctx);
+        this.explosionEffect = new ExplosionEffect(ctx, this.audioManager);
 
         // Enhanced rotation parameters
         this.baseRotationSpeed = 1.0;  // Increased from 0.5
@@ -376,16 +377,14 @@ class PatternFormation {
         const shooter = this.aliens[Math.floor(Math.random() * this.aliens.length)];
         const laser = new AlienLaser(
             shooter.x + shooter.width/2,
-            shooter.y + shooter.height
+            shooter.y + shooter.height,
+            this.audioManager  // Pass the audioManager instance
         );
         this.lasers.push(laser);
-
-        // Play shoot sound with position
-        AlienLaser.playShootSound(shooter.x + shooter.width/2, this.virtualWidth);
     }
 
     getPatternPosition(angle, centerX, centerY, radiusX, radiusY) {
-        switch(this.pattern.type || 'circle') {
+        switch (this.pattern.type || 'circle') {
             case 'figure8':
                 return {
                     x: centerX + Math.sin(angle * 2) * radiusX,

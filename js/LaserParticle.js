@@ -1,5 +1,5 @@
 class AlienLaser {
-    constructor(x, y) {
+    constructor(x, y, audioManager) {
         this.x = x;
         this.y = y;
         this.width = 4;
@@ -7,51 +7,38 @@ class AlienLaser {
         this.vy = 420;  // Reduced from 600 by 30%
         this.life = 2.0;
         this.maxLife = this.life;
+        this.audioManager = audioManager;
 
-        // Set up audio if it hasn't been initialized yet
-        if (!AlienLaser.audioContext) {
-            AlienLaser.setupAudio();
-        }
+        // Play sound when laser is created
+        AlienLaser.playShootSound(x, window.innerWidth, audioManager);
     }
 
-    static async setupAudio() {
-        AlienLaser.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    static playShootSound(x, virtualWidth, audioManager) {
+        if (!audioManager) {
+            console.warn('AlienLaser: No audioManager provided');
+            return;
+        }
+        
         try {
-            const response = await fetch('./audio/alien-shoot.mp3');
-            const arrayBuffer = await response.arrayBuffer();
-            AlienLaser.shootBuffer = await AlienLaser.audioContext.decodeAudioData(arrayBuffer);
+            if (!audioManager.sounds.has('alien-laser')) {
+                console.error('alien-laser sound not loaded!');
+                return;
+            }
+
+            const normalizedX = (x / virtualWidth) * 2 - 1;
+            
+            const soundConfig = {
+                pitch: 0.5 + Math.random(),          // Random pitch between 0.5 and 1.5
+                pan: normalizedX,                    // Pan based on position (-1 to 1)
+                volume: 0.5 + Math.random() * 0.25,  // Random volume between 0.5 and 0.75
+                decay: 0.5 + Math.random() * 0.5     // Random decay between 0.5 and 1.0 seconds
+            };
+
+            audioManager.playSound('alien-laser', soundConfig); 
+
         } catch (error) {
-            console.error('Error loading alien shoot sound:', error);
+            console.error('AlienLaser: Error playing sound:', error);
         }
-    }
-
-    static playShootSound(x, virtualWidth) {
-        if (!AlienLaser.shootBuffer || !AlienLaser.audioContext) return;
-
-        const source = AlienLaser.audioContext.createBufferSource();
-        const gainNode = AlienLaser.audioContext.createGain();
-        const pannerNode = AlienLaser.audioContext.createStereoPanner();
-
-        source.buffer = AlienLaser.shootBuffer;
-        source.connect(pannerNode);
-        pannerNode.connect(gainNode);
-        gainNode.connect(AlienLaser.audioContext.destination);
-
-        // Pan based on position
-        const normalizedX = (x / virtualWidth) * 2 - 1;
-        pannerNode.pan.value = normalizedX;
-
-        // Slightly randomize pitch
-        const pitchVariation = 1 + (Math.random() * 0.1 - 0.05); // ±5% variation
-        source.playbackRate.value = pitchVariation;
-
-        // Quick fade out
-        const fadeDuration = 0.2;
-        gainNode.gain.setValueAtTime(0.3, AlienLaser.audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0, AlienLaser.audioContext.currentTime + fadeDuration);
-
-        source.start();
-        source.stop(AlienLaser.audioContext.currentTime + fadeDuration);
     }
 
     update(delta) {

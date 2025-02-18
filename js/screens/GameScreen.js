@@ -9,7 +9,14 @@ class GameScreen {
         this.virtualHeight = options.virtualHeight;
         this.bgScroller = options.bgScroller;
         this.gameState = options.gameState;
+        this.audioManager = options.audioManager; // Add this
         
+        this.player = new Player(ctx, {
+            virtualWidth: options.virtualWidth,
+            virtualHeight: options.virtualHeight,
+            audioManager: options.audioManager  // Make sure to pass audioManager
+        });
+
         this.initializeGameObjects();
         this.offCanvasCache = document.createElement('canvas');
     }
@@ -25,14 +32,15 @@ class GameScreen {
         this.particleEngine = new ParticleEngine(this.ctx);
         this.particleEngine2 = new ParticleEngine(this.ctx);
         this.particleEngine3 = new ParticleEngine(this.ctx);
-        this.laserEngineLeft = new LaserEngine(this.ctx);
-        this.laserEngineRight = new LaserEngine(this.ctx);
+        this.laserEngineLeft = new LaserEngine(this.ctx, this.audioManager);
+        this.laserEngineRight = new LaserEngine(this.ctx, this.audioManager);
 
         // Initialize formation with points callback
         this.formation = new PatternFormation(this.ctx, {
             virtualWidth: this.virtualWidth,
             virtualHeight: this.virtualHeight,
             pattern: 'infinity',
+            audioManager: this.audioManager, // Add this
             onPointsScored: (points) => this.addPoints(points)
         });
 
@@ -95,6 +103,7 @@ class GameScreen {
                 pattern: 'infinity',
                 bgScroller: this.bgScroller,
                 difficulty: this.formation.difficulty + 1,
+                audioManager: this.audioManager, // Add this
                 onPointsScored: (points) => this.addPoints(points)
             });
         }

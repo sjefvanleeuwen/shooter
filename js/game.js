@@ -12,9 +12,19 @@ import HUDManager from './managers/HUDManager.js';
 import GameStateManager from './managers/GameStateManager.js';
 import GameScreen from './screens/GameScreen.js';
 import CRTEffect from './effects/CRTEffect.js';  // Add this import
+import AudioManager from './audio/AudioManager.js';
 
 class Game {
     constructor() {
+        // Initialize AudioManager first
+        this.audioManager = AudioManager.getInstance();
+        // Make sure preload is completed
+        this.audioManager.preloadGameSounds().then(() => {
+            console.log('Audio manager initialization complete');
+        }).catch(error => {
+            console.error('Failed to initialize audio:', error);
+        });
+
         // Create container div for centering
         this.container = document.createElement('div');
         this.container.style.position = 'fixed';
@@ -92,7 +102,8 @@ class Game {
                 virtualWidth: this.virtualWidth,
                 virtualHeight: this.virtualHeight,
                 bgScroller: this.bgScroller,
-                gameState: this.gameState
+                gameState: this.gameState,
+                audioManager: this.audioManager
             })
         };
         
@@ -182,7 +193,8 @@ class Game {
                 virtualWidth: this.virtualWidth,
                 virtualHeight: this.virtualHeight,
                 bgScroller: this.bgScroller,
-                gameState: this.gameState
+                gameState: this.gameState,
+                audioManager: this.audioManager
             });
         }
 

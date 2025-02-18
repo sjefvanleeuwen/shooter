@@ -1,5 +1,7 @@
+import VideoRecorder from '../utils/VideoRecorder.js';
+
 class CRTEffect {
-    constructor(targetCanvas, container) {
+    constructor(targetCanvas, container, audioManager = null) {
         this.gameCanvas = targetCanvas;
 
         // Create WebGL canvas with fixed 1024x1024 dimensions
@@ -24,6 +26,10 @@ class CRTEffect {
         this.createShaders();
         this.createBuffers();
         this.createTexture();
+
+        // Add video recorder with audio manager
+        this.videoRecorder = new VideoRecorder(this.glCanvas, audioManager);
+        this.setupRecordingControls();
     }
 
     createShaders() {
@@ -186,6 +192,18 @@ class CRTEffect {
 
         // Draw
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    setupRecordingControls() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'r') {
+                if (!this.videoRecorder.isRecording()) {
+                    this.videoRecorder.startRecording();
+                } else {
+                    this.videoRecorder.stopRecording();
+                }
+            }
+        });
     }
 }
 

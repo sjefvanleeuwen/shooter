@@ -66,7 +66,10 @@ class ExplosionParticle {
 }
 
 class ExplosionEffect {
-    constructor(ctx) {
+    constructor(ctx, audioManager) {
+        if (!audioManager) {
+            console.error('ExplosionEffect: AudioManager not provided!');
+        }
         this.ctx = ctx;
         this.explosions = [];
         
@@ -92,7 +95,7 @@ class ExplosionEffect {
 
         // Add virtual width for position calculations
         this.virtualWidth = ctx.canvas.width;
-        this.setupAudio();
+        this.audioManager = audioManager;
 
         // Add performance optimizations
         this.maxExplosions = 5; // Limit concurrent explosions
@@ -144,54 +147,29 @@ class ExplosionEffect {
         return particle;
     }
 
-    setupAudio() {
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        this.loadExplosionSound();
-    }
+    playExplosionSound(x) {
+        if (!this.audioManager) return;
 
-    async loadExplosionSound() {
         try {
-            const response = await fetch('./audio/explosion.mp3');
-            const arrayBuffer = await response.arrayBuffer();
-            this.explosionBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+            const normalizedX = (x / this.virtualWidth) * 2 - 1;
+            
+            const soundConfig = {
+                pitch: 0.5 + Math.random(),          // Random pitch between 0.5 and 1.5
+                pan: normalizedX,                    // Pan based on position (-1 to 1)
+                volume: 0.5 + Math.random() * 0.25,  // Random volume between 0.5 and 0.75
+                decay: 0.5 + Math.random() * 0.5     // Random decay between 0.5 and 1.0 seconds
+            };
+
+            this.audioManager.playSound('explosion', soundConfig);
         } catch (error) {
-            console.error('Error loading explosion sound:', error);
+            console.error('ExplosionEffect: Error playing sound:', error);
         }
     }
 
-    playExplosionSound(x) {
-        if (!this.explosionBuffer) return;
-
-        // Create audio nodes
-        const source = this.audioContext.createBufferSource();
-        const gainNode = this.audioContext.createGain();
-        const pannerNode = this.audioContext.createStereoPanner();
-        
-        // Connect nodes: source -> panner -> gain -> destination
-        source.buffer = this.explosionBuffer;
-        source.connect(pannerNode);
-        pannerNode.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-
-        // Calculate pan based on x position (-1 to 1)
-        const normalizedX = (x / this.virtualWidth) * 2 - 1;
-        pannerNode.pan.value = normalizedX;
-
-        // Random pitch variation (1 semitone = 1.059463)
-        const pitchVariation = 1 + (Math.random() * 0.1);
-        source.playbackRate.value = pitchVariation;
-
-        // Random fade duration
-        const fadeDuration = Math.random() * 0.25 + 0.25;
-        
-        // Start playing
-        source.start();
-        gainNode.gain.setValueAtTime(0.4, this.audioContext.currentTime); // Reduced gain by 30%
-        gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + fadeDuration);
-        source.stop(this.audioContext.currentTime + fadeDuration);
-    }
-
     createExplosion(x, y) {
+        // Play sound before creating particles
+        this.playExplosionSound(x);
+        
         // Limit concurrent explosions
         if (this.explosions.length >= this.maxExplosions) {
             return;
@@ -202,9 +180,6 @@ class ExplosionEffect {
             particles.push(this.getParticle(x, y, this.config));
         }
         this.explosions.push(particles);
-        
-        // Play sound with position
-        this.playExplosionSound(x);
     }
 
     update(delta) {

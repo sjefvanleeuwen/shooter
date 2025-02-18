@@ -32,15 +32,14 @@ class Player {
         window.addEventListener('keydown', (e) => {
             switch(e.key) {
                 case 'ArrowLeft':
-                case 'a':
                     this.movingLeft = true;
                     break;
                 case 'ArrowRight':
-                case 'd':
                     this.movingRight = true;
                     break;
                 case ' ':
                     this.isFiring = true;
+                    this.shoot(); // Add this line to shoot when space is pressed
                     break;
             }
         });
@@ -48,11 +47,9 @@ class Player {
         window.addEventListener('keyup', (e) => {
             switch(e.key) {
                 case 'ArrowLeft':
-                case 'a':
                     this.movingLeft = false;
                     break;
                 case 'ArrowRight':
-                case 'd':
                     this.movingRight = false;
                     break;
                 case ' ':
@@ -65,11 +62,9 @@ class Player {
     handleInput(key) {
         switch(key) {
             case 'ArrowLeft':
-            case 'a':
                 this.movingLeft = true;
                 break;
             case 'ArrowRight':
-            case 'd':
                 this.movingRight = true;
                 break;
             case ' ':
@@ -138,6 +133,11 @@ class Player {
             ctx.fillStyle = '#ff0000';
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
+    }
+
+    shoot() {
+        // No sound logic here anymore - LaserEngine handles that
+        this.isFiring = true;
     }
 }
 

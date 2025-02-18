@@ -166,7 +166,7 @@ class ParticleEngine {
 }
 
 class LaserEngine {
-    constructor(ctx) {
+    constructor(ctx, audioManager) {
         this.ctx = ctx;
         this.particles = []; // Make particles accessible
         this.emissionRate = 4;    // Reduced from 20 to 4 shots per second
@@ -174,55 +174,46 @@ class LaserEngine {
         this.emitterX = 0;
         this.emitterY = 0;
         this.firing = false;
+        this.audioManager = audioManager;
         this.virtualWidth = ctx.canvas.width;
-        this.setupAudio();
-    }
-    
-    setupAudio() {
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        this.loadShootSound();
-    }
-
-    async loadShootSound() {
-        try {
-            const response = await fetch('./audio/player-shoot.wav');
-            const arrayBuffer = await response.arrayBuffer();
-            this.shootBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-        } catch (error) {
-            console.error('Error loading shoot sound:', error);
-        }
     }
 
     playShootSound(x) {
-        if (!this.shootBuffer) return;
+        console.log('Attempting to play shoot sound at position:', x); // Debug line
 
-        // Create audio nodes
-        const source = this.audioContext.createBufferSource();
-        const gainNode = this.audioContext.createGain();
-        const pannerNode = this.audioContext.createStereoPanner();
-        
-        // Connect nodes
-        source.buffer = this.shootBuffer;
-        source.connect(pannerNode);
-        pannerNode.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
+        if (!this.audioManager) {
+            console.error('No audio manager available!');
+            return;
+        }
 
-        // Calculate pan based on x position (-1 to 1)
-        const normalizedX = (x / this.virtualWidth) * 2 - 1;
-        pannerNode.pan.value = normalizedX;
+        // Debug logging for audio manager state
+        console.debug('LaserEngine Audio State:', {
+            hasAudioManager: !!this.audioManager,
+            isInitialized: this.audioManager?.isInitialized,
+            availableSounds: this.audioManager ? Array.from(this.audioManager.sounds?.keys() || []) : [],
+            isFiring: this.firing,
+            position: {
+                x: x,
+                normalized: (x / this.virtualWidth) * 2 - 1
+            }
+        });
 
-        // Random pitch variation (smaller range than explosion)
-        const pitchVariation = 1 + (Math.random() * 0.09); // Half semitone variation
-        source.playbackRate.value = pitchVariation;
+        try {
+            const normalizedX = (x / this.virtualWidth) * 2 - 1;
+            
+            const soundConfig = {
+                pitch: 0.4 + Math.random() * 0.4,    // Base pitch lowered from 0.6 to 0.4 (another 4 semitones lower)
+                pan: normalizedX,
+                volume: 0.15 + Math.random() * 0.1,  // Volume reduced from 0.25 to 0.15 base
+                decay: 0.3 + Math.random() * 0.2
+            };
 
-        // Quick fade out
-        const fadeDuration = (Math.random() * 0.5); // 100ms fade
-        
-        // Start playing
-        source.start();
-        gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime); // Lower volume for rapid fire
-        gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + fadeDuration);
-        source.stop(this.audioContext.currentTime + fadeDuration);
+            console.log('Playing sound with config:', soundConfig); // Debug line
+            const result = this.audioManager.playSound('laser', soundConfig);
+            console.log('Sound play result:', result); // Debug line
+        } catch (error) {
+            console.error('Error playing shoot sound:', error);
+        }
     }
 
     setEmitter(x, y) {
@@ -237,14 +228,18 @@ class LaserEngine {
     update(delta) {
         // Only emit new particles if firing
         if (this.firing) {
+            console.log('LaserEngine is firing, delta:', delta); // Debug line
             const toEmit = this.emissionRate * delta + this.emissionAccumulator;
             const count = Math.floor(toEmit);
             this.emissionAccumulator = toEmit - count;
-            for (let i = 0; i < count; i++) {
-                this.particles.push(new LaserParticle(this.emitterX, this.emitterY));
-            }
             
             if (count > 0) {
+                console.log(`Creating ${count} laser particles`); // Debug line
+            }
+
+            for (let i = 0; i < count; i++) {
+                this.particles.push(new LaserParticle(this.emitterX, this.emitterY));
+                // Ensure sound plays for each particle
                 this.playShootSound(this.emitterX);
             }
         }

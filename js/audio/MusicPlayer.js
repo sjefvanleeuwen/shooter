@@ -1,3 +1,5 @@
+import AudioManager from './AudioManager.js';
+
 class MusicPlayer {
     constructor() {
         this.tracks = [
@@ -15,17 +17,24 @@ class MusicPlayer {
         // Add playlist management
         this.playlist = [...this.tracks]; // Copy tracks for shuffling
         this.currentTrack = 0;
-        this.audioElement = new Audio();
-        this.audioElement.volume = 0.4;
+
+        // Replace Audio element with Web Audio nodes
+        this.audioManager = AudioManager.getInstance();
+        this.audioContext = this.audioManager.context;
+        this.currentSource = null;
+        this.gainNode = this.audioContext.createGain();
+        this.gainNode.connect(this.audioManager.musicGain);
+        this.gainNode.gain.value = 0.4;
+        
+        this.loadedBuffers = new Map(); // Cache for loaded audio buffers
         this.isPlaying = false;
 
         // Shuffle initial playlist
         this.shufflePlaylist();
+    }
 
-        // Setup track ending handler
-        this.audioElement.addEventListener('ended', () => {
-            this.playNext();
-        });
+    getTracks() {
+        return this.tracks;
     }
 
     shufflePlaylist() {
@@ -45,12 +54,45 @@ class MusicPlayer {
         }
     }
 
+    async loadAudioFile(url) {
+        // Check cache first
+        if (this.loadedBuffers.has(url)) {
+            return this.loadedBuffers.get(url);
+        }
+
+        try {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+            this.loadedBuffers.set(url, audioBuffer); // Cache the buffer
+            return audioBuffer;
+        } catch (error) {
+            console.error(`Failed to load audio file ${url}:`, error);
+            throw error;
+        }
+    }
+
     async playTrack(index) {
         if (index >= 0 && index < this.playlist.length) {
             const trackPath = this.playlist[index];
-            this.audioElement.src = trackPath;
             try {
-                await this.audioElement.play();
+                // Stop current track if playing
+                if (this.currentSource) {
+                    this.currentSource.stop();
+                }
+
+                const audioBuffer = await this.loadAudioFile(trackPath);
+                this.currentSource = this.audioContext.createBufferSource();
+                this.currentSource.buffer = audioBuffer;
+                this.currentSource.connect(this.gainNode);
+                
+                this.currentSource.onended = () => {
+                    if (this.isPlaying) {
+                        this.playNext();
+                    }
+                };
+
+                this.currentSource.start();
                 this.isPlaying = true;
                 console.log('Now playing:', trackPath.split('/').pop());
             } catch (error) {
@@ -69,60 +111,45 @@ class MusicPlayer {
     }
 
     pause() {
-        this.audioElement.pause();
+        if (this.currentSource) {
+            this.currentSource.stop();
+            this.currentSource = null;
+        }
         this.isPlaying = false;
     }
 
     resume() {
-        this.audioElement.play();
-        this.isPlaying = true;
+        if (!this.isPlaying) {
+            this.playTrack(this.currentTrack);
+        }
     }
 
     stop() {
-        this.audioElement.pause();
-        this.audioElement.currentTime = 0;
+        if (this.currentSource) {
+            this.currentSource.stop();
+            this.currentSource = null;
+        }
         this.isPlaying = false;
     }
 
     setVolume(value) {
-        // Clamp volume between 0 and 1
-        this.audioElement.volume = Math.max(0, Math.min(1, value));
+        this.gainNode.gain.value = Math.max(0, Math.min(1, value));
     }
 
     fadeOut(duration = 2) {
-        const steps = 60;
-        const initialVolume = this.audioElement.volume;
-        const volumeStep = initialVolume / steps;
-        let currentStep = 0;
-
-        const fadeInterval = setInterval(() => {
-            currentStep++;
-            if (currentStep >= steps) {
-                clearInterval(fadeInterval);
-                this.pause();
-                this.audioElement.volume = initialVolume;
-            } else {
-                this.audioElement.volume = initialVolume - (volumeStep * currentStep);
-            }
-        }, (duration * 1000) / steps);
+        const currentTime = this.audioContext.currentTime;
+        this.gainNode.gain.linearRampToValueAtTime(0, currentTime + duration);
+        setTimeout(() => {
+            this.pause();
+            this.gainNode.gain.value = 0.4;
+        }, duration * 1000);
     }
 
     fadeIn(duration = 2) {
-        const steps = 60;
-        const targetVolume = 0.4; // Default volume
-        const volumeStep = targetVolume / steps;
-        let currentStep = 0;
-
-        this.audioElement.volume = 0;
+        this.gainNode.gain.value = 0;
         this.resume();
-
-        const fadeInterval = setInterval(() => {
-            currentStep++;
-            if (currentStep >= steps) {
-                clearInterval(fadeInterval);
-            }
-            this.audioElement.volume = volumeStep * currentStep;
-        }, (duration * 1000) / steps);
+        const currentTime = this.audioContext.currentTime;
+        this.gainNode.gain.linearRampToValueAtTime(0.4, currentTime + duration);
     }
 }
 
