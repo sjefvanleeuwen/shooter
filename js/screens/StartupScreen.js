@@ -31,7 +31,7 @@ class StartupScreen {
         
         this.ctx.globalAlpha = this.alpha;
         this.ctx.fillStyle = '#00ff00';
-        this.ctx.font = '48px "Press Start 2P"';
+        this.ctx.font = '32px "Press Start 2P"';  // Reduced from 48px
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         

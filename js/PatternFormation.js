@@ -383,33 +383,6 @@ class PatternFormation {
         this.lasers.push(laser);
     }
 
-    getPatternPosition(angle, centerX, centerY, radiusX, radiusY) {
-        switch (this.pattern.type || 'circle') {
-            case 'figure8':
-                return {
-                    x: centerX + Math.sin(angle * 2) * radiusX,
-                    y: centerY + Math.sin(angle) * radiusY
-                };
-            case 'wave':
-                return {
-                    x: centerX + Math.cos(angle) * radiusX,
-                    y: centerY + Math.sin(angle * 2) * radiusY * 0.5
-                };
-            case 'circle':
-            default:
-                return {
-                    x: centerX + Math.cos(angle) * radiusX,
-                    y: centerY + Math.sin(angle) * radiusY
-                };
-        }
-    }
-
-    easeInOutCubic(t) {
-        return t < 0.5
-            ? 4 * t * t * t
-            : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-
     lerp(a, b, t) {
         return a + (b - a) * t;
     }

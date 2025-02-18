@@ -1,0 +1,28 @@
+{
+  "scanline": {
+    "intensity": 0.28,
+    "count": 1024.0,
+    "rollingSpeed": 10.3
+  },
+  "screenEffects": {
+    "vignetteStrength": 0.22,
+    "brightness": 1.1,
+    "curvature": 0.1,
+    "gamma": 1.2
+  },
+  "colorEffects": {
+    "rgbShift": 0.0015,
+    "saturation": 1.1,
+    "contrast": 1.2
+  },
+  "blur": {
+    "horizontal": 0.4,
+    "samples": 5
+  },
+  "distortion": {
+    "flickerSpeed": 8.0,
+    "flickerIntensity": 0.03,
+    "noiseAmount": 0.05,
+    "ghosting": 0.12
+  }
+}

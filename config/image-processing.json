@@ -1,0 +1,46 @@
+{
+  "sprites": {
+    "dimensions": {
+      "alien1.png": { "width": 100, "height": 100 },
+      "alien.png": { "width": 100, "height": 100 },
+      "player.png": { "width": 200, "height": 200 },
+      "xenowar.png": { "width": 1024, "height": 1024 }
+    },
+    "processing": {
+      "fit": "contain",
+      "position": "center",
+      "colors": 16,
+      "compression": {
+        "quality": [0.3, 0.5],
+        "speed": 1,
+        "strip": true,
+        "dithering": 0.6,
+        "effort": 10,
+        "adaptiveFiltering": true
+      }
+    }
+  },
+  "backgrounds": {
+    "dimensions": {
+      "width": 1024,
+      "height": 1024
+    },
+    "processing": {
+      "fit": "fill",
+      "colors": 16,
+      "compression": {
+        "quality": [0.3, 0.5],
+        "speed": 1,
+        "effort": 10,
+        "dithering": 0.5,
+        "adaptiveFiltering": true
+      }
+    }
+  },
+  "general": {
+    "tempDir": "temp",
+    "outputFormat": "png",
+    "skipExisting": false,
+    "verifyDimensions": true
+  }
+}

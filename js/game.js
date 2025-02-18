@@ -133,16 +133,6 @@ class Game {
         // Start the game loop
         this.startGameLoop();
 
-        this.playerHit = false;
-        this.playerInvulnerable = false;
-        this.invulnerabilityTime = 2.0;
-        this.invulnerabilityTimer = 0;
-        this.score = 0;
-        this.highScore = localStorage.getItem('highScore') 
-            ? parseInt(localStorage.getItem('highScore'), 10)
-            : 0;
-        this.lives = 3;
-
         // Initialize music player without starting it
         this.musicPlayer = new MusicPlayer();
         // Create persistent offscreen canvas for player tinting effects
@@ -172,12 +162,6 @@ class Game {
             highScore: this.gameState.highScore
         });
         this.switchScreen('intro');
-    }
-
-    reset() {
-        // Reposition player at center bottom of the virtual game area, raised 50px.
-        this.player.x = (this.virtualWidth - this.player.width) / 2;
-        this.player.y = this.virtualHeight - this.player.height - 20 - 50;
     }
 
     switchScreen(screenName) {

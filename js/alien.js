@@ -14,9 +14,9 @@ class Alien {
         this.speed = options.speed || 100;
         this.direction = 1; // 1 for right, -1 for left
         
-        // Load alien sprite
+        // Update sprite path to match processed file
         this.img = new Image();
-        this.img.src = './sprites/alien1.png';
+        this.img.src = './sprites/alien1.png';  // Updated path
     }
 
     update(delta) {

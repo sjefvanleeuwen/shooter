@@ -31,7 +31,7 @@ class AudioManager {
 
         // Set default volumes
         this.masterGain.gain.value = 1.0;
-        this.musicGain.gain.value = 0.5;  // Lower music volume
+        this.musicGain.gain.value = 0.8;  // Lower music volume
         this.fxGain.gain.value = 0.7;     // Slightly lower FX volume
 
         // Add initialization state
@@ -87,7 +87,7 @@ class AudioManager {
             // Load standard game sounds
             const standardSounds = [
                 this.loadSound('explosion', './audio/explosion.mp3'),
-                this.loadSound('laser', './audio/player-shoot.wav'),
+                this.loadSound('laser', './audio/player-shoot.mp3'),
                 this.loadSound('alien-laser', './audio/alien-shoot.mp3')
             ];
 

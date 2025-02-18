@@ -23,13 +23,38 @@ class CRTEffect {
             alpha: false
         });
 
-        this.createShaders();
-        this.createBuffers();
-        this.createTexture();
+        // Load CRT configuration
+        this.loadConfig().then(() => {
+            this.createShaders();
+            this.createBuffers();
+            this.createTexture();
+        });
 
         // Add video recorder with audio manager
         this.videoRecorder = new VideoRecorder(this.glCanvas, audioManager);
         this.setupRecordingControls();
+    }
+
+    async loadConfig() {
+        try {
+            // Update path to use the correct location in dist
+            const response = await fetch('./config/crt-effect.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            this.config = await response.json();
+            console.log('CRT config loaded:', this.config);
+        } catch (err) {
+            console.error('Failed to load CRT config:', err);
+            // Fallback to default values
+            this.config = {
+                scanline: { intensity: 0.18, count: 1024.0, rollingSpeed: 0.3 },
+                screenEffects: { vignetteStrength: 0.22, brightness: 1.1, curvature: 0.1 },
+                colorEffects: { rgbShift: 0.0015 },
+                blur: { horizontal: 0.4 },
+                distortion: { flickerSpeed: 8.0, flickerIntensity: 0.03 }
+            };
+        }
     }
 
     createShaders() {
@@ -49,46 +74,78 @@ class CRTEffect {
             uniform vec2 u_resolution;
             uniform float u_time;
             
+            uniform float u_scanlineIntensity;
+            uniform float u_scanlineCount;
+            uniform float u_rollingSpeed;
+            uniform float u_vignetteStrength;
+            uniform float u_brightness;
+            uniform float u_curvature;
+            uniform float u_rgbShift;
+            uniform float u_horizontalBlur;
+            uniform float u_flickerSpeed;
+            uniform float u_flickerIntensity;
+            uniform float u_noiseAmount;
+            
             in vec2 v_texCoord;
             out vec4 outColor;
+            
+            float rand(vec2 co) {
+                return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+            }
 
-            #define SCANLINE_INTENSITY 0.1
-            #define VIGNETTE_STRENGTH 0.2
+            vec3 sampleWithBlur(sampler2D tex, vec2 uv, float blur) {
+                vec3 color = vec3(0.0);
+                float total = 0.0;
+                for(float i = -2.0; i <= 2.0; i++) {
+                    float weight = 1.0 - abs(i) / 3.0;
+                    color += texture(tex, uv + vec2(i * blur / u_resolution.x, 0.0)).rgb * weight;
+                    total += weight;
+                }
+                return color / total;
+            }
             
             void main() {
                 vec2 uv = v_texCoord;
                 
-                // Screen curve
+                // Screen curvature
                 vec2 curve_uv = uv * 2.0 - 1.0;
-                vec2 offset = curve_uv.yx * curve_uv.yx * vec2(0.075, 0.075);
+                vec2 offset = curve_uv.yx * curve_uv.yx * vec2(u_curvature);
                 curve_uv += curve_uv * offset;
                 uv = curve_uv * 0.5 + 0.5;
 
-                // Check bounds
+                // Early exit if outside bounds
                 if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
                     outColor = vec4(0.0, 0.0, 0.0, 1.0);
                     return;
                 }
 
-                // Sample with subtle RGB shift
-                float r = texture(u_image, uv + vec2(0.001, 0.0)).r;
-                float g = texture(u_image, uv).g;
-                float b = texture(u_image, uv - vec2(0.001, 0.0)).b;
-                vec4 color = vec4(r, g, b, 1.0);
-                
-                // Scanlines
-                float scanline = sin(uv.y * u_resolution.y * 1.5) * 0.5 + 0.5;
-                color *= 1.0 - scanline * SCANLINE_INTENSITY;
-                
-                // Vignette
-                float vignette = 1.0 - length(curve_uv) * VIGNETTE_STRENGTH;
-                color *= vignette;
-                
-                // Subtle noise
-                float noise = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
-                color *= 0.98 + noise * 0.02;
+                // Rolling scanline
+                float scanline = sin(uv.y * u_scanlineCount + u_time * u_rollingSpeed);
+                scanline = scanline * 0.5 + 0.5;
+                scanline = pow(scanline, 0.5);
 
-                outColor = color;
+                // RGB shift
+                vec2 rUV = uv - vec2(u_rgbShift * sin(u_time), 0.0);
+                vec2 gUV = uv;
+                vec2 bUV = uv + vec2(u_rgbShift * sin(u_time), 0.0);
+
+                // Sample with blur
+                vec3 color;
+                color.r = sampleWithBlur(u_image, rUV, u_horizontalBlur).r;
+                color.g = sampleWithBlur(u_image, gUV, u_horizontalBlur).g;
+                color.b = sampleWithBlur(u_image, bUV, u_horizontalBlur).b;
+
+                // Apply effects
+                color *= u_brightness;
+                color *= 1.0 - (scanline * u_scanlineIntensity);
+                color *= 1.0 - length(curve_uv) * u_vignetteStrength;
+                color *= 1.0 - (sin(u_time * u_flickerSpeed) * u_flickerIntensity);
+                
+                // Add noise
+                float noise = rand(uv + vec2(u_time * 0.001));
+                color += (noise - 0.5) * u_noiseAmount;
+
+                outColor = vec4(color, 1.0);
             }`;
 
         const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vsSource);
@@ -101,6 +158,21 @@ class CRTEffect {
         this.texCoordLoc = this.gl.getAttribLocation(this.program, 'a_texCoord');
         this.resolutionLoc = this.gl.getUniformLocation(this.program, 'u_resolution');
         this.timeLoc = this.gl.getUniformLocation(this.program, 'u_time');
+
+        // Get additional uniform locations
+        this.uniformLocations = {
+            scanlineIntensity: this.gl.getUniformLocation(this.program, 'u_scanlineIntensity'),
+            scanlineCount: this.gl.getUniformLocation(this.program, 'u_scanlineCount'),
+            rollingSpeed: this.gl.getUniformLocation(this.program, 'u_rollingSpeed'),
+            vignetteStrength: this.gl.getUniformLocation(this.program, 'u_vignetteStrength'),
+            brightness: this.gl.getUniformLocation(this.program, 'u_brightness'),
+            curvature: this.gl.getUniformLocation(this.program, 'u_curvature'),
+            rgbShift: this.gl.getUniformLocation(this.program, 'u_rgbShift'),
+            horizontalBlur: this.gl.getUniformLocation(this.program, 'u_horizontalBlur'),
+            flickerSpeed: this.gl.getUniformLocation(this.program, 'u_flickerSpeed'),
+            flickerIntensity: this.gl.getUniformLocation(this.program, 'u_flickerIntensity'),
+            noiseAmount: this.gl.getUniformLocation(this.program, 'u_noiseAmount')
+        };
     }
 
     createBuffers() {
@@ -180,6 +252,21 @@ class CRTEffect {
         // Set uniforms
         gl.uniform2f(this.resolutionLoc, gl.canvas.width, gl.canvas.height);
         gl.uniform1f(this.timeLoc, time * 0.001);
+
+        // Set CRT effect uniforms from config
+        if (this.config) {  // Add check for config
+            gl.uniform1f(this.uniformLocations.scanlineIntensity, this.config.scanline.intensity);
+            gl.uniform1f(this.uniformLocations.scanlineCount, this.config.scanline.count);
+            gl.uniform1f(this.uniformLocations.rollingSpeed, this.config.scanline.rollingSpeed);
+            gl.uniform1f(this.uniformLocations.vignetteStrength, this.config.screenEffects.vignetteStrength);
+            gl.uniform1f(this.uniformLocations.brightness, this.config.screenEffects.brightness);
+            gl.uniform1f(this.uniformLocations.curvature, this.config.screenEffects.curvature);
+            gl.uniform1f(this.uniformLocations.rgbShift, this.config.colorEffects.rgbShift);
+            gl.uniform1f(this.uniformLocations.horizontalBlur, this.config.blur.horizontal);
+            gl.uniform1f(this.uniformLocations.flickerSpeed, this.config.distortion.flickerSpeed);
+            gl.uniform1f(this.uniformLocations.flickerIntensity, this.config.distortion.flickerIntensity);
+            gl.uniform1f(this.uniformLocations.noiseAmount, this.config.distortion.noiseAmount);
+        }
 
         // Set attributes
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);

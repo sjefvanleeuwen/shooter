@@ -1,0 +1,27 @@
+{
+  "name": "space-shooter",
+  "version": "1.0.0",
+  "description": "A retro-style space shooter game",
+  "private": true,
+  "scripts": {
+    "start": "vite",
+    "clean": "rimraf dist",
+    "copy-assets": "node scripts/copyAssets.js",
+    "optimize": "node scripts/postProcessImages.js",
+    "prebuild": "npm run clean",
+    "build": "npm run copy-assets && vite build",
+    "postbuild": "npm run optimize",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "eslint": "^8.53.0",
+    "fs-extra": "^11.1.1",
+    "imagemin": "^8.0.1",
+    "imagemin-pngquant": "^9.0.2",
+    "imagemin-zopfli": "^7.0.0",
+    "sharp": "^0.32.6",
+    "vite": "^4.5.0",
+    "rimraf": "^5.0.1"
+  },
+  "type": "module"
+}

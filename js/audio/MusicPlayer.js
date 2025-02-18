@@ -24,7 +24,7 @@ class MusicPlayer {
         this.currentSource = null;
         this.gainNode = this.audioContext.createGain();
         this.gainNode.connect(this.audioManager.musicGain);
-        this.gainNode.gain.value = 0.4;
+        this.gainNode.gain.value = 0.8;
         
         this.loadedBuffers = new Map(); // Cache for loaded audio buffers
         this.isPlaying = false;

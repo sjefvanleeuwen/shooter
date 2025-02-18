@@ -1,20 +1,29 @@
 import Player from '../player.js';
 import { ParticleEngine, LaserEngine } from '../particleEngine.js';
 import PatternFormation from '../PatternFormation.js';
+import ImageBackgroundScroller from '../imageBackgroundScroller.js';  // Add this import
 
 class GameScreen {
     constructor(ctx, options = {}) {
         this.ctx = ctx;
         this.virtualWidth = options.virtualWidth;
         this.virtualHeight = options.virtualHeight;
-        this.bgScroller = options.bgScroller;
         this.gameState = options.gameState;
-        this.audioManager = options.audioManager; // Add this
+        this.audioManager = options.audioManager;
         
         this.player = new Player(ctx, {
             virtualWidth: options.virtualWidth,
             virtualHeight: options.virtualHeight,
-            audioManager: options.audioManager  // Make sure to pass audioManager
+            audioManager: options.audioManager
+        });
+
+        this.bgScroller = new ImageBackgroundScroller(ctx, {
+            virtualWidth: options.virtualWidth,
+            virtualHeight: options.virtualHeight,
+            viewportWidth: options.virtualWidth,
+            checkerSize: 64,
+            scrollSpeed: 100,
+            offsetY: 0
         });
 
         this.initializeGameObjects();
@@ -40,16 +49,9 @@ class GameScreen {
             virtualWidth: this.virtualWidth,
             virtualHeight: this.virtualHeight,
             pattern: 'infinity',
-            audioManager: this.audioManager, // Add this
+            audioManager: this.audioManager,
             onPointsScored: (points) => this.addPoints(points)
         });
-
-        this.reset();
-    }
-
-    reset() {
-        this.player.x = (this.virtualWidth - this.player.width) / 2;
-        this.player.y = this.virtualHeight - this.player.height - 70;
     }
 
     handleInput(key) {
@@ -103,7 +105,7 @@ class GameScreen {
                 pattern: 'infinity',
                 bgScroller: this.bgScroller,
                 difficulty: this.formation.difficulty + 1,
-                audioManager: this.audioManager, // Add this
+                audioManager: this.audioManager,
                 onPointsScored: (points) => this.addPoints(points)
             });
         }
@@ -113,7 +115,7 @@ class GameScreen {
         // Check player collisions with formation lasers
         for (const laser of this.formation.lasers) {
             if (this.player.checkCollision(laser)) {
-                this.handlePlayerHit(); // Changed from window.game.handlePlayerHit()
+                this.handlePlayerHit();
                 laser.life = 0;
                 break;
             }
@@ -124,7 +126,7 @@ class GameScreen {
             engine.particles.forEach(laser => {
                 if (this.formation.checkCollision(laser.x, laser.y)) {
                     laser.life = 0;
-                    this.addPoints(100); // Changed from window.game.addPoints()
+                    this.addPoints(100);
                 }
             });
         });
@@ -136,7 +138,7 @@ class GameScreen {
 
     handlePlayerHit() {
         if (this.gameState.handlePlayerHit()) {
-            window.game.gameOver(); // Still need to call game's gameOver for screen transition
+            window.game.gameOver();
         }
     }
 
