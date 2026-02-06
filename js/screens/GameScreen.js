@@ -225,8 +225,11 @@ class GameScreen {
         );
 
         const offCanvas = this.offCanvasCache;
-        offCanvas.width = this.player.img.width;
-        offCanvas.height = this.player.img.height;
+        if (offCanvas.width !== this.player.img.width || offCanvas.height !== this.player.img.height) {
+            offCanvas.width = this.player.img.width;
+            offCanvas.height = this.player.img.height;
+        }
+        
         const offCtx = offCanvas.getContext('2d');
         offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
         offCtx.drawImage(this.player.img, 0, 0);

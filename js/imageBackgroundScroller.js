@@ -42,8 +42,8 @@ export default class ImageBackgroundScroller {
 
         // Color sampling cache
         this.tempCanvas = document.createElement('canvas');
-        this.tempCanvas.width = 20;
-        this.tempCanvas.height = 20;
+        this.tempCanvas.width = 1;
+        this.tempCanvas.height = 1;
         this.tempCtx = this.tempCanvas.getContext('2d', { willReadFrequently: true });
         this.lastColorSample = { x: null, y: null, color: null, time: 0 };
     }
@@ -120,7 +120,9 @@ export default class ImageBackgroundScroller {
 
     getColorAt(x, y) {
         const now = performance.now();
-        if (this.lastColorSample.x === x && this.lastColorSample.y === y && now - this.lastColorSample.time < 100) {
+        // Performance optimization: Throttle sampling to ~10 times per second
+        // Removing x/y check allows relying on cache even while moving
+        if (this.lastColorSample.color && now - this.lastColorSample.time < 100) {
             return this.lastColorSample.color;
         }
 
@@ -139,15 +141,21 @@ export default class ImageBackgroundScroller {
                  const source = layer.processed || layer.image;
                  if (!source) continue;
 
-                 this.tempCtx.clearRect(0, 0, 20, 20);
-                 this.tempCtx.drawImage(source, x - 10, localY - 10, 20, 20, 0, 0, 20, 20);
+                 // Optimize: 1x1 pixel sample
+                 this.tempCtx.clearRect(0, 0, 1, 1);
+                 this.tempCtx.drawImage(
+                    source, 
+                    Math.floor(x), Math.floor(localY), 1, 1, 
+                    0, 0, 1, 1
+                 );
                  
-                 const data = this.tempCtx.getImageData(0, 0, 20, 20).data;
-                 let r=0,g=0,b=0,count=0;
-                 for(let i=0; i<data.length; i+=4) {
-                     r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++;
-                 }
-                 this.lastColorSample = { x, y, color: { r: r/count, g: g/count, b: b/count }, time: now };
+                 const data = this.tempCtx.getImageData(0, 0, 1, 1).data;
+                 
+                 this.lastColorSample = { 
+                     x, y, 
+                     color: { r: data[0], g: data[1], b: data[2] }, 
+                     time: now 
+                 };
                  return this.lastColorSample.color;
              }
         }

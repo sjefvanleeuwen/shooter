@@ -58,7 +58,7 @@ export const patterns = {
         type: 'functional',
         func: (t) => ({
             x: 0.5 + Math.sin(t * Math.PI * 2) * 0.15, // Reduced sweep
-            y: 0.2 + Math.abs(Math.cos(t * Math.PI)) * 0.1
+            y: 0.2 + (1 - Math.cos(t * Math.PI * 2)) * 0.05 // Smoothed dip
         }),
         speed: 0.2,
         spacing: { type: 'grid', cols: 4, spacing: 130, count: 12 } // Increased spacing 100 -> 130
@@ -85,7 +85,7 @@ export const patterns = {
         type: 'functional',
         isBoss: true,
         func: (t) => ({
-            x: 0.5 + Math.sin(t * Math.PI) * 0.2,
+            x: 0.5 + Math.sin(t * Math.PI * 2) * 0.2, // increased frequency to match loop
             y: 0.15 + Math.cos(t * Math.PI * 2) * 0.05
         }),
         speed: 0.05,
