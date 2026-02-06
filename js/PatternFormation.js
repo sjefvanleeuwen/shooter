@@ -178,18 +178,19 @@ class PatternFormation {
         this.formationSpacing = Math.max(minSpacing, this.config.formationRadius * 0.8);
     }
 
-    // Modify createFormation to apply current difficulty settings
+    // Modify createFormation to adjust alien count without full reset
     createFormation() {
-        // Apply new difficulty modifiers before creating formation
+        // Apply new difficulty modifiers before checking count
         this.applyDifficultyModifiers();
 
-        this.aliens = [];
-        this.alienSlots = [];  // Reset slots
-        const count = Math.floor(this.config.alienCount);
-        
-        // First, create all possible slots
-        const angleStep = (Math.PI * 2) / count;
-        for (let i = 0; i < count; i++) {
+        // Base count from pattern, plus a bonus based on difficulty
+        const baseCount = this.pattern.spacing?.count || 10;
+        const difficultyBonus = Math.floor((this.difficulty - 1) / 2); // +1 ship every 2 levels
+        const targetCount = baseCount + difficultyBonus;
+
+        this.alienSlots = [];  // Reset slots structure
+        const angleStep = (Math.PI * 2) / targetCount;
+        for (let i = 0; i < targetCount; i++) {
             this.alienSlots.push({
                 index: i,
                 angle: i * angleStep,
@@ -197,17 +198,28 @@ class PatternFormation {
             });
         }
 
-        // Then create aliens and assign them to slots
-        for (let i = 0; i < count; i++) {
-            const alien = new Alien(this.ctx, {
-                virtualWidth: this.virtualWidth,
-                virtualHeight: this.virtualHeight,
-                width: 100,
-                height: 100
-            });
-            alien.slotIndex = i;  // Remember which slot this alien belongs to
-            this.aliens.push(alien);
+        // Adjust alien array to match target count
+        if (this.aliens.length < targetCount) {
+            // Add more aliens
+            const toAdd = targetCount - this.aliens.length;
+            for (let i = 0; i < toAdd; i++) {
+                const alien = new Alien(this.ctx, {
+                    virtualWidth: this.virtualWidth,
+                    virtualHeight: this.virtualHeight,
+                    width: 100,
+                    height: 100
+                });
+                this.aliens.push(alien);
+            }
+        } else if (this.aliens.length > targetCount) {
+            // Remove excess aliens from the end
+            this.aliens.splice(targetCount);
         }
+
+        // Re-assign slot indices to all current aliens
+        this.aliens.forEach((alien, index) => {
+            alien.slotIndex = index;
+        });
 
         this.calculateFormationParameters();
     }
@@ -215,6 +227,11 @@ class PatternFormation {
     switchPattern(patternName) {
         if (patterns[patternName]) {
             this.pattern = patterns[patternName];
+            
+            // Set base radius from pattern and re-apply difficulty scaling
+            this.baseFormationRadius = this.pattern.spacing?.radius || 150;
+            this.applyDifficultyModifiers();
+
             this.calculateFormationParameters();
             this.time = 0; // Reset time to start pattern from beginning
             
@@ -224,54 +241,37 @@ class PatternFormation {
                 alien.lastY = alien.y;
             });
 
-            // Update spline curve
-            this.spline = new SplineCurve(
-                this.pattern.points.map(p => ({
-                    x: p.x * this.virtualWidth,
-                    y: p.y * this.virtualHeight
-                })),
-                true  // Force closed curve
-            );
+            // Update spline or functional path
+            if (this.pattern.type === 'spline' && this.pattern.points) {
+                this.spline = new SplineCurve(
+                    this.pattern.points.map(p => ({
+                        x: p.x * this.virtualWidth,
+                        y: p.y * this.virtualHeight
+                    })),
+                    true  // Force closed curve
+                );
+            }
         }
     }
 
     update(delta) {
-        // Check if all aliens are destroyed
-        if (this.aliens.length === 0 && !this.isRespawning) {
-            this.isRespawning = true;
-            this.respawnTimer = this.respawnDelay;
-        }
-
-        // Handle respawn timer
-        if (this.isRespawning) {
-            this.respawnTimer -= delta;
-            if (this.respawnTimer <= 0) {
-                // Switch to a new random pattern
-                const availablePatterns = this.patternNames.filter(p => p !== this.pattern.type);
-                const newPattern = availablePatterns[Math.floor(Math.random() * availablePatterns.length)];
-                this.switchPattern(newPattern);
-                
-                // Recreate alien formation
-                this.createFormation();
-                this.isRespawning = false;
-            }
-            return; // Skip regular update while respawning
-        }
-
-        // Update pattern timer and check for pattern switch
-        this.patternTimer += delta;
-        if (this.patternTimer >= this.patternDuration) {
-            this.patternTimer = 0;
-            this.currentPatternIndex = (this.currentPatternIndex + 1) % this.patternNames.length;
-            this.switchPattern(this.patternNames[this.currentPatternIndex]);
-        }
-
         // Update continuous time
         this.time = (this.time + delta) % this.loopDuration;
         const progress = this.time / this.loopDuration;
 
-        // Get current position and clamp vertical position
-        const pos = this.path.getPoint(progress);
+        // Get central position from pattern
+        let pos = { x: this.virtualWidth * 0.5, y: this.virtualHeight * 0.3 };
+        if (this.pattern.type === 'spline' && this.spline) {
+            pos = this.spline.getPoint(progress);
+        } else if (this.pattern.type === 'functional' && this.pattern.func) {
+            const normalizedPos = this.pattern.func(progress);
+            pos = {
+                x: normalizedPos.x * this.virtualWidth,
+                y: normalizedPos.y * this.virtualHeight
+            };
+        }
+        
+        // Clamp vertical position
         pos.y = Math.min(pos.y, this.maxVerticalPosition);
         pos.y = Math.max(pos.y, this.verticalOffset);
 
@@ -289,10 +289,22 @@ class PatternFormation {
             if (!alien.isDiving) {
                 // Normal formation movement
                 const slot = this.alienSlots[alien.slotIndex];
-                const rotatedAngle = slot.angle + this.currentRotation;
                 
-                const targetX = pos.x + Math.cos(rotatedAngle) * currentRadius;
-                const targetY = pos.y + Math.sin(rotatedAngle) * currentRadius;
+                let targetX, targetY;
+                
+                if (this.pattern.type === 'functional' && this.pattern.spacing?.type === 'circular') {
+                    // Circular spacing around the functional path center
+                    const orbitAngle = slot.angle + (this.time * 2); // Rotate slots over time
+                    // Use the difficulty-scaled formation radius
+                    const radius = this.config.formationRadius + (pulseAmount * 0.5);
+                    targetX = pos.x + Math.cos(orbitAngle) * radius;
+                    targetY = pos.y + Math.sin(orbitAngle) * radius;
+                } else {
+                    // Default circular formation behavior
+                    const rotatedAngle = slot.angle + this.currentRotation;
+                    targetX = pos.x + Math.cos(rotatedAngle) * currentRadius;
+                    targetY = pos.y + Math.sin(rotatedAngle) * currentRadius;
+                }
                 
                 // Enhanced dive chance check with spacing
                 if (Math.random() < this.currentDiveChance * delta && 

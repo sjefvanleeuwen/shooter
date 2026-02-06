@@ -45,10 +45,13 @@ class GameScreen {
         this.laserEngineRight = new LaserEngine(this.ctx, this.audioManager);
 
         // Initialize formation with points callback
+        const patternNames = ['infinity', 'sinusoidal', 'vortex', 'diamond_weave', 'clover'];
+        const startPattern = patternNames[Math.floor(Math.random() * patternNames.length)];
+
         this.formation = new PatternFormation(this.ctx, {
             virtualWidth: this.virtualWidth,
             virtualHeight: this.virtualHeight,
-            pattern: 'infinity',
+            pattern: startPattern,
             audioManager: this.audioManager,
             onPointsScored: (points) => this.addPoints(points)
         });
@@ -99,10 +102,13 @@ class GameScreen {
     updateFormation(delta) {
         this.formation.update(delta);
         if (this.formation.aliens.length === 0) {
+            const patternNames = ['infinity', 'sinusoidal', 'vortex', 'diamond_weave', 'clover'];
+            const nextPattern = patternNames[Math.floor(Math.random() * patternNames.length)];
+            
             this.formation = new PatternFormation(this.ctx, {
                 virtualWidth: this.virtualWidth,
                 virtualHeight: this.virtualHeight,
-                pattern: 'infinity',
+                pattern: nextPattern,
                 bgScroller: this.bgScroller,
                 difficulty: this.formation.difficulty + 1,
                 audioManager: this.audioManager,
