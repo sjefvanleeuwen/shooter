@@ -80,6 +80,13 @@ class AudioManager {
         this.music.set(key, audioBuffer);
     }
 
+    async resumeContext() {
+        if (this.context.state === 'suspended') {
+            await this.context.resume();
+            console.log('AudioContext resumed');
+        }
+    }
+
     async preloadGameSounds(musicTracks = []) {
         try {
             console.log('Loading game sounds...');

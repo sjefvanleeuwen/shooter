@@ -184,9 +184,7 @@ class Game {
 
         // Handle music transitions
         if (this.currentScreen === 'startup' && screenName === 'intro') {
-            this.musicPlayer.start().then(() => {
-                this.musicPlayer.fadeIn(3);
-            });
+            this.musicPlayer.fadeIn(3);
         }
 
         this.currentScreen = screenName;

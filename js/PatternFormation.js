@@ -257,10 +257,13 @@ class PatternFormation {
                 if (this.pattern.isBoss) {
                     alienType = (globalIndex === 0) ? 'boss' : 'normal';
                 } else {
-                    // Improved Elite/Kamikaze distribution
-                    if (this.difficulty >= 2 && globalIndex % 5 === 0) {
+                    // Gradual introduction of Elites (Medium Bosses)
+                    // Level 1-2: Normal only
+                    // Level 3-4: 1 Elite per 5 ships
+                    // Level 5+: Improved Elite/Kamikaze distribution
+                    if (this.difficulty >= 3 && globalIndex % 5 === 0) {
                         alienType = 'elite';
-                    } else if (this.difficulty >= 3 && (globalIndex + 2) % 5 === 0) {
+                    } else if (this.difficulty >= 5 && (globalIndex + 2) % 5 === 0) {
                         alienType = 'kamikaze';
                     }
                 }
@@ -546,11 +549,12 @@ class PatternFormation {
                     const explosionCount = isBoss ? 5 : (isElite ? 2 : 1);
                     
                     if (isBoss && this.shieldEffect) {
+                        // Make sure the death flare is explicitly white/blue and large enough
                         this.shieldEffect.createRipple(
                             alien.x + alien.width/2, 
                             alien.y + alien.height/2, 
-                            '#00ffff',
-                            alien.width // Larger shield flare for boss death
+                            '#ffffff',
+                            alien.width * 1.25 // Explicitly larger flare
                         );
                     }
 

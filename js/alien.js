@@ -1,27 +1,9 @@
 class Alien {
     constructor(ctx, options = {}) {
         this.ctx = ctx;
+        this.type = options.type || 'normal';
         this.width = options.width || 100;
         this.height = options.height || 100;
-        this.virtualWidth = options.virtualWidth || 1920;
-        this.virtualHeight = options.virtualHeight || 1080;
-        
-        // Position will be set by the formation manager
-        this.x = options.x || 0;
-        this.y = options.y || 0;
-        
-        // Movement properties
-        this.speed = options.speed || 100;
-        this.direction = 1; // 1 for right, -1 for left
-        this.type = options.type || 'normal';
-        this.health = options.health || 1;
-        this.maxHealth = this.health;
-        this.isKamikaze = this.type === 'kamikaze';
-        this.hitFlash = 0;
-        
-        // Update sprite path to match processed file
-        this.img = new Image();
-        this.img.src = './sprites/alien1.png';  // Updated path
 
         // Difficulty/Type adjustments
         if (this.type === 'elite') {
@@ -32,11 +14,29 @@ class Alien {
         } else if (this.type === 'kamikaze') {
             this.health = 1;
         } else if (this.type === 'boss') {
-            this.width *= 4;
-            this.height *= 4;
+            this.width = 400; // Explicitly large for boss
+            this.height = 400;
             this.health = 75; // Reduced from 100 to make spark effects more meaningful without being tedious
             this.maxHealth = 75;
         }
+
+        this.virtualWidth = options.virtualWidth || 1920;
+        this.virtualHeight = options.virtualHeight || 1080;
+        
+        // Position will be set by the formation manager
+        this.x = options.x || 0;
+        this.y = options.y || 0;
+        
+        // Movement properties
+        this.speed = options.speed || 100;
+        this.direction = 1; // 1 for right, -1 for left
+        this.health = options.health || (this.type === 'normal' ? 1 : this.health);
+        this.isKamikaze = this.type === 'kamikaze';
+        this.hitFlash = 0;
+        
+        // Update sprite path to match processed file
+        this.img = new Image();
+        this.img.src = './sprites/alien1.png';  // Updated path
     }
 
     update(delta) {

@@ -48,6 +48,9 @@ class GameScreen {
 
         this.shieldEffect = new ShieldEffect(this.ctx, this.audioManager);
 
+        // Initialize user firepower
+        this.updatePlayerFirepower(1);
+
         // Initialize formation with points callback
         const patternNames = Object.keys(patterns);
         const startPattern = patternNames[Math.floor(Math.random() * patternNames.length)];
@@ -111,8 +114,9 @@ class GameScreen {
             const nextDifficulty = this.formation.difficulty + 1;
             let nextPattern;
 
-            if (nextDifficulty % 5 === 0) {
-                // Boss wave every 5 levels
+            // Delayed introduction of Big Boss: Level 7 instead of 5
+            if (nextDifficulty >= 7 && nextDifficulty % 7 === 0) {
+                // Boss wave every 7 levels
                 nextPattern = 'boss_wave';
             } else {
                 const patternNames = Object.keys(patterns).filter(p => p !== 'boss_wave');
@@ -129,7 +133,21 @@ class GameScreen {
                 shieldEffect: this.shieldEffect,
                 onPointsScored: (points) => this.addPoints(points)
             });
+
+            this.updatePlayerFirepower(nextDifficulty);
         }
+    }
+
+    updatePlayerFirepower(difficulty) {
+        const baseRate = 4;
+        const rateIncrease = 0.2; // Increase fire rate by 0.2 per level
+        const newRate = baseRate + (difficulty - 1) * rateIncrease;
+        
+        // Cap the rate at 12 shots per second (reduced from 20)
+        const cappedRate = Math.min(newRate, 12);
+        
+        this.laserEngineLeft.emissionRate = cappedRate;
+        this.laserEngineRight.emissionRate = cappedRate;
     }
 
     checkCollisions() {

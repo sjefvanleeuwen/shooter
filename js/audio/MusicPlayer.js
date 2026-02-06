@@ -48,6 +48,7 @@ class MusicPlayer {
 
     async start() {
         try {
+            await this.audioManager.resumeContext();
             await this.playTrack(this.currentTrack);
         } catch (error) {
             console.error('Error starting music:', error);
@@ -73,6 +74,7 @@ class MusicPlayer {
     }
 
     async playTrack(index) {
+        await this.audioManager.resumeContext();
         if (index >= 0 && index < this.playlist.length) {
             const trackPath = this.playlist[index];
             try {
@@ -120,8 +122,9 @@ class MusicPlayer {
 
     resume() {
         if (!this.isPlaying) {
-            this.playTrack(this.currentTrack);
+            return this.playTrack(this.currentTrack);
         }
+        return Promise.resolve();
     }
 
     stop() {
@@ -145,9 +148,9 @@ class MusicPlayer {
         }, duration * 1000);
     }
 
-    fadeIn(duration = 2) {
+    async fadeIn(duration = 2) {
         this.gainNode.gain.value = 0;
-        this.resume();
+        await this.resume();
         const currentTime = this.audioContext.currentTime;
         this.gainNode.gain.linearRampToValueAtTime(0.4, currentTime + duration);
     }
