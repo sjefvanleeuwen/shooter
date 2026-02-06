@@ -1,7 +1,8 @@
 import Player from '../player.js';
 import { ParticleEngine, LaserEngine } from '../particleEngine.js';
 import PatternFormation from '../PatternFormation.js';
-import ImageBackgroundScroller from '../imageBackgroundScroller.js';  // Add this import
+import ImageBackgroundScroller from '../imageBackgroundScroller.js';
+import { patterns } from '../patterns/formationPatterns.js';
 
 class GameScreen {
     constructor(ctx, options = {}) {
@@ -45,7 +46,7 @@ class GameScreen {
         this.laserEngineRight = new LaserEngine(this.ctx, this.audioManager);
 
         // Initialize formation with points callback
-        const patternNames = ['infinity', 'sinusoidal', 'vortex', 'diamond_weave', 'clover'];
+        const patternNames = Object.keys(patterns);
         const startPattern = patternNames[Math.floor(Math.random() * patternNames.length)];
 
         this.formation = new PatternFormation(this.ctx, {
@@ -102,15 +103,23 @@ class GameScreen {
     updateFormation(delta) {
         this.formation.update(delta);
         if (this.formation.aliens.length === 0) {
-            const patternNames = ['infinity', 'sinusoidal', 'vortex', 'diamond_weave', 'clover'];
-            const nextPattern = patternNames[Math.floor(Math.random() * patternNames.length)];
+            const nextDifficulty = this.formation.difficulty + 1;
+            let nextPattern;
+
+            if (nextDifficulty % 5 === 0) {
+                // Boss wave every 5 levels
+                nextPattern = 'boss_wave';
+            } else {
+                const patternNames = Object.keys(patterns).filter(p => p !== 'boss_wave');
+                nextPattern = patternNames[Math.floor(Math.random() * patternNames.length)];
+            }
             
             this.formation = new PatternFormation(this.ctx, {
                 virtualWidth: this.virtualWidth,
                 virtualHeight: this.virtualHeight,
                 pattern: nextPattern,
                 bgScroller: this.bgScroller,
-                difficulty: this.formation.difficulty + 1,
+                difficulty: nextDifficulty,
                 audioManager: this.audioManager,
                 onPointsScored: (points) => this.addPoints(points)
             });
@@ -130,9 +139,9 @@ class GameScreen {
         // Check lasers collision with formation
         [this.laserEngineLeft, this.laserEngineRight].forEach(engine => {
             engine.particles.forEach(laser => {
-                if (this.formation.checkCollision(laser.x, laser.y)) {
+                const result = this.formation.checkCollision(laser.x, laser.y);
+                if (result.hit) {
                     laser.life = 0;
-                    this.addPoints(100);
                 }
             });
         });

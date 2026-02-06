@@ -13,7 +13,7 @@ export default class WebGLRenderer {
         this.textCtx = this.textCanvas.getContext('2d');
         
         this.matrixStack = [[1,0,0, 0,1,0, 0,0,1]];
-        this.stateStack = [{ alpha: 1.0, fillStyle: [1,1,1,1], font: '20px Arial', textAlign: 'left' }];
+        this.stateStack = [{ alpha: 1.0, fillStyle: [1,1,1,1], font: '20px Arial', textAlign: 'left', brightness: 1.0, flash: 0.0 }];
     }
 
     get currentMatrix() { return this.matrixStack[this.matrixStack.length - 1]; }
@@ -33,15 +33,15 @@ export default class WebGLRenderer {
         const fs = `#version 300 es
             precision highp float;
             uniform sampler2D u_image; uniform vec4 u_color; uniform bool u_useTexture;
-            uniform float u_brightness;
+            uniform float u_brightness; uniform float u_flash;
             in vec2 v_texCoord; out vec4 outColor;
             void main() {
                 if (u_useTexture) {
                     vec4 texColor = texture(u_image, v_texCoord);
-                    // Premultiply the texture color and multiply by premultiplied uniform color
                     vec4 premulColor = vec4(u_color.rgb * u_color.a, u_color.a);
                     vec4 tex = vec4(texColor.rgb * texColor.a, texColor.a);
                     outColor = tex * premulColor;
+                    outColor.rgb = mix(outColor.rgb, vec4(1.0, 1.0, 1.0, 1.0).rgb * outColor.a, u_flash);
                     outColor.rgb *= u_brightness;
                 } else {
                     outColor = vec4(u_color.rgb * u_color.a, u_color.a);
@@ -63,7 +63,8 @@ export default class WebGLRenderer {
             img: this.gl.getUniformLocation(program, 'u_image'),
             color: this.gl.getUniformLocation(program, 'u_color'),
             useTex: this.gl.getUniformLocation(program, 'u_useTexture'),
-            brightness: this.gl.getUniformLocation(program, 'u_brightness')
+            brightness: this.gl.getUniformLocation(program, 'u_brightness'),
+            flash: this.gl.getUniformLocation(program, 'u_flash')
         };
     }
 
@@ -208,6 +209,7 @@ export default class WebGLRenderer {
             if (match) bright = parseFloat(match[1]);
         }
         this.gl.uniform1f(this.locs.brightness, bright);
+        this.gl.uniform1f(this.locs.flash, this.currentState.flash || 0.0);
 
         // For drawImage, we use the globalAlpha but default the fillStyle to white
         this.gl.uniform4fv(this.locs.color, [1, 1, 1, this.globalAlpha]);

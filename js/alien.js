@@ -13,34 +13,91 @@ class Alien {
         // Movement properties
         this.speed = options.speed || 100;
         this.direction = 1; // 1 for right, -1 for left
+        this.type = options.type || 'normal';
+        this.health = options.health || 1;
+        this.maxHealth = this.health;
+        this.isKamikaze = this.type === 'kamikaze';
+        this.hitFlash = 0;
         
         // Update sprite path to match processed file
         this.img = new Image();
         this.img.src = './sprites/alien1.png';  // Updated path
+
+        // Difficulty/Type adjustments
+        if (this.type === 'elite') {
+            this.width *= 1.5;
+            this.height *= 1.5;
+            this.health = 12; // Increased from 4 for more "life fource"
+            this.maxHealth = 12;
+        } else if (this.type === 'kamikaze') {
+            this.health = 1;
+        } else if (this.type === 'boss') {
+            this.width *= 4;
+            this.height *= 4;
+            this.health = 100; // Increased from 50
+            this.maxHealth = 100;
+        }
     }
 
     update(delta) {
-        // Basic horizontal movement
-        this.x += this.speed * this.direction * delta;
+        // Position is usually set by PatternFormation, 
+        // but we can add specific behaviors here if needed
+        if (this.hitFlash > 0) {
+            this.hitFlash -= delta;
+        }
     }
 
     draw() {
         const ctx = this.ctx;
         if (this.img.complete) {
-            // Draw drop shadow (same as player)
             ctx.save();
-            ctx.globalAlpha = 0.7;          // Same opacity as player
-            ctx.filter = 'blur(15px) brightness(0)';
+            
+            // Base filter for the alien type
+            let baseFilter = 'none';
+            if (this.type === 'elite') {
+                baseFilter = 'hue-rotate(90deg) brightness(1.2)';
+            } else if (this.type === 'kamikaze') {
+                baseFilter = 'hue-rotate(180deg) brightness(1.5)';
+            } else if (this.type === 'boss') {
+                baseFilter = 'hue-rotate(270deg) saturate(2)';
+            }
+
+            // Apply hit flash to renderer state if supported
+            if (this.hitFlash > 0) {
+                if (ctx.currentState) ctx.currentState.flash = 1.0;
+            }
+
+            // Draw drop shadow (explicitly set filter to brightness 0)
+            ctx.save();
+            ctx.globalAlpha = 0.5;
+            ctx.filter = 'brightness(0) blur(15px)';
             ctx.drawImage(
                 this.img,
-                this.x + 20,               // Offset x (+20)
-                this.y - 50,               // Offset y (-50)
-                this.width * 1.2,          // Scaled width (1.2)
-                this.height * 1.2          // Scaled height (1.2)
+                this.x + 20,
+                this.y - 50,
+                this.width * 1.2,
+                this.height * 1.2
             );
             ctx.restore();
-            // Draw original alien sprite
+
+            // Draw original alien sprite with its base filter
+            ctx.filter = baseFilter;
             ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+            
+            // Health bar for elites/bosses
+            if (this.health < this.maxHealth) {
+                const barWidth = this.width * 0.8;
+                const barHeight = 6;
+                const barX = this.x + (this.width - barWidth) / 2;
+                const barY = this.y - 15;
+                
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(barX, barY, barWidth, barHeight);
+                ctx.fillStyle = this.type === 'boss' ? '#ffcc00' : '#00ff00';
+                ctx.fillRect(barX, barY, barWidth * (this.health / this.maxHealth), barHeight);
+            }
+
+            ctx.restore();
         } else {
             ctx.fillStyle = '#00ff00';
             ctx.fillRect(this.x, this.y, this.width, this.height);

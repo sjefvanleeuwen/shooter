@@ -4,6 +4,7 @@ class AlienLaser {
         this.y = y;
         this.width = 4;
         this.height = 16;
+        this.vx = 0;
         this.vy = 420;  // Reduced from 600 by 30%
         this.life = 2.0;
         this.maxLife = this.life;
@@ -42,6 +43,7 @@ class AlienLaser {
     }
 
     update(delta) {
+        this.x += (this.vx || 0) * delta;
         this.y += this.vy * delta;
         this.life -= delta;
     }

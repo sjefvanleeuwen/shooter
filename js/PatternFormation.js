@@ -189,25 +189,82 @@ class PatternFormation {
         const targetCount = baseCount + difficultyBonus;
 
         this.alienSlots = [];  // Reset slots structure
-        const angleStep = (Math.PI * 2) / targetCount;
+        const spacingConfig = this.pattern.spacing || {};
+        const type = spacingConfig.type || 'circular';
+        const spacing = spacingConfig.spacing || 100;
+        
+        this.maxFormationOffset = 0; // Track max offset for screen clamping
+
         for (let i = 0; i < targetCount; i++) {
-            this.alienSlots.push({
-                index: i,
-                angle: i * angleStep,
-                occupied: true
-            });
+            let slot = { index: i, occupied: true, offsetX: 0, offsetY: 0, angle: 0, radiusMultiplier: 1.0 };
+            
+            if (type === 'circular') {
+                if (this.pattern.isBoss) {
+                    if (i === 0) {
+                        slot.angle = 0;
+                        slot.radiusMultiplier = 0; // Boss stays at the center of the path
+                    } else {
+                        slot.angle = (i - 1) * (Math.PI * 2 / (targetCount - 1));
+                        slot.radiusMultiplier = 1.0; // Escorts orbit the boss
+                    }
+                } else {
+                    slot.angle = i * (Math.PI * 2 / targetCount);
+                    slot.radiusMultiplier = 1.0;
+                }
+                this.maxFormationOffset = this.config.formationRadius;
+            } else if (type === 'grid') {
+                const cols = spacingConfig.cols || 4;
+                const row = Math.floor(i / cols);
+                const col = i % cols;
+                slot.offsetX = (col - (cols - 1) / 2) * spacing;
+                slot.offsetY = (row - (Math.ceil(targetCount / cols) - 1) / 2) * spacing;
+            } else if (type === 'v_shape') {
+                const half = Math.floor(targetCount / 2);
+                const dist = i - half;
+                slot.offsetX = dist * spacing;
+                slot.offsetY = Math.abs(dist) * spacing * 0.8;
+            } else if (type === 'cross') {
+                const mid = Math.floor(targetCount / 2);
+                if (i <= mid) { // Horizontal
+                    slot.offsetX = (i - Math.floor(mid/2)) * spacing;
+                    slot.offsetY = 0;
+                } else { // Vertical
+                    slot.offsetX = 0;
+                    slot.offsetY = (i - mid - Math.floor((targetCount-mid)/2)) * spacing;
+                }
+            }
+            
+            this.maxFormationOffset = Math.max(this.maxFormationOffset, Math.abs(slot.offsetX), Math.abs(slot.offsetY));
+            this.alienSlots.push(slot);
         }
 
         // Adjust alien array to match target count
         if (this.aliens.length < targetCount) {
             // Add more aliens
-            const toAdd = targetCount - this.aliens.length;
+            const originalCount = this.aliens.length;
+            const toAdd = targetCount - originalCount;
             for (let i = 0; i < toAdd; i++) {
+                const globalIndex = originalCount + i;
+                let alienType = 'normal';
+                
+                // Deterministic type assignment based on slot index
+                if (this.pattern.isBoss) {
+                    alienType = (globalIndex === 0) ? 'boss' : 'normal';
+                } else {
+                    // Improved Elite/Kamikaze distribution
+                    if (this.difficulty >= 2 && globalIndex % 5 === 0) {
+                        alienType = 'elite';
+                    } else if (this.difficulty >= 3 && (globalIndex + 2) % 5 === 0) {
+                        alienType = 'kamikaze';
+                    }
+                }
+
                 const alien = new Alien(this.ctx, {
                     virtualWidth: this.virtualWidth,
                     virtualHeight: this.virtualHeight,
                     width: 100,
-                    height: 100
+                    height: 100,
+                    type: alienType
                 });
                 this.aliens.push(alien);
             }
@@ -271,9 +328,13 @@ class PatternFormation {
             };
         }
         
-        // Clamp vertical position
-        pos.y = Math.min(pos.y, this.maxVerticalPosition);
-        pos.y = Math.max(pos.y, this.verticalOffset);
+        // Clamp position to stay on screen
+        const shipHalfWidth = this.pattern.isBoss ? 200 : 50;
+        const formationMargin = this.pattern.isBoss ? 0 : (this.maxFormationOffset || this.config.formationRadius);
+        const totalMargin = shipHalfWidth + formationMargin + 40; // Increased comfort margin to 40
+
+        pos.x = Math.max(totalMargin, Math.min(this.virtualWidth - totalMargin, pos.x));
+        pos.y = Math.max(this.verticalOffset, Math.min(this.maxVerticalPosition, pos.y));
 
         // Increase pulse amplitude by 50%
         const pulseAmount = Math.sin(this.time * this.config.pulseSpeed * Math.PI * 2) * 
@@ -286,31 +347,37 @@ class PatternFormation {
 
         // Position aliens in formation based on their slots
         this.aliens.forEach(alien => {
+            alien.update(delta); // Update internal state (like hit flash)
+
             if (!alien.isDiving) {
                 // Normal formation movement
                 const slot = this.alienSlots[alien.slotIndex];
                 
                 let targetX, targetY;
+                const spacingType = this.pattern.spacing?.type || 'circular';
                 
-                if (this.pattern.type === 'functional' && this.pattern.spacing?.type === 'circular') {
+                if (spacingType === 'circular') {
                     // Circular spacing around the functional path center
                     const orbitAngle = slot.angle + (this.time * 2); // Rotate slots over time
-                    // Use the difficulty-scaled formation radius
-                    const radius = this.config.formationRadius + (pulseAmount * 0.5);
+                    // Use the difficulty-scaled formation radius and respect slot multiplier
+                    const radius = (this.config.formationRadius + (pulseAmount * 0.5)) * (slot.radiusMultiplier ?? 1.0);
                     targetX = pos.x + Math.cos(orbitAngle) * radius;
                     targetY = pos.y + Math.sin(orbitAngle) * radius;
                 } else {
-                    // Default circular formation behavior
-                    const rotatedAngle = slot.angle + this.currentRotation;
-                    targetX = pos.x + Math.cos(rotatedAngle) * currentRadius;
-                    targetY = pos.y + Math.sin(rotatedAngle) * currentRadius;
+                    // Static offset formations (Grid, V-Shape, Cross)
+                    targetX = pos.x + slot.offsetX;
+                    targetY = pos.y + slot.offsetY;
                 }
                 
                 // Enhanced dive chance check with spacing
-                if (Math.random() < this.currentDiveChance * delta && 
+                let diveChance = this.currentDiveChance;
+                if (alien.type === 'kamikaze') diveChance *= 8; // Kamikazes dive MUCH more often
+                if (alien.type === 'boss') diveChance = 0; // Boss never dives
+
+                if (Math.random() < diveChance * delta && 
                     !this.aliens.some(a => a.isDiving && Math.abs(a.x - targetX) < 100)) {
                     alien.isDiving = true;
-                    alien.diveVelocityY = this.currentDiveSpeed;
+                    alien.diveVelocityY = alien.type === 'kamikaze' ? this.currentDiveSpeed * 1.5 : this.currentDiveSpeed;
                     alien.diveVelocityX = 0;
                     alien.diveStartX = targetX;
                     alien.diveStartY = targetY;
@@ -322,23 +389,24 @@ class PatternFormation {
                         const dx = this.player.x - targetX;
                         const dy = this.player.y - targetY;
                         const angle = Math.atan2(dy, dx);
+                        const intensity = alien.type === 'kamikaze' ? 1.5 : this.diveCurveIntensity;
                         alien.diveTargetX = this.player.x + (this.player.velocity?.x || 0) * 0.5;
-                        alien.diveVelocityX = Math.cos(angle) * this.currentDiveSpeed * this.diveCurveIntensity;
+                        alien.diveVelocityX = Math.cos(angle) * alien.diveVelocityY * intensity;
                     }
                 } else {
                     // Normal position update
                     // Smooth transition if we have last positions
                     if (alien.lastX !== undefined) {
                         const t = Math.min(1, this.time * 2); // Transition over 0.5 seconds
-                        alien.x = this.lerp(alien.lastX, targetX, t);
-                        alien.y = this.lerp(alien.lastY, targetY, t);
+                        alien.x = this.lerp(alien.lastX, targetX - alien.width / 2, t);
+                        alien.y = this.lerp(alien.lastY, targetY - alien.height / 2, t);
                         if (t === 1) {
                             delete alien.lastX;
                             delete alien.lastY;
                         }
                     } else {
-                        alien.x = targetX;
-                        alien.y = targetY;
+                        alien.x = targetX - alien.width / 2;
+                        alien.y = targetY - alien.height / 2;
                     }
                 }
             } else {
@@ -385,14 +453,41 @@ class PatternFormation {
     }
 
     shoot() {
-        // Random alien shoots
-        const shooter = this.aliens[Math.floor(Math.random() * this.aliens.length)];
+        // Random alien shoots, but prioritize special types
+        const candidates = this.aliens.filter(a => !a.isDiving);
+        if (candidates.length === 0) return;
+        
+        const boss = candidates.find(a => a.type === 'boss');
+        if (boss) {
+            // Reduced to a 3-way spread to prevent "too many bullets"
+            for (let i = -1; i <= 1; i++) {
+                const laser = new AlienLaser(
+                    boss.x + boss.width/2 + i * 60,
+                    boss.y + boss.height,
+                    this.audioManager
+                );
+                laser.vx = i * 150; // Wider spread, fewer total projectiles
+                this.lasers.push(laser);
+            }
+            return;
+        }
+
+        const shooter = candidates[Math.floor(Math.random() * candidates.length)];
         const laser = new AlienLaser(
             shooter.x + shooter.width/2,
             shooter.y + shooter.height,
             this.audioManager  // Pass the audioManager instance
         );
-        this.lasers.push(laser);
+        
+        if (shooter.type === 'elite') {
+            // Elites fire faster or multiple lasers? Let's give them a slight spread
+            const laser2 = new AlienLaser(shooter.x+shooter.width/2, shooter.y+shooter.height, this.audioManager);
+            laser.vx = -50;
+            laser2.vx = 50;
+            this.lasers.push(laser, laser2);
+        } else {
+            this.lasers.push(laser);
+        }
     }
 
     lerp(a, b, t) {
@@ -423,28 +518,45 @@ class PatternFormation {
     checkCollision(x, y) {
         for (let alien of this.aliens) {
             if (alien.collidesWith(x, y)) {
-                // Create explosion at alien's center
-                this.explosionEffect.createExplosion(
-                    alien.x + alien.width/2,
-                    alien.y + alien.height/2
-                );
+                // Flash the alien white on hit (if renderer supports it)
+                alien.hitFlash = 0.1; // Flash for 0.1 seconds
+
+                alien.health--;
                 
-                // Mark the slot as unoccupied but don't remove it
-                this.alienSlots[alien.slotIndex].occupied = false;
+                if (alien.health <= 0) {
+                    // Create massive explosion for larger types
+                    const explosionCount = alien.type === 'boss' ? 5 : (alien.type === 'elite' ? 2 : 1);
+                    for (let i = 0; i < explosionCount; i++) {
+                        this.explosionEffect.createExplosion(
+                            alien.x + alien.width/2 + (Math.random() - 0.5) * alien.width * 0.5,
+                            alien.y + alien.height/2 + (Math.random() - 0.5) * alien.height * 0.5
+                        );
+                    }
+                    
+                    // Mark the slot as unoccupied
+                    if (this.alienSlots[alien.slotIndex]) {
+                        this.alienSlots[alien.slotIndex].occupied = false;
+                    }
+                    
+                    // Calculate points with multipliers
+                    let basePoints = this.pointsBase;
+                    if (alien.type === 'elite') basePoints *= 5;
+                    if (alien.type === 'kamikaze') basePoints *= 2;
+                    if (alien.type === 'boss') basePoints *= 50;
+
+                    const pointsMultiplier = this.difficulty * (1 + (this.initialAlienCount - this.aliens.length) * 0.1);
+                    const points = Math.floor(basePoints * pointsMultiplier);
+                    
+                    // Remove the alien
+                    this.aliens = this.aliens.filter(a => a !== alien);
+                    this.onPointsScored(points);
+                    return { hit: true, killed: true, type: alien.type };
+                }
                 
-                // Remove only this alien
-                this.aliens = this.aliens.filter(a => a !== alien);
-                
-                // Calculate points with multiplier
-                const pointsMultiplier = this.difficulty * (1 + (this.initialAlienCount - this.aliens.length) * 0.1);
-                const points = Math.floor(this.pointsBase * pointsMultiplier);
-                
-                // Replace direct call with callback
-                this.onPointsScored(points);
-                return true;
+                return { hit: true, killed: false, type: alien.type };
             }
         }
-        return false;
+        return { hit: false };
     }
 
     checkPlayerCollision(playerX, playerY, playerWidth, playerHeight) {
