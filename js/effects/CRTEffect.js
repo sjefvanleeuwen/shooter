@@ -237,7 +237,8 @@ class CRTEffect {
 
     render(time) {
         const gl = this.gl;
-        
+        if (!this.program || !this.config) return; // Wait for initialization
+
         // Ensure viewport matches fixed canvas size
         gl.viewport(0, 0, 1024, 1024);
         gl.clearColor(0, 0, 0, 0);

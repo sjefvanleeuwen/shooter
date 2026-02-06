@@ -10,7 +10,7 @@ Among the Guardians was a young pilot named Alex, who had lost everything to the
 The battle for Earth had begun, and the fate of humanity rested in the hands of the Guardians. This is the story of Xenowar.
 
 ## Overview
-XENOWAR is a modern HTML5 Canvas-based space shooter game engine built with vanilla JavaScript, featuring a component-based architecture, particle systems, formation patterns, and dynamic audio management.
+XENOWAR is a high-performance space shooter game engine built with vanilla JavaScript and a custom **WebGL 2.0** rendering pipeline. It features a component-based architecture, advanced GPU-accelerated particle systems, complex formation patterns, and dynamic audio management.
 
 # XENOWAR Engine Documentation
 
@@ -48,11 +48,11 @@ npm run build  # Create production build
 ### Rendering Pipeline
 ```mermaid
 graph LR
-    A[Game State] --> B[Entity Renderer]
-    B --> C[Particle System]
-    C --> D[Post-Processing]
-    D --> E[CRT Shader]
-    E --> F[Screen Output]
+    A[Game State] --> B[Custom WebGL Renderer]
+    B --> C[GPU Particle Engine]
+    C --> D[Post-Processing Layer]
+    D --> E[CRT Logic & Shaders]
+    E --> F[Display Output]
 ```
 
 ### CRT Shader System
@@ -98,11 +98,11 @@ graph LR
 - Memory monitoring
 
 ### Rendering Optimizations
-- WebGL2 acceleration
-- Batch rendering
-- Shader-based effects
-- Double-buffered rendering
-- Screen-space culling
+- **Custom WebGL 2.0 Core**: Low-level GPU-accelerated graphics pipeline.
+- **GLSL Shaders**: High-performance fragment and vertex shaders for all entities.
+- **Hardware-Accelerated Effects**: Texture filtering, mipmapping, and alpha blending.
+- **Batch-Style Rendering**: Efficient draw calls for sprites and shape primitives.
+- **Matrix Stack**: Manual GPU-friendly transformation system for complex entity movement.
 
 ## Technical Architecture
 

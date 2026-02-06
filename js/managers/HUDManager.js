@@ -7,7 +7,7 @@ class HUDManager {
     }
 
     draw(lives, score, highScore) {
-        this.ctx.save();
+        // Use renderer properties directly
         this.ctx.fillStyle = '#ffffff';
         this.ctx.font = this.font;
 
@@ -22,8 +22,6 @@ class HUDManager {
         // Score at bottom right
         this.ctx.textAlign = 'right';
         this.ctx.fillText(`SCORE: ${score}`, this.virtualWidth - 20, this.virtualHeight - 20);
-
-        this.ctx.restore();
     }
 }
 

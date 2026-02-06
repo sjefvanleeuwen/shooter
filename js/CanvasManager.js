@@ -1,3 +1,5 @@
+import WebGLRenderer from './WebGLRenderer.js';
+
 class CanvasManager {
     constructor(canvas) {
         this.canvas = canvas;
@@ -7,9 +9,9 @@ class CanvasManager {
         this.canvas.width = 1024;
         this.canvas.height = 1024;
         
-        // Set up context with fixed dimensions
-        this.ctx = this.canvas.getContext('2d');
-        this.ctx.imageSmoothingEnabled = false;
+        // Set up WebGL renderer
+        this.renderer = new WebGLRenderer(this.canvas);
+        this.ctx = this.renderer; // Use renderer as ctx
 
         // Store virtual dimensions
         this.virtualWidth = 1024;
@@ -17,8 +19,7 @@ class CanvasManager {
     }
 
     clearScreen() {
-        this.ctx.fillStyle = '#000000';
-        this.ctx.fillRect(0, 0, 1024, 1024);
+        this.renderer.clear();
     }
 
     setupCanvas() {
