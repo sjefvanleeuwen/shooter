@@ -10,7 +10,8 @@ class PatternFormation {
         this.ctx = ctx;
         this.virtualWidth = options.virtualWidth || 1080;
         this.virtualHeight = options.virtualHeight || 1080;
-        this.audioManager = options.audioManager; // Add this
+        this.audioManager = options.audioManager; 
+        this.shieldEffect = options.shieldEffect;
         
         // Initialize config with new starting values
         this.config = {
@@ -18,7 +19,7 @@ class PatternFormation {
             radius: 80,
             patternType: 'infinity',
             loopDuration: 10,
-            alienCount: 10, // Increased from 5 to 10
+            alienCount: 6, // Start with lower count
             showPath: false,
             pathPoints: 100, // number of points to draw on path
             formationRadius: 150,  // New separate radius for formation
@@ -81,14 +82,19 @@ class PatternFormation {
 
         this.lasers = [];
         this.shootTimer = 0;
-        this.baseShootInterval = 3.0; // Increased from 2.6
-        this.minShootInterval = 1.2; // Increased from 0.8 (50% slower minimum interval)
-        this.shootInterval = this.baseShootInterval;
+        
+        // Balanced shooting interval: More engaging from the start
+        this.baseShootInterval = 2.8; 
+        this.minShootInterval = 0.8; 
+        
+        // Slightly faster ramp for better early-game pacing
+        this.shootInterval = Math.max(
+            this.minShootInterval, 
+            this.baseShootInterval - (this.difficulty - 1) * 0.4
+        );
 
-        this.difficulty = options.difficulty || 1;
-        this.shootInterval = Math.max(0.3, 1.0 - (this.difficulty * 0.1)); // Shoot faster with higher difficulty
-        this.config.speed = Math.min(2.0, 0.3 + (this.difficulty * 0.1)); // Move faster with higher difficulty
-        this.initialAlienCount = this.config.alienCount; // Store initial count
+        this.config.speed = Math.min(1.9, 0.35 + (this.difficulty * 0.09)); 
+        this.initialAlienCount = this.config.alienCount; 
         this.pointsBase = 100; // Base points per alien
 
         this.explosionEffect = new ExplosionEffect(ctx, this.audioManager);
@@ -137,12 +143,12 @@ class PatternFormation {
         // Adjust base shooting speed based on cycle count
         const cycleCount = Math.floor((this.difficulty - 1) / this.maxDifficulty);
         this.shootInterval = Math.max(
-            this.minShootInterval, // Use new minimum interval
-            this.baseShootInterval - (cycleCount * 0.1) - (cycleDifficulty * 0.05) // Reduced scaling rates
+            this.minShootInterval,
+            this.baseShootInterval - (cycleDifficulty - 1) * 0.25 
         );
         
         // Adjust movement speed
-        this.config.speed = Math.min(2.0, 0.3 + (cycleCount * 0.1) + (cycleDifficulty * 0.05));
+        this.config.speed = Math.min(1.9, 0.4 + (cycleDifficulty * 0.08));
 
         console.log(`Level ${this.difficulty} (Cycle ${cycleCount + 1}, Difficulty ${cycleDifficulty})`);
         console.log(`Formation Radius: ${this.config.formationRadius}`);
@@ -183,9 +189,9 @@ class PatternFormation {
         // Apply new difficulty modifiers before checking count
         this.applyDifficultyModifiers();
 
-        // Base count from pattern, plus a bonus based on difficulty
-        const baseCount = this.pattern.spacing?.count || 10;
-        const difficultyBonus = Math.floor((this.difficulty - 1) / 2); // +1 ship every 2 levels
+        // Base count from pattern, slightly more ships to start
+        const baseCount = this.pattern.spacing?.count || 8;
+        const difficultyBonus = Math.floor((this.difficulty - 1) / 2); // +1 ship every 2 levels for steady ramp
         const targetCount = baseCount + difficultyBonus;
 
         this.alienSlots = [];  // Reset slots structure
@@ -518,18 +524,51 @@ class PatternFormation {
     checkCollision(x, y) {
         for (let alien of this.aliens) {
             if (alien.collidesWith(x, y)) {
-                // Flash the alien white on hit (if renderer supports it)
-                alien.hitFlash = 0.1; // Flash for 0.1 seconds
+                // Flash the alien white on hit
+                alien.hitFlash = 0.1; 
 
                 alien.health--;
                 
-                if (alien.health <= 0) {
-                    // Create massive explosion for larger types
-                    const explosionCount = alien.type === 'boss' ? 5 : (alien.type === 'elite' ? 2 : 1);
+                if (alien.health > 0) {
+                    // Create energy shield ring surrounding the ship
+                    if (this.shieldEffect) {
+                        this.shieldEffect.createRipple(
+                            alien.x + alien.width/2, 
+                            alien.y + alien.height/2,
+                            alien.type === 'elite' ? '#00eaff' : (alien.type === 'boss' ? '#00ffff' : '#00aaff'),
+                            alien.width * 0.7 // Pass ship size for ring scaling
+                        );
+                    }
+                } else {
+                    // Configuration based on size/type
+                    const isBoss = alien.type === 'boss';
+                    const isElite = alien.type === 'elite';
+                    const explosionCount = isBoss ? 5 : (isElite ? 2 : 1);
+                    
+                    if (isBoss && this.shieldEffect) {
+                        this.shieldEffect.createRipple(
+                            alien.x + alien.width/2, 
+                            alien.y + alien.height/2, 
+                            '#00ffff',
+                            alien.width // Larger shield flare for boss death
+                        );
+                    }
+
+                    // Configuration based on size/type
+                    const explosionConfig = {
+                        pitch: isBoss ? 0.35 : (isElite ? 0.6 : 1.1),
+                        volume: isBoss ? 1.0 : (isElite ? 0.8 : 0.6),
+                        decay: isBoss ? 4.5 : (isElite ? 1.8 : 0.8), // Massive decay for bosses
+                        particleSize: isBoss ? 120 : (isElite ? 60 : 32),
+                        isHeavy: isBoss || isElite,
+                        count: isBoss ? 24 : (isElite ? 16 : 12)
+                    };
+
                     for (let i = 0; i < explosionCount; i++) {
                         this.explosionEffect.createExplosion(
                             alien.x + alien.width/2 + (Math.random() - 0.5) * alien.width * 0.5,
-                            alien.y + alien.height/2 + (Math.random() - 0.5) * alien.height * 0.5
+                            alien.y + alien.height/2 + (Math.random() - 0.5) * alien.height * 0.5,
+                            explosionConfig
                         );
                     }
                     

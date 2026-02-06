@@ -321,12 +321,64 @@ export default class WebGLRenderer {
     arc(x, y, r) {
         this._lastArc = {x, y, r};
     } 
-    stroke() {} fill() {
+    stroke() {} 
+    fill() {
         if (this._lastArc) {
             const {x, y, r} = this._lastArc;
-            this.fillRect(x - r, y - r, r * 2, r * 2);
+            // Generate a circle texture if not already present
+            if (!this._circleTexture) {
+                const c = document.createElement('canvas');
+                c.width = 128; c.height = 128;
+                const ctx = c.getContext('2d');
+                
+                // Create a "Power Shield" ring gradient
+                // Transparent center -> Bright Ring -> Transparent edge
+                const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 0)');      // Hollow center
+                grad.addColorStop(0.6, 'rgba(255, 255, 255, 0.1)'); // Faint inner glow
+                grad.addColorStop(0.85, 'rgba(255, 255, 255, 1.0)'); // Hot shield perimeter
+                grad.addColorStop(1, 'rgba(255, 255, 255, 0)');      // Soft outer falloff
+                
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 128, 128);
+                this._circleTexture = this.getTexture(c);
+            }
+            
+            this.drawRawTexture(this._circleTexture, x - r, y - r, r * 2, r * 2);
             this._lastArc = null;
         }
+    }
+    
+    drawRawTexture(t, x, y, w, h) {
+        this.gl.useProgram(this.program);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.posBuf);
+        this.gl.enableVertexAttribArray(this.locs.pos);
+        this.gl.vertexAttribPointer(this.locs.pos, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuf);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([0,0, 1,0, 0,1, 0,1, 1,0, 1,1]), this.gl.DYNAMIC_DRAW);
+        this.gl.enableVertexAttribArray(this.locs.uv);
+        this.gl.vertexAttribPointer(this.locs.uv, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.uniform2f(this.locs.res, this.canvas.width, this.canvas.height);
+        let m = this.multiply(this.currentMatrix, [1,0,0, 0,1,0, x,y,1]);
+        m = this.multiply(m, [w,0,0, 0,h,0, 0,0,1]);
+        this.gl.uniformMatrix3fv(this.locs.mat, false, m);
+        
+        // Use current fillStyle color
+        let c = [1, 1, 1, 1];
+        if (Array.isArray(this.fillStyle)) c = [...this.fillStyle];
+        c[3] *= this.globalAlpha;
+        
+        let bright = 1.0;
+        if (this.filter && this.filter.includes('brightness')) {
+            const match = this.filter.match(/brightness\((.+?)\)/);
+            if (match) bright = parseFloat(match[1]);
+        }
+        this.gl.uniform1f(this.locs.brightness, bright);
+        this.gl.uniform4fv(this.locs.color, c);
+        this.gl.uniform1i(this.locs.useTex, 1);
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, t);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
     }
     moveTo() {} lineTo() {} closePath() {}
     createLinearGradient() { return { addColorStop: () => {} }; }

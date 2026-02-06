@@ -27,15 +27,15 @@ class Alien {
         if (this.type === 'elite') {
             this.width *= 1.5;
             this.height *= 1.5;
-            this.health = 12; // Increased from 4 for more "life fource"
-            this.maxHealth = 12;
+            this.health = 8; // Slightly reduced from 12 for better pacing
+            this.maxHealth = 8;
         } else if (this.type === 'kamikaze') {
             this.health = 1;
         } else if (this.type === 'boss') {
             this.width *= 4;
             this.height *= 4;
-            this.health = 100; // Increased from 50
-            this.maxHealth = 100;
+            this.health = 75; // Reduced from 100 to make spark effects more meaningful without being tedious
+            this.maxHealth = 75;
         }
     }
 

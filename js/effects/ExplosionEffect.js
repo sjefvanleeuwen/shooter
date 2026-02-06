@@ -19,6 +19,7 @@ class ExplosionParticle {
         this.pulseSpeed = Math.random() * 10 + 8;
         this.glowSize = Math.random() * config.glowVariation + config.glowSize;
         this.config = config;
+        this.drawSize = 32; // Default size, will be overridden by createExplosion if needed
         return this;
     }
 
@@ -147,17 +148,21 @@ class ExplosionEffect {
         return particle;
     }
 
-    playExplosionSound(x) {
+    playExplosionSound(x, options = {}) {
         if (!this.audioManager) return;
 
         try {
             const normalizedX = (x / this.virtualWidth) * 2 - 1;
             
+            // Heavier sounds = lower pitch
+            const basePitch = options.pitch || 1.0;
+            const baseVolume = options.volume || 0.6;
+
             const soundConfig = {
-                pitch: 0.5 + Math.random(),          // Random pitch between 0.5 and 1.5
-                pan: normalizedX,                    // Pan based on position (-1 to 1)
-                volume: 0.5 + Math.random() * 0.25,  // Random volume between 0.5 and 0.75
-                decay: 0.5 + Math.random() * 0.5     // Random decay between 0.5 and 1.0 seconds
+                pitch: (basePitch * 0.9) + (Math.random() * 0.2 * basePitch),
+                pan: normalizedX,
+                volume: baseVolume + (Math.random() * 0.15),
+                decay: (options.decay || 0.8) + (Math.random() * 0.4)
             };
 
             this.audioManager.playSound('explosion', soundConfig);
@@ -166,18 +171,42 @@ class ExplosionEffect {
         }
     }
 
-    createExplosion(x, y) {
-        // Play sound before creating particles
-        this.playExplosionSound(x);
+    createExplosion(x, y, options = {}) {
+        // Play sound before creating particles unless it's just a spark
+        if (!options.isSpark) {
+            this.playExplosionSound(x, options);
+        }
         
         // Limit concurrent explosions
         if (this.explosions.length >= this.maxExplosions) {
             return;
         }
 
+        const count = options.count || this.maxParticlesPerExplosion;
+        let config = options.isSpark ? {
+            ...this.config,
+            baseSpeed: options.speed || 350,
+            baseLife: 0.25,
+            lifeVariation: 0.15,
+            baseRadius: 1.5,
+            radiusVariation: 12,
+            hueBase: options.hue || 60, // Default to yellowish sparks
+            hueVariation: 20
+        } : { ...this.config };
+
+        // For "heavy" explosions, bump the speed and variation
+        if (options.isHeavy) {
+            config.baseSpeed *= 1.8;
+            config.speedVariation *= 2.5;
+            config.baseLife *= 3.0; // Triple the life for heavy explosions to match sound
+            config.lifeVariation *= 2.0;
+        }
+
         const particles = [];
-        for (let i = 0; i < this.maxParticlesPerExplosion; i++) {
-            particles.push(this.getParticle(x, y, this.config));
+        for (let i = 0; i < count; i++) {
+            const p = this.getParticle(x, y, config);
+            p.drawSize = (options.particleSize || 32) * (0.8 + Math.random() * 0.4);
+            particles.push(p);
         }
         this.explosions.push(particles);
     }
@@ -211,11 +240,12 @@ class ExplosionEffect {
                 const alpha = p.life / p.maxLife;
                 this.ctx.globalAlpha = alpha;
                 
-                // Use pre-rendered particle
+                // Use pre-rendered particle with custom size
+                const sz = p.drawSize || 32;
                 this.ctx.drawImage(
                     this.particleCanvas,
-                    p.x - 16, p.y - 16,
-                    32, 32
+                    p.x - sz/2, p.y - sz/2,
+                    sz, sz
                 );
             });
         });

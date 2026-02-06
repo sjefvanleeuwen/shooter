@@ -88,7 +88,8 @@ class AudioManager {
             const standardSounds = [
                 this.loadSound('explosion', './audio/explosion.mp3'),
                 this.loadSound('laser', './audio/player-shoot.mp3'),
-                this.loadSound('alien-laser', './audio/alien-shoot.mp3')
+                this.loadSound('alien-laser', './audio/alien-shoot.mp3'),
+                this.loadSound('forcefield', './audio/alien-forcefield.flac')
             ];
 
             // Load music tracks

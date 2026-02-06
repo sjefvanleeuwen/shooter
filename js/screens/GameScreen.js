@@ -3,6 +3,7 @@ import { ParticleEngine, LaserEngine } from '../particleEngine.js';
 import PatternFormation from '../PatternFormation.js';
 import ImageBackgroundScroller from '../imageBackgroundScroller.js';
 import { patterns } from '../patterns/formationPatterns.js';
+import ShieldEffect from '../effects/ShieldEffect.js';
 
 class GameScreen {
     constructor(ctx, options = {}) {
@@ -45,6 +46,8 @@ class GameScreen {
         this.laserEngineLeft = new LaserEngine(this.ctx, this.audioManager);
         this.laserEngineRight = new LaserEngine(this.ctx, this.audioManager);
 
+        this.shieldEffect = new ShieldEffect(this.ctx, this.audioManager);
+
         // Initialize formation with points callback
         const patternNames = Object.keys(patterns);
         const startPattern = patternNames[Math.floor(Math.random() * patternNames.length)];
@@ -54,6 +57,7 @@ class GameScreen {
             virtualHeight: this.virtualHeight,
             pattern: startPattern,
             audioManager: this.audioManager,
+            shieldEffect: this.shieldEffect,
             onPointsScored: (points) => this.addPoints(points)
         });
     }
@@ -66,6 +70,7 @@ class GameScreen {
         this.bgScroller.update(delta);
         this.player.update(delta);
         
+        this.shieldEffect.update(delta);
         this.updateParticles(delta);
         this.updateFormation(delta);
         this.checkCollisions();
@@ -121,6 +126,7 @@ class GameScreen {
                 bgScroller: this.bgScroller,
                 difficulty: nextDifficulty,
                 audioManager: this.audioManager,
+                shieldEffect: this.shieldEffect,
                 onPointsScored: (points) => this.addPoints(points)
             });
         }
@@ -166,6 +172,9 @@ class GameScreen {
         
         // Draw formation
         this.formation.draw();
+        
+        // Draw effects
+        this.shieldEffect.draw();
         
         // Draw particle effects
         this.laserEngineLeft.draw();
