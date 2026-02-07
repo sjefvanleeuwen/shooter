@@ -9,13 +9,16 @@ class CRTEffect {
         this.glCanvas.width = 1024;
         this.glCanvas.height = 1024;
         
-        // Force exact pixel dimensions in style
-        this.glCanvas.style.width = '1024px';
-        this.glCanvas.style.height = '1024px';
+        // Initial style (will be updated by resize)
         this.glCanvas.style.display = 'block';
         
         // Center in container
         container.appendChild(this.glCanvas);
+
+        // Bind resize
+        this.resize = this.resize.bind(this);
+        window.addEventListener('resize', this.resize);
+        requestAnimationFrame(() => this.resize());
 
         // Init WebGL with correct size
         this.gl = this.glCanvas.getContext('webgl2', {
@@ -33,6 +36,26 @@ class CRTEffect {
         // Add video recorder with audio manager
         this.videoRecorder = new VideoRecorder(this.glCanvas, audioManager);
         // this.setupRecordingControls(); // Removed: Handled by InputManager
+    }
+
+    resize() {
+        // Keep 1:1 aspect ratio
+        const aspect = 1.0; 
+        const availableWidth = window.innerWidth;
+        const availableHeight = window.innerHeight;
+        
+        let width, height;
+        
+        if (availableWidth / availableHeight < aspect) {
+            width = availableWidth;
+            height = availableWidth / aspect;
+        } else {
+            height = availableHeight;
+            width = availableHeight * aspect;
+        }
+        
+        this.glCanvas.style.width = `${width}px`;
+        this.glCanvas.style.height = `${height}px`;
     }
 
     async loadConfig() {
