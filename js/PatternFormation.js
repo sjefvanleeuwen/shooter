@@ -284,7 +284,7 @@ class PatternFormation {
                 // Max radius approx 300px
                 let dynamicSpacing = spacing;
                 if (horizArmLen * spacing > 300) {
-                    dynamicSpacing = 300 / max(1, horizArmLen);
+                    dynamicSpacing = 300 / Math.max(1, horizArmLen);
                 }
 
                 if (i <= mid) { // Horizontal
