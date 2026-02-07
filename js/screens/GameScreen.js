@@ -120,6 +120,8 @@ class GameScreen {
             if (nextDifficulty >= 7 && nextDifficulty % 7 === 0) {
                 // Boss wave every 7 levels
                 nextPattern = 'boss_wave';
+                // Trigger boss voice
+                this.audioManager.playRandomBossVoice();
             } else {
                 const patternNames = Object.keys(patterns).filter(p => p !== 'boss_wave');
                 nextPattern = patternNames[Math.floor(Math.random() * patternNames.length)];

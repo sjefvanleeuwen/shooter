@@ -36,6 +36,12 @@ class AudioManager {
 
         // Add initialization state
         this.isInitialized = false;
+
+        this.bossVoiceKeys = [
+            'boss_hope', 'boss_mistake', 'boss_devour', 'boss_erase', 
+            'boss_run', 'boss_galaxy', 'boss_dead', 'boss_inevitable', 'boss_annihilation'
+        ];
+        this.bossVoicePlaylist = [];
     }
 
     createAudioNodes(source, config = {}) {
@@ -96,7 +102,18 @@ class AudioManager {
                 this.loadSound('explosion', './audio/explosion.mp3'),
                 this.loadSound('laser', './audio/player-shoot.mp3'),
                 this.loadSound('alien-laser', './audio/alien-shoot.mp3'),
-                this.loadSound('forcefield', './audio/alien-forcefield.flac')
+                this.loadSound('forcefield', './audio/alien-forcefield.flac'),
+                
+                // Boss Voices
+                this.loadSound('boss_hope', './audio/boss/boss - hope is a lie.mp3'),
+                this.loadSound('boss_mistake', './audio/boss/boss - i am your final mistake.mp3'),
+                this.loadSound('boss_devour', './audio/boss/boss - i divour heros like you.mp3'),
+                this.loadSound('boss_erase', './audio/boss/boss - i will erase you from existence.mp3'),
+                this.loadSound('boss_run', './audio/boss/boss - run while you still can.mp3'),
+                this.loadSound('boss_galaxy', './audio/boss/boss - this galaxy will be your grave.mp3'),
+                this.loadSound('boss_dead', './audio/boss/boss - you are already dead.mp3'),
+                this.loadSound('boss_inevitable', './audio/boss/boss - your end is innevitable.mp3'),
+                this.loadSound('boss_annihilation', './audio/boss/boss - your prepare for total anihilation.mp3')
             ];
 
             // Load music tracks
@@ -155,6 +172,26 @@ class AudioManager {
             source.start(0);
             return source;
         }
+    }
+
+    playRandomBossVoice() {
+        if (!this.isInitialized) return;
+
+        // Reset playlist if empty
+        if (this.bossVoicePlaylist.length === 0) {
+            this.bossVoicePlaylist = [...this.bossVoiceKeys];
+            // Shuffle
+            for (let i = this.bossVoicePlaylist.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.bossVoicePlaylist[i], this.bossVoicePlaylist[j]] = [this.bossVoicePlaylist[j], this.bossVoicePlaylist[i]];
+            }
+        }
+
+        const key = this.bossVoicePlaylist.pop();
+        console.log(`Playing boss voice: ${key}`);
+        
+        // Play with higher volume (1.5) and no pan (center)
+        this.playSound(key, { volume: 1.5, pan: 0 });
     }
 
     connectToDestination(destination) {
