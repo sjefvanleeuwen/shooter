@@ -49,12 +49,20 @@ export default class ImageBackgroundScroller {
     }
     
     // Create a cached canvas version of the image with the transparency gradient baked in
-    processLayer(layer) {
+    async processLayer(layer) {
         if (!layer.image.complete || layer.image.naturalWidth === 0) return;
 
-        const pCanvas = document.createElement('canvas');
-        pCanvas.width = this.virtualWidth;
-        pCanvas.height = this.virtualHeight;
+        // Use OffscreenCanvas if available to avoid DOM overhead
+        const isOffscreen = typeof OffscreenCanvas !== 'undefined';
+        const pCanvas = isOffscreen 
+            ? new OffscreenCanvas(this.virtualWidth, this.virtualHeight)
+            : document.createElement('canvas');
+
+        if (!isOffscreen) {
+            pCanvas.width = this.virtualWidth;
+            pCanvas.height = this.virtualHeight;
+        }
+
         const pCtx = pCanvas.getContext('2d');
 
         // 1. Draw Image
@@ -69,9 +77,16 @@ export default class ImageBackgroundScroller {
         pCtx.fillRect(0, this.virtualHeight - this.overlap, this.virtualWidth, this.overlap);
 
         // 3. Reset and Store
-        pCtx.globalCompositeOperation = 'source-over';
+        // Optimize: Convert to ImageBitmap for faster WebGL upload
+        try {
+            const bitmap = await createImageBitmap(pCanvas);
+            layer.processed = bitmap;
+        } catch (e) {
+            // Fallback for browsers that might fail bitmap creation
+            pCtx.globalCompositeOperation = 'source-over';
+            layer.processed = pCanvas; 
+        }
         
-        layer.processed = pCanvas;
         layer.ready = true;
     }
     

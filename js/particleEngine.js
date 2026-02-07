@@ -1,6 +1,10 @@
 // Renamed Particle to EngineParticle.
 class EngineParticle {
     constructor(x, y) {
+        this.reset(x, y);
+    }
+    
+    reset(x, y) {
         this.x = x;
         this.y = y;
         // More focused horizontal spread and faster upward velocity.
@@ -130,25 +134,49 @@ class ParticleEngine {
         const toEmit = this.emissionRate * delta + this.emissionAccumulator;
         const count = Math.floor(toEmit);
         this.emissionAccumulator = toEmit - count;
+        
+        // Use object pool for emission
         for (let i = 0; i < count; i++) {
-            // Use EngineParticle instead of Particle.
-            this.particles.push(new EngineParticle(this.emitterX, this.emitterY));
+            let p;
+            if (this.particlePool.length > 0) {
+                p = this.particlePool.pop();
+                p.reset(this.emitterX, this.emitterY);
+            } else {
+                p = new EngineParticle(this.emitterX, this.emitterY);
+            }
+            this.particles.push(p);
         }
         
-        this.particles.forEach(p => p.update(delta));
-        this.particles = this.particles.filter(p => p.life > 0);
-
-        // Return dead particles to pool
-        const activeParticles = this.particles.filter(p => p.life > 0);
-        this.particles.forEach(p => {
-            if (p.life <= 0) {
+        // In-place update and excessive allocation avoidance
+        let liveCount = 0;
+        for (let i = 0; i < this.particles.length; i++) {
+            const p = this.particles[i];
+            p.update(delta);
+            
+            if (p.life > 0) {
+                // Keep particle (swap into live position)
+                if (i !== liveCount) {
+                    this.particles[liveCount] = p;
+                }
+                liveCount++;
+            } else {
+                // Recycle particle
                 this.particlePool.push(p);
             }
-        });
-        this.particles = activeParticles;
+        }
+        
+        // Truncate the array to remove dead particles from the end
+        if (this.particles.length > liveCount) {
+            this.particles.length = liveCount;
+        }
     }
     
     draw() {
+        if (this.ctx.renderParticles) {
+            this.ctx.renderParticles(this.particles);
+            return;
+        }
+
         this.ctx.save();
         this.ctx.globalCompositeOperation = 'screen';
         
@@ -176,43 +204,31 @@ class LaserEngine {
         this.firing = false;
         this.audioManager = audioManager;
         this.virtualWidth = ctx.canvas.width;
+
+        // Laser pooling
+        this.laserPool = [];
+        this.poolSize = 50;
+        for (let i = 0; i < this.poolSize; i++) {
+            this.laserPool.push(new LaserParticle(0, 0));
+        }
     }
 
     playShootSound(x) {
-        console.log('Attempting to play shoot sound at position:', x); // Debug line
-
-        if (!this.audioManager) {
-            console.error('No audio manager available!');
-            return;
-        }
-
-        // Debug logging for audio manager state
-        console.debug('LaserEngine Audio State:', {
-            hasAudioManager: !!this.audioManager,
-            isInitialized: this.audioManager?.isInitialized,
-            availableSounds: this.audioManager ? Array.from(this.audioManager.sounds?.keys() || []) : [],
-            isFiring: this.firing,
-            position: {
-                x: x,
-                normalized: (x / this.virtualWidth) * 2 - 1
-            }
-        });
+        if (!this.audioManager) return;
 
         try {
             const normalizedX = (x / this.virtualWidth) * 2 - 1;
             
             const soundConfig = {
-                pitch: 0.4 + Math.random() * 0.4,    // Base pitch lowered from 0.6 to 0.4 (another 4 semitones lower)
+                pitch: 0.4 + Math.random() * 0.4,
                 pan: normalizedX,
-                volume: 0.15 + Math.random() * 0.1,  // Volume reduced from 0.25 to 0.15 base
+                volume: 0.15 + Math.random() * 0.1,
                 decay: 0.3 + Math.random() * 0.2
             };
 
-            console.log('Playing sound with config:', soundConfig); // Debug line
-            const result = this.audioManager.playSound('laser', soundConfig);
-            console.log('Sound play result:', result); // Debug line
+            this.audioManager.playSound('laser', soundConfig);
         } catch (error) {
-            console.error('Error playing shoot sound:', error);
+            // Silently fail if audio system is not ready
         }
     }
 
@@ -225,32 +241,54 @@ class LaserEngine {
         this.firing = isFiring;
     }
     
+    getLaser(x, y) {
+        if (this.laserPool.length > 0) {
+            const l = this.laserPool.pop();
+            l.x = x; l.y = y; l.initialX = x; 
+            l.life = l.maxLife; // Reset life
+            return l;
+        }
+        return new LaserParticle(x, y);
+    }
+
     update(delta) {
         // Only emit new particles if firing
         if (this.firing) {
-            console.log('LaserEngine is firing, delta:', delta); // Debug line
             const toEmit = this.emissionRate * delta + this.emissionAccumulator;
             const count = Math.floor(toEmit);
             this.emissionAccumulator = toEmit - count;
             
-            if (count > 0) {
-                console.log(`Creating ${count} laser particles`); // Debug line
-            }
-
             for (let i = 0; i < count; i++) {
-                this.particles.push(new LaserParticle(this.emitterX, this.emitterY));
+                this.particles.push(this.getLaser(this.emitterX, this.emitterY));
                 // Ensure sound plays for each particle
                 this.playShootSound(this.emitterX);
             }
         }
         
         // Always update existing particles
-        this.particles.forEach(p => p.update(delta));
-        this.particles = this.particles.filter(p => p.life > 0);
+        // this.particles.forEach(p => p.update(delta));
+        // this.particles = this.particles.filter(p => p.life > 0);
+        
+        // Optimized update and pool recycling
+        let writeIdx = 0;
+        for (let i = 0; i < this.particles.length; i++) {
+            const p = this.particles[i];
+            p.update(delta);
+            if (p.life > 0) {
+                this.particles[writeIdx++] = p;
+            } else {
+                this.laserPool.push(p);
+            }
+        }
+        this.particles.length = writeIdx;
     }
     
     draw() {
-        this.particles.forEach(p => p.draw(this.ctx));
+        if (this.ctx.renderLasers) {
+            this.ctx.renderLasers(this.particles);
+        } else {
+            this.particles.forEach(p => p.draw(this.ctx));
+        }
     }
 }
 

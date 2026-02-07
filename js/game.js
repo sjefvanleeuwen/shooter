@@ -14,6 +14,16 @@ import GameScreen from './screens/GameScreen.js';
 import CRTEffect from './effects/CRTEffect.js';  // Add this import
 import AudioManager from './audio/AudioManager.js';
 
+// Debug Log Switch
+const ENABLE_DEBUG_LOGS = false;
+
+if (!ENABLE_DEBUG_LOGS) {
+    // Save original in case we need to restore or use internally? 
+    // Usually not needed for simple toggle.
+    // We preserve error and warn as they are critical.
+    console.log = () => {}; 
+}
+
 class Game {
     constructor() {
         // Initialize AudioManager first

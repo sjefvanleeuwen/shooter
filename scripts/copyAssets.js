@@ -88,13 +88,13 @@ async function processImage(srcPath, destPath, options) {
                     background: { r: 0, g: 0, b: 0, alpha: 0 }  // Transparent background
                 })
                 .png({
-                    palette: true,
+                    palette: options.palette,
                     colors: options.colors,
-                    quality: 60,
+                    quality: options.quality || 60,
                     compressionLevel: 9,
                     effort: 10,
                     adaptiveFiltering: true,
-                    dither: 0.5
+                    dither: options.compression?.dithering ?? 0.5
                 })
                 .toFile(destPath);
         } else {
@@ -108,9 +108,9 @@ async function processImage(srcPath, destPath, options) {
                 .normalize()
                 .median(3)
                 .png({
-                    palette: true,
+                    palette: options.palette, // Respect config
                     colors: options.colors,
-                    quality: 100,
+                    quality: 100, // Keep first pass high quality
                     compressionLevel: 9,
                     adaptiveFiltering: true,
                     effort: 10,
@@ -118,16 +118,16 @@ async function processImage(srcPath, destPath, options) {
                 })
                 .toFile(tempFile);
 
-            // Second pass: Optimize with more aggressive settings
+            // Second pass: Optimize with configured settings
             await sharp(tempFile)
                 .png({
-                    quality: 40, // More aggressive quality reduction
+                    quality: options.quality || 40, 
                     compressionLevel: 9,
                     effort: 10,
                     adaptiveFiltering: true,
-                    palette: true,
+                    palette: options.palette, // Respect config
                     colors: options.colors,
-                    dither: 0.5 // Reduced dithering for second pass
+                    dither: options.compression?.dithering ?? 0.5
                 })
                 .toFile(destPath);
 

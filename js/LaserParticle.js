@@ -1,3 +1,5 @@
+const RADIOSITY_ENABLED = false;
+
 class AlienLaser {
     constructor(x, y, audioManager) {
         this.x = x;
@@ -64,10 +66,12 @@ class AlienLaser {
         ctx.fillStyle = gradient;
         ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
         
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
-        ctx.shadowBlur = 8;
-        ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
+        if (RADIOSITY_ENABLED) {
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+            ctx.shadowBlur = 8;
+            ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
+        }
         ctx.restore();
     }
 }

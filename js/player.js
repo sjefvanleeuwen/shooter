@@ -26,6 +26,10 @@ class Player {
         this.collisionMask.height = this.height;
         this.maskCtx = this.collisionMask.getContext('2d');
         this.createCollisionMask();
+        
+        // Shadow cache
+        this.shadowCache = null;
+        this.createShadowCache();
 
         this.velocity = { x: 0, y: 0 };  // Add this line for velocity tracking
     }
@@ -78,7 +82,10 @@ class Player {
     createCollisionMask() {
         // Wait for image to load
         if (!this.img.complete) {
-            this.img.addEventListener('load', () => this.createCollisionMask());
+            this.img.addEventListener('load', () => {
+                this.createCollisionMask();
+                this.createShadowCache();
+            });
             return;
         }
 
@@ -86,6 +93,51 @@ class Player {
         this.maskCtx.drawImage(this.img, 0, 0, this.width, this.height);
         // Get pixel data for collision detection
         this.maskData = this.maskCtx.getImageData(0, 0, this.width, this.height).data;
+    }
+
+    createShadowCache() {
+        if (!this.img.complete) return;
+
+        // Create an offscreen canvas for the shadow
+        const shadowCanvas = document.createElement('canvas');
+        shadowCanvas.width = this.width * 1.2 + 40; // Extra padding for blur
+        shadowCanvas.height = this.height * 1.2 + 40;
+        const ctx = shadowCanvas.getContext('2d');
+
+        // Draw the player scaled up and black
+        ctx.save();
+        ctx.translate(20, 20); // Offset for padding
+        ctx.scale(1.2, 1.2);
+        
+        // Draw black silhouette
+        ctx.drawImage(this.img, 0, 0, this.width, this.height);
+        ctx.globalCompositeOperation = 'source-in';
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, shadowCanvas.width, shadowCanvas.height);
+        
+        ctx.restore();
+
+        // Apply blur needed
+        // Note: verify if filter is supported on this canvas context in this env, 
+        // if not we might need manually blurred sprite or accept sharp shadow
+        // But assuming standard browser support for ctx.filter
+        
+        // Actually, to "bake" the blur, we need to draw *with* the filter onto another canvas
+        // or just draw this silhouette with filter in the main loop? 
+        // No, we want to bake the blur.
+        
+        const key = 'player-shadow';
+        // Let's use createImageBitmap if possible for speed, but standard canvas is fine for a single player
+        // For baking blur efficiently:
+        const blurCanvas = document.createElement('canvas');
+        blurCanvas.width = shadowCanvas.width;
+        blurCanvas.height = shadowCanvas.height;
+        const blurCtx = blurCanvas.getContext('2d');
+        
+        blurCtx.filter = 'blur(15px)';
+        blurCtx.drawImage(shadowCanvas, 0, 0);
+        
+        this.shadowCache = blurCanvas; 
     }
 
     checkPixelCollision(x, y) {

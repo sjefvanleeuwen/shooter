@@ -5,6 +5,8 @@ import ImageBackgroundScroller from '../imageBackgroundScroller.js';
 import { patterns } from '../patterns/formationPatterns.js';
 import ShieldEffect from '../effects/ShieldEffect.js';
 
+const ENABLE_AMBIENT_LIGHTING = false;
+
 class GameScreen {
     constructor(ctx, options = {}) {
         this.ctx = ctx;
@@ -210,44 +212,56 @@ class GameScreen {
     drawPlayer() {
         if (!this.player.img.complete) return;
 
-        // Draw player shadow
-        this.ctx.save();
-        this.ctx.globalAlpha = 0.7;
-        this.ctx.filter = 'blur(15px) brightness(0)';
-        this.ctx.drawImage(
-            this.player.img,
-            this.player.x + 20,
-            this.player.y - 50,
-            this.player.width * 1.2,
-            this.player.height * 1.2
-        );
-        this.ctx.restore();
-
-        // Draw player with background color effect
-        const bgColor = this.bgScroller.getColorAt(
-            this.player.x + this.player.width/2,
-            this.player.y + this.player.height
-        );
-
-        const offCanvas = this.offCanvasCache;
-        if (offCanvas.width !== this.player.img.width || offCanvas.height !== this.player.img.height) {
-            offCanvas.width = this.player.img.width;
-            offCanvas.height = this.player.img.height;
+        // Draw player shadow (Cached)
+        if (this.player.shadowCache) {
+            this.ctx.save();
+            this.ctx.globalAlpha = 0.7;
+            // No filter needed here, it's baked in
+            // The shadow cache includes padding and scaling
+            // Original logic: x + 20, y - 50. 
+            // Cache padding creates offset of -20,-20 relative to that origin.
+            this.ctx.drawImage(
+                this.player.shadowCache,
+                this.player.x, // (x+20) - 20
+                this.player.y - 70 // (y-50) - 20
+            );
+            this.ctx.restore();
         }
-        
-        const offCtx = offCanvas.getContext('2d');
-        offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
-        offCtx.drawImage(this.player.img, 0, 0);
-        offCtx.globalCompositeOperation = 'source-atop';
-        offCtx.fillStyle = `rgba(${bgColor.r}, ${bgColor.g}, ${bgColor.b}, 0.33)`;
-        offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
 
+        // Draw player
         this.ctx.save();
+        
+        let drawSource = this.player.img;
+
+        if (ENABLE_AMBIENT_LIGHTING) {
+            // Draw player with background color effect
+            const bgColor = this.bgScroller.getColorAt(
+                this.player.x + this.player.width/2,
+                this.player.y + this.player.height
+            );
+
+            const offCanvas = this.offCanvasCache;
+            if (offCanvas.width !== this.player.img.width || offCanvas.height !== this.player.img.height) {
+                offCanvas.width = this.player.img.width;
+                offCanvas.height = this.player.img.height;
+            }
+            
+            const offCtx = offCanvas.getContext('2d');
+            offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
+            offCtx.drawImage(this.player.img, 0, 0);
+            offCtx.globalCompositeOperation = 'source-atop';
+            offCtx.fillStyle = `rgba(${bgColor.r}, ${bgColor.g}, ${bgColor.b}, 0.33)`;
+            offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+            
+            drawSource = offCanvas;
+        }
+
         if (this.gameState.playerInvulnerable) {
             this.ctx.globalAlpha = this.gameState.getInvulnerabilityAlpha();
         }
+        
         this.ctx.drawImage(
-            offCanvas,
+            drawSource,
             this.player.x,
             this.player.y,
             this.player.width,

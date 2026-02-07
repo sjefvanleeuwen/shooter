@@ -43,6 +43,37 @@ npm run dev    # Start development server
 npm run build  # Create production build
 ```
 
+### Build Configuration
+
+The build process includes an asset optimization step that can be configured for different visual styles using the `BUILD_MODE` environment variable.
+
+| Mode | Description |
+|------|-------------|
+| `modern` | **(Default)** High-resolution assets, 256+ colors, smooth gradients, and reduced banding. Ideal for modern HD displays. |
+| `retro` | Classic 16-color palette, lower resolution, and dithering for an authentic retro feel. |
+
+**Usage:**
+
+**Windows (PowerShell):**
+```powershell
+# Build with default modern settings
+npm run build
+
+# Build with retro settings
+$env:BUILD_MODE="retro"; npm run build
+```
+
+**Linux / macOS / Bash:**
+```bash
+# Build with default modern settings
+npm run build
+
+# Build with retro settings
+BUILD_MODE=retro npm run build
+```
+
+This configuration is also used in the GitHub Actions deployment pipeline (defaulting to `modern`).
+
 ## Core Systems Architecture
 
 ### Rendering Pipeline

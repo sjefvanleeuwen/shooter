@@ -1,3 +1,5 @@
+const RADIOSITY_ENABLED = false;
+
 class ExplosionParticle {
     constructor(x, y, config) {
         this.reset(x, y, config);

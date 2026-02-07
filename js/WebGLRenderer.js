@@ -14,6 +14,13 @@ export default class WebGLRenderer {
         
         this.matrixStack = [[1,0,0, 0,1,0, 0,0,1]];
         this.stateStack = [{ alpha: 1.0, fillStyle: [1,1,1,1], font: '20px Arial', textAlign: 'left', brightness: 1.0, flash: 0.0 }];
+        
+        // Reusable arrays to reduce GC
+        this.uvArray = new Float32Array(12);
+        this.identityUV = new Float32Array([0,0, 1,0, 0,1, 0,1, 1,0, 1,1]);
+        
+        // Matrix tmp buffers
+        this._matTemp = new Float32Array(9);
     }
 
     get currentMatrix() { return this.matrixStack[this.matrixStack.length - 1]; }
@@ -75,28 +82,42 @@ export default class WebGLRenderer {
         this.uvBuf = this.gl.createBuffer();
     }
 
-    multiply(a, b) {
+    // Optimized matrix multiply (no allocation)
+    multiply(a, b, out) {
         const a00 = a[0], a01 = a[1], a02 = a[2], a10 = a[3], a11 = a[4], a12 = a[5], a20 = a[6], a21 = a[7], a22 = a[8];
         const b00 = b[0], b01 = b[1], b02 = b[2], b10 = b[3], b11 = b[4], b12 = b[5], b20 = b[6], b21 = b[7], b22 = b[8];
-        return [
-            b00*a00+b01*a10+b02*a20, b00*a01+b01*a11+b02*a21, b00*a02+b01*a12+b02*a22,
-            b10*a00+b11*a10+b12*a20, b10*a01+b11*a11+b12*a21, b10*a02+b11*a12+b12*a22,
-            b20*a00+b21*a10+b22*a20, b20*a01+b21*a11+b22*a21, b20*a02+b21*a12+b22*a22
-        ];
+        
+        if (!out) out = new Array(9); // Fallback if no output buffer
+        
+        out[0] = b00*a00+b01*a10+b02*a20; out[1] = b00*a01+b01*a11+b02*a21; out[2] = b00*a02+b01*a12+b02*a22;
+        out[3] = b10*a00+b11*a10+b12*a20; out[4] = b10*a01+b11*a11+b12*a21; out[5] = b10*a02+b11*a12+b12*a22;
+        out[6] = b20*a00+b21*a10+b22*a20; out[7] = b20*a01+b21*a11+b22*a21; out[8] = b20*a02+b21*a12+b22*a22;
+        return out;
     }
 
-    save() { this.matrixStack.push([...this.currentMatrix]); this.stateStack.push({...this.currentState}); }
+    save() { 
+        // Clone current matrix
+        this.matrixStack.push([...this.currentMatrix]); 
+        this.stateStack.push({...this.currentState}); 
+    }
     restore() { if (this.matrixStack.length > 1) this.matrixStack.pop(); if (this.stateStack.length > 1) this.stateStack.pop(); }
+    
     scale(x, y) { 
-        this.matrixStack[this.matrixStack.length-1] = this.multiply(this.currentMatrix, [x,0,0, 0,y,0, 0,0,1]); 
+        const m = this.matrixStack[this.matrixStack.length-1]; // In-place update target
+        const temp = [x,0,0, 0,y,0, 0,0,1];
+        this.multiply(m, temp, m); // Updates m in place
     }
     translate(x, y) { 
-        this.matrixStack[this.matrixStack.length-1] = this.multiply(this.currentMatrix, [1,0,0, 0,1,0, x,y,1]); 
+        const m = this.matrixStack[this.matrixStack.length-1];
+        const temp = [1,0,0, 0,1,0, x,y,1];
+        this.multiply(m, temp, m);
     }
     rotate(angle) {
         const c = Math.cos(angle);
         const s = Math.sin(angle);
-        this.matrixStack[this.matrixStack.length-1] = this.multiply(this.currentMatrix, [c,s,0, -s,c,0, 0,0,1]);
+        const m = this.matrixStack[this.matrixStack.length-1];
+        const temp = [c,s,0, -s,c,0, 0,0,1];
+        this.multiply(m, temp, m);
     }
 
     strokeRect(x, y, w, h) {
@@ -152,7 +173,18 @@ export default class WebGLRenderer {
     get font() { return this.currentState.font; }
     set textAlign(v) { this.currentState.textAlign = v; }
     get textAlign() { return this.currentState.textAlign; }
-    set filter(v) { this.currentState.filter = v; }
+    set filter(v) { 
+        if (this.currentState.filter === v) return;
+        this.currentState.filter = v;
+        
+        // Pre-parse brightness
+        let bright = 1.0;
+        if (v && v.includes('brightness')) {
+            const match = v.match(/brightness\((.+?)\)/);
+            if (match) bright = parseFloat(match[1]);
+        }
+        this.currentState.parsedBrightness = bright;
+    }
     get filter() { return this.currentState.filter; }
 
     setTransform(a, b, c, d, e, f) {
@@ -168,7 +200,12 @@ export default class WebGLRenderer {
     }
 
     getTexture(img) {
-        if (!img.complete && !(img instanceof HTMLCanvasElement) && !(typeof OffscreenCanvas !== 'undefined' && img instanceof OffscreenCanvas)) return null;
+        if (typeof ImageBitmap !== 'undefined' && img instanceof ImageBitmap) {
+            // Pass through for ImageBitmap
+        } else if (!img.complete && !(img instanceof HTMLCanvasElement) && !(typeof OffscreenCanvas !== 'undefined' && img instanceof OffscreenCanvas)) {
+            return null;
+        }
+        
         const k = img.src || img;
         if (this.textures.has(k)) return this.textures.get(k);
         const t = this.gl.createTexture();
@@ -203,8 +240,17 @@ export default class WebGLRenderer {
         this.gl.vertexAttribPointer(this.locs.pos, 2, this.gl.FLOAT, false, 0, 0);
 
         const u=sx/img.width, v=sy/img.height, w=sw/img.width, h=sh/img.height;
+        
+        // Use pre-allocated array
+        this.uvArray[0]=u;     this.uvArray[1]=v;
+        this.uvArray[2]=u+w;   this.uvArray[3]=v;
+        this.uvArray[4]=u;     this.uvArray[5]=v+h;
+        this.uvArray[6]=u;     this.uvArray[7]=v+h;
+        this.uvArray[8]=u+w;   this.uvArray[9]=v;
+        this.uvArray[10]=u+w;  this.uvArray[11]=v+h;
+
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuf);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([u,v, u+w,v, u,v+h, u,v+h, u+w,v, u+w,v+h]), this.gl.DYNAMIC_DRAW);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.uvArray, this.gl.DYNAMIC_DRAW);
         this.gl.enableVertexAttribArray(this.locs.uv);
         this.gl.vertexAttribPointer(this.locs.uv, 2, this.gl.FLOAT, false, 0, 0);
 
@@ -213,11 +259,9 @@ export default class WebGLRenderer {
         m = this.multiply(m, [dw,0,0, 0,dh,0, 0,0,1]);
         this.gl.uniformMatrix3fv(this.locs.mat, false, m);
         
-        let bright = 1.0;
-        if (this.filter && this.filter.includes('brightness')) {
-            const match = this.filter.match(/brightness\((.+?)\)/);
-            if (match) bright = parseFloat(match[1]);
-        }
+        // Use pre-parsed brightness
+        const bright = this.currentState.parsedBrightness !== undefined ? this.currentState.parsedBrightness : 1.0;
+        
         this.gl.uniform1f(this.locs.brightness, bright);
         this.gl.uniform1f(this.locs.flash, this.currentState.flash || 0.0);
 
@@ -311,14 +355,18 @@ export default class WebGLRenderer {
         this.gl.enableVertexAttribArray(this.locs.pos);
         this.gl.vertexAttribPointer(this.locs.pos, 2, this.gl.FLOAT, false, 0, 0);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuf);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([0,0, 1,0, 0,1, 0,1, 1,0, 1,1]), this.gl.DYNAMIC_DRAW);
+        // Use identity UVs
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.identityUV, this.gl.DYNAMIC_DRAW);
         this.gl.enableVertexAttribArray(this.locs.uv);
         this.gl.vertexAttribPointer(this.locs.uv, 2, this.gl.FLOAT, false, 0, 0);
         this.gl.uniform2f(this.locs.res, this.canvas.width, this.canvas.height);
         let m = this.multiply(this.currentMatrix, [1,0,0, 0,1,0, x,y,1]);
         m = this.multiply(m, [w,0,0, 0,h,0, 0,0,1]);
         this.gl.uniformMatrix3fv(this.locs.mat, false, m);
-        this.gl.uniform1f(this.locs.brightness, 1.0);
+        
+        // Use pre-parsed brightness
+        const bright = this.currentState.parsedBrightness !== undefined ? this.currentState.parsedBrightness : 1.0;
+        this.gl.uniform1f(this.locs.brightness, bright);
         this.gl.uniform4fv(this.locs.color, [1,1,1,this.globalAlpha]);
         this.gl.uniform1i(this.locs.useTex, 1);
         this.gl.activeTexture(this.gl.TEXTURE0);
@@ -365,7 +413,8 @@ export default class WebGLRenderer {
         this.gl.enableVertexAttribArray(this.locs.pos);
         this.gl.vertexAttribPointer(this.locs.pos, 2, this.gl.FLOAT, false, 0, 0);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuf);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([0,0, 1,0, 0,1, 0,1, 1,0, 1,1]), this.gl.DYNAMIC_DRAW);
+        // Use identity UVs
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.identityUV, this.gl.DYNAMIC_DRAW);
         this.gl.enableVertexAttribArray(this.locs.uv);
         this.gl.vertexAttribPointer(this.locs.uv, 2, this.gl.FLOAT, false, 0, 0);
         this.gl.uniform2f(this.locs.res, this.canvas.width, this.canvas.height);
@@ -378,11 +427,9 @@ export default class WebGLRenderer {
         if (Array.isArray(this.fillStyle)) c = [...this.fillStyle];
         c[3] *= this.globalAlpha;
         
-        let bright = 1.0;
-        if (this.filter && this.filter.includes('brightness')) {
-            const match = this.filter.match(/brightness\((.+?)\)/);
-            if (match) bright = parseFloat(match[1]);
-        }
+        // Use pre-parsed brightness if available, otherwise default to 1
+        const bright = this.currentState.parsedBrightness !== undefined ? this.currentState.parsedBrightness : 1.0;
+        
         this.gl.uniform1f(this.locs.brightness, bright);
         this.gl.uniform4fv(this.locs.color, c);
         this.gl.uniform1i(this.locs.useTex, 1);
@@ -394,5 +441,179 @@ export default class WebGLRenderer {
     createLinearGradient() { return { addColorStop: () => {} }; }
     createRadialGradient() { return { addColorStop: () => {} }; }
     set shadowBlur(v) {} set shadowColor(v) {} set globalCompositeOperation(v) {}
+
+    initParticleSystem() {
+        const vs = `#version 300 es
+        in vec2 a_quad;
+        in vec4 a_inst; // x, y, life, maxLife
+        uniform vec2 u_res;
+        uniform mat3 u_mat;
+        out float v_life;
+        out vec2 v_uv;
+        void main() {
+            vec2 pos = a_inst.xy;
+            float r = 5.0; // Fixed radius for now, matches particleEngine
+            vec2 offset = (a_quad - 0.5) * r * 2.0;
+
+            vec3 p = u_mat * vec3(pos, 1.0);
+            // Apply simple 2D transform to offset (ignoring translation)
+            p.xy += (u_mat * vec3(offset, 0.0)).xy; 
+
+            vec2 clip = (p.xy / u_res) * 2.0 - 1.0;
+            gl_Position = vec4(clip * vec2(1, -1), 0, 1);
+            v_life = a_inst.z / a_inst.w; // normalized life 0..1
+            v_uv = a_quad;
+        }`;
+        
+        const fs = `#version 300 es
+        precision highp float;
+        in float v_life;
+        in vec2 v_uv;
+        out vec4 color;
+        void main() {
+            float d = length(v_uv - 0.5) * 2.0;
+            if (d > 1.0) discard;
+            float alpha = max(v_life, 0.0) * (1.0 - d); // Fade out
+            // Gradient: White -> Orange -> Red -> Transp
+            // Simple approx:
+            vec3 c = mix(vec3(1,0,0), vec3(1,1,1), v_life); 
+            c = mix(vec3(1,0.5,0), c, 0.5); // Orange tint
+            color = vec4(c, alpha);
+        }`;
+
+        const p = this.gl.createProgram();
+        const v = this.gl.createShader(this.gl.VERTEX_SHADER);
+        this.gl.shaderSource(v, vs); this.gl.compileShader(v);
+        const f = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+        this.gl.shaderSource(f, fs); this.gl.compileShader(f);
+        this.gl.attachShader(p, v); this.gl.attachShader(p, f);
+        this.gl.linkProgram(p);
+        
+        if (!this.gl.getProgramParameter(p, this.gl.LINK_STATUS)) {
+            console.error(this.gl.getProgramInfoLog(p));
+        }
+
+        this.particleProgram = p;
+        this.pLocs = {
+            quad: this.gl.getAttribLocation(p, 'a_quad'),
+            inst: this.gl.getAttribLocation(p, 'a_inst'),
+            res: this.gl.getUniformLocation(p, 'u_res'),
+            mat: this.gl.getUniformLocation(p, 'u_mat')
+        };
+        
+        this.pInstBuf = this.gl.createBuffer();
+    }
+
+    renderParticles(particles) {
+        if (!this.particleProgram) this.initParticleSystem();
+        if (particles.length === 0) return;
+
+        const data = new Float32Array(particles.length * 4);
+        let i = 0;
+        for (const p of particles) {
+             data[i++] = p.x;
+             data[i++] = p.y;
+             data[i++] = p.life;
+             data[i++] = p.maxLife;
+        }
+
+        this.gl.useProgram(this.particleProgram);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.posBuf); // Use existing quad buffer 0..1
+        this.gl.enableVertexAttribArray(this.pLocs.quad);
+        this.gl.vertexAttribPointer(this.pLocs.quad, 2, this.gl.FLOAT, false, 0, 0);
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.pInstBuf);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.DYNAMIC_DRAW);
+        this.gl.enableVertexAttribArray(this.pLocs.inst);
+        this.gl.vertexAttribPointer(this.pLocs.inst, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribDivisor(this.pLocs.inst, 1); // Instanced
+
+        this.gl.uniform2f(this.pLocs.res, this.canvas.width, this.canvas.height);
+        this.gl.uniformMatrix3fv(this.pLocs.mat, false, this.currentMatrix); // Use current global transform
+
+        // Additive blending for fire
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
+        this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, 6, particles.length);
+        this.gl.blendFunc(this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA); // Restore
+        
+        // Cleanup
+        this.gl.vertexAttribDivisor(this.pLocs.inst, 0);
+    }
+
+    renderLasers(lasers) {
+        if (!this.laserProgram) {
+            const vs = `#version 300 es
+            in vec2 a_quad; // 0..1
+            in vec4 a_laser; // x, y, w, h
+            uniform vec2 u_res;
+            uniform mat3 u_mat;
+            out vec2 v_uv;
+            void main() {
+                vec2 pos = a_laser.xy;
+                vec2 size = a_laser.zw;
+                vec2 p_local = a_quad * size;
+                
+                vec3 p = u_mat * vec3(pos + p_local, 1.0);
+                vec2 clip = (p.xy / u_res) * 2.0 - 1.0;
+                gl_Position = vec4(clip * vec2(1, -1), 0, 1);
+                v_uv = a_quad; // 0..1
+            }`;
+
+            const fs = `#version 300 es
+            precision highp float;
+            in vec2 v_uv;
+            out vec4 color;
+            void main() {
+                 float g = abs(v_uv.x - 0.5) * 2.0; // 0 (middle) -> 1 (edge)
+                 vec3 c = mix(vec3(1.0, 1.0, 1.0), vec3(0.0, 1.0, 1.0), g);
+                 color = vec4(c, 1.0);
+            }`;
+            
+            const p = this.gl.createProgram();
+            const v = this.gl.createShader(this.gl.VERTEX_SHADER); this.gl.shaderSource(v, vs); this.gl.compileShader(v);
+            const f = this.gl.createShader(this.gl.FRAGMENT_SHADER); this.gl.shaderSource(f, fs); this.gl.compileShader(f);
+            this.gl.attachShader(p, v); this.gl.attachShader(p, f); this.gl.linkProgram(p);
+            
+            this.laserProgram = p;
+            this.lLocs = {
+                quad: this.gl.getAttribLocation(p, 'a_quad'),
+                laser: this.gl.getAttribLocation(p, 'a_laser'),
+                res: this.gl.getUniformLocation(p, 'u_res'),
+                mat: this.gl.getUniformLocation(p, 'u_mat')
+            };
+            this.lBuf = this.gl.createBuffer();
+        }
+
+        if (lasers.length === 0) return;
+
+        const data = new Float32Array(lasers.length * 4);
+        let i=0;
+        for(const l of lasers) {
+            data[i++] = l.x - l.width/2; // align center
+            data[i++] = l.y; 
+            data[i++] = l.width;
+            data[i++] = l.height;
+        }
+
+        this.gl.useProgram(this.laserProgram);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.posBuf);
+        this.gl.enableVertexAttribArray(this.lLocs.quad);
+        this.gl.vertexAttribPointer(this.lLocs.quad, 2, this.gl.FLOAT, false, 0, 0);
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.lBuf);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.DYNAMIC_DRAW);
+        this.gl.enableVertexAttribArray(this.lLocs.laser);
+        this.gl.vertexAttribPointer(this.lLocs.laser, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribDivisor(this.lLocs.laser, 1);
+
+        this.gl.uniform2f(this.lLocs.res, this.canvas.width, this.canvas.height);
+        this.gl.uniformMatrix3fv(this.lLocs.mat, false, this.currentMatrix);
+        
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
+        this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, 6, lasers.length);
+        this.gl.blendFunc(this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA);
+        
+        this.gl.vertexAttribDivisor(this.lLocs.laser, 0);
+    }
 }
 

@@ -4,6 +4,19 @@ class HUDManager {
         this.virtualWidth = virtualWidth;
         this.virtualHeight = virtualHeight;
         this.font = '16px "Press Start 2P"';
+        
+        // Cache boss health gradient
+        this.bossGradient = null;
+        this.initGradient();
+    }
+
+    initGradient() {
+        const barWidth = this.virtualWidth * 0.6;
+        const barX = (this.virtualWidth - barWidth) / 2;
+        this.bossGradient = this.ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
+        this.bossGradient.addColorStop(0, '#ff0000');
+        this.bossGradient.addColorStop(0.5, '#ffff00');
+        this.bossGradient.addColorStop(1, '#00ff00');
     }
 
     draw(lives, score, highScore, boss = null) {
@@ -40,13 +53,7 @@ class HUDManager {
             // Health
             const healthPercent = Math.max(0, boss.health / boss.maxHealth);
             
-            // Gradient based on health
-            const gradient = this.ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
-            gradient.addColorStop(0, '#ff0000');
-            gradient.addColorStop(0.5, '#ffff00');
-            gradient.addColorStop(1, '#00ff00');
-            
-            this.ctx.fillStyle = gradient;
+            this.ctx.fillStyle = this.bossGradient;
             this.ctx.fillRect(barX + 2, barY + 2, (barWidth - 4) * healthPercent, barHeight - 4);
 
             // Boss Name Text

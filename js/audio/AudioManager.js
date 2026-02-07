@@ -137,7 +137,6 @@ class AudioManager {
             const nodes = this.createAudioNodes(source, config);
             
             source.start(0);
-            console.log(`Playing sound: ${key} with config:`, config);
             
             return { source, ...nodes };
         } catch (error) {

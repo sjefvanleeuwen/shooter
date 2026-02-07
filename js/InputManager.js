@@ -21,7 +21,7 @@ class InputManager {
 
     handleKeyDown(e) {
         // Handle debug toggle
-        if (e.key === 'd' || e.key === 'D') {
+        if (e.key === 'f' || e.key === 'F') {
             if (this.debugHandler) {
                 this.debugHandler();
             }

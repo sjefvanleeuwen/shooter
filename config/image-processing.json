@@ -12,6 +12,8 @@
           "fit": "contain",
           "position": "center",
           "colors": 16,
+          "palette": true,
+          "quality": 60,
           "compression": {
             "quality": [0.3, 0.5],
             "speed": 1,
@@ -30,6 +32,8 @@
         "processing": {
           "fit": "fill",
           "colors": 16,
+          "palette": true,
+          "quality": 60,
           "compression": {
             "quality": [0.3, 0.5],
             "speed": 1,
@@ -51,12 +55,13 @@
         "processing": {
           "fit": "contain",
           "position": "center",
-          "colors": 256,
+          "palette": false,
+          "quality": 95,
           "compression": {
-            "quality": [0.8, 0.95],
+            "quality": [0.9, 1.0],
             "speed": 1,
             "strip": true,
-            "dithering": 1.0,
+            "dithering": 0,
             "effort": 10,
             "adaptiveFiltering": true
           }
@@ -69,12 +74,13 @@
         },
         "processing": {
           "fit": "fill",
-          "colors": 128,
+          "palette": false,
+          "quality": 90,
           "compression": {
-            "quality": [0.7, 0.9],
+            "quality": [0.8, 1.0],
             "speed": 1,
             "effort": 10,
-            "dithering": 1.0,
+            "dithering": 0,
             "adaptiveFiltering": true
           }
         }

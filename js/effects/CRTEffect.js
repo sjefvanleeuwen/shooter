@@ -94,11 +94,17 @@ class CRTEffect {
             }
 
             vec3 sampleWithBlur(sampler2D tex, vec2 uv, float blur) {
+                // Optimization: fast path for no blur
+                if (blur < 0.01) return texture(tex, uv).rgb;
+
                 vec3 color = vec3(0.0);
                 float total = 0.0;
-                for(float i = -2.0; i <= 2.0; i++) {
-                    float weight = 1.0 - abs(i) / 3.0;
-                    color += texture(tex, uv + vec2(i * blur / u_resolution.x, 0.0)).rgb * weight;
+                // Optimized: Reduced from 5 taps to 3 taps per channel
+                for(float i = -1.0; i <= 1.0; i++) {
+                    float weight = 1.0 - abs(i) * 0.4;
+                    // Slightly wider spread to compensate for fewer samples
+                    float spread = 1.3; 
+                    color += texture(tex, uv + vec2(i * spread * blur / u_resolution.x, 0.0)).rgb * weight;
                     total += weight;
                 }
                 return color / total;
