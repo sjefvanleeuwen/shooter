@@ -87,6 +87,21 @@ export default class MobileControls {
             .fire-btn:active, .fire-btn.active {
                  background-color: transparent;
             }
+
+            .fs-btn {
+                width: 50px;
+                height: 50px;
+                border: 2px solid #00ff00;
+                border-radius: 5px;
+                background: rgba(0, 0, 0, 0.5);
+                color: #00ff00;
+                font-family: monospace;
+                font-size: 10px;
+                cursor: pointer;
+                pointer-events: auto;
+                text-align: center;
+                line-height: 50px;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -118,6 +133,19 @@ export default class MobileControls {
         leftGroup.appendChild(this.leftBtn);
         leftGroup.appendChild(this.rightBtn);
 
+        // Center control (Fullscreen)
+        const centerGroup = document.createElement('div');
+        centerGroup.className = 'control-group';
+        
+        this.fsBtn = document.createElement('div');
+        this.fsBtn.className = 'fs-btn';
+        this.fsBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="#00ff00" style="margin-top: 10px;">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+        `;
+        centerGroup.appendChild(this.fsBtn);
+
         // Right controls (Fire)
         const rightGroup = document.createElement('div');
         rightGroup.className = 'control-group';
@@ -130,6 +158,7 @@ export default class MobileControls {
         rightGroup.appendChild(this.fireBtn);
 
         this.container.appendChild(leftGroup);
+        this.container.appendChild(centerGroup);
         this.container.appendChild(rightGroup);
         document.body.appendChild(this.container);
     }
@@ -182,5 +211,24 @@ export default class MobileControls {
         bindButton(this.leftBtn, 'ArrowLeft');
         bindButton(this.rightBtn, 'ArrowRight');
         bindButton(this.fireBtn, ' ');
+        
+        // Fullscreen toggle
+        this.fsBtn.addEventListener('click', () => {
+             if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+        
+        // Touch handler for FS button to ensure it works on mobile
+        this.fsBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.fsBtn.click();
+        });
     }
 }
