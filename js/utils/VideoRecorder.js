@@ -10,35 +10,22 @@ class VideoRecorder {
     async startRecording() {
         this.chunks = [];
         const videoStream = this.canvas.captureStream(60);
-        let combinedStream;
+        
+        // Create audio stream destination
+        const dest = this.audioManager.context.createMediaStreamDestination();
+        this.audioManager.masterGain.connect(dest);
+        this.audioStreamDestination = dest;
+        
+        // Combine video and audio tracks
+        const tracks = [
+            ...videoStream.getVideoTracks(),
+            ...dest.stream.getAudioTracks()
+        ];
+        
+        const finalStream = new MediaStream(tracks);
 
-        if (this.audioManager) {
-            try {
-                const audioDestination = this.audioManager.context.createMediaStreamDestination();
-                
-                // Create a splitter node to send audio to both destinations
-                const splitterNode = this.audioManager.context.createGain();
-                this.audioManager.masterGain.connect(splitterNode);
-                
-                // Route 1: To recording
-                splitterNode.connect(audioDestination);
-                // Route 2: Keep connected to speakers
-                splitterNode.connect(this.audioManager.context.destination);
-                
-                combinedStream = new MediaStream([
-                    ...videoStream.getVideoTracks(),
-                    ...audioDestination.stream.getAudioTracks()
-                ]);
-            } catch (e) {
-                console.warn('Failed to capture audio, recording video only:', e);
-                combinedStream = videoStream;
-            }
-        } else {
-            combinedStream = videoStream;
-        }
-
-        this.mediaRecorder = new MediaRecorder(combinedStream, {
-            mimeType: 'video/webm;codecs=vp9,opus'
+        this.mediaRecorder = new MediaRecorder(finalStream, {
+            mimeType: 'video/webm;codecs=vp9'
         });
 
         this.mediaRecorder.ondataavailable = (e) => {
@@ -55,7 +42,12 @@ class VideoRecorder {
     stopRecording() {
         return new Promise((resolve) => {
             this.mediaRecorder.onstop = () => {
-                // No need to reconnect to speakers since we never disconnected
+                // Clean up audio connection
+                if (this.audioStreamDestination) {
+                    this.audioManager.masterGain.disconnect(this.audioStreamDestination);
+                    this.audioStreamDestination = null;
+                }
+
                 const blob = new Blob(this.chunks, { type: 'video/webm' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');

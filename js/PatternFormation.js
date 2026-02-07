@@ -184,6 +184,30 @@ class PatternFormation {
         this.formationSpacing = Math.max(minSpacing, this.config.formationRadius * 0.8);
     }
 
+    createFormations() {
+        // ... unused ...
+    }
+
+    spawnMinion() {
+        const x = Math.random() * (this.virtualWidth - 100) + 50;
+        const alien = new Alien(this.ctx, {
+            virtualWidth: this.virtualWidth,
+            virtualHeight: this.virtualHeight,
+            x: x,
+            y: -150,
+            type: 'kamikaze',
+            width: 60,
+            height: 60,
+            health: 1 // One shot kill
+        });
+        
+        alien.isMinion = true;
+        alien.diveVelocityY = 700 + (this.difficulty * 30); // Fast swoosh
+        alien.diveVelocityX = (Math.random() - 0.5) * 400; // Random angle
+        
+        this.aliens.push(alien);
+    }
+
     // Modify createFormation to adjust alien count without full reset
     createFormation() {
         // Apply new difficulty modifiers before checking count
@@ -253,7 +277,6 @@ class PatternFormation {
                 const globalIndex = originalCount + i;
                 let alienType = 'normal';
                 
-                // Deterministic type assignment based on slot index
                 if (this.pattern.isBoss) {
                     alienType = (globalIndex === 0) ? 'boss' : 'normal';
                 } else {
@@ -268,13 +291,22 @@ class PatternFormation {
                     }
                 }
 
-                const alien = new Alien(this.ctx, {
+                const alienOptions = {
                     virtualWidth: this.virtualWidth,
                     virtualHeight: this.virtualHeight,
                     width: 100,
                     height: 100,
                     type: alienType
-                });
+                };
+
+                if (alienType === 'boss') {
+                    // Significant health boost for boss
+                    // Base 1500 + 500 per difficulty level
+                    // Old was fixed 75, which is way too low
+                    alienOptions.health = 1500 + (this.difficulty * 500);
+                }
+
+                const alien = new Alien(this.ctx, alienOptions);
                 this.aliens.push(alien);
             }
         } else if (this.aliens.length > targetCount) {
@@ -340,48 +372,80 @@ class PatternFormation {
         // Clamp position to stay on screen
         const shipHalfWidth = this.pattern.isBoss ? 200 : 50;
         const formationMargin = this.pattern.isBoss ? 0 : (this.maxFormationOffset || this.config.formationRadius);
-        const totalMargin = shipHalfWidth + formationMargin + 40; // Increased comfort margin to 40
+        const totalMargin = shipHalfWidth + formationMargin + 40; 
 
         pos.x = Math.max(totalMargin, Math.min(this.virtualWidth - totalMargin, pos.x));
         pos.y = Math.max(this.verticalOffset, Math.min(this.maxVerticalPosition, pos.y));
-
-        // Increase pulse amplitude by 50%
-        const pulseAmount = Math.sin(this.time * this.config.pulseSpeed * Math.PI * 2) * 
-                          (this.config.pulseIntensity * 7.5); // Increased from 5 to 7.5
-        const currentRadius = this.config.formationRadius + pulseAmount;
-
+        
         // Update rotation
-        this.currentRotation += this.rotationSpeed * delta;
+        this.currentRotation += this.rotationSpeed * delta * this.rotationDirection;
         this.currentRotation = this.currentRotation % (Math.PI * 2);
 
-        // Position aliens in formation based on their slots
+        // Increase pulse amplitude
+        const pulseAmount = Math.sin(this.time * this.config.pulseSpeed * Math.PI * 2) * 
+                          (this.config.pulseIntensity * 7.5);
+
+        // Boss Minion Spawning
+        if (this.pattern.isBoss) {
+            const boss = this.aliens.find(a => a.type === 'boss');
+            if (boss) {
+                this.minionTimer = (this.minionTimer || 0) + delta;
+                const spawnRate = Math.max(0.15, 0.6 - (this.difficulty * 0.04));
+                
+                if (this.minionTimer > spawnRate) {
+                    this.minionTimer = 0;
+                    this.spawnMinion();
+                }
+            }
+        }
+
+        // Position aliens
         this.aliens.forEach(alien => {
-            alien.update(delta); // Update internal state (like hit flash)
+            alien.update(delta); 
+
+            // Handle Minions
+            if (alien.isMinion) {
+                alien.y += alien.diveVelocityY * delta;
+                alien.x += alien.diveVelocityX * delta;
+                
+                if (alien.y > this.virtualHeight + 100 || alien.x < -100 || alien.x > this.virtualWidth + 100) {
+                    alien.shouldRemove = true;
+                }
+                return;
+            }
 
             if (!alien.isDiving) {
                 // Normal formation movement
                 const slot = this.alienSlots[alien.slotIndex];
                 
+                if (!slot) return;
+                
                 let targetX, targetY;
                 const spacingType = this.pattern.spacing?.type || 'circular';
                 
                 if (spacingType === 'circular') {
-                    // Circular spacing around the functional path center
-                    const orbitAngle = slot.angle + (this.time * 2); // Rotate slots over time
-                    // Use the difficulty-scaled formation radius and respect slot multiplier
+                    const orbitAngle = slot.angle + (this.time * 2);
                     const radius = (this.config.formationRadius + (pulseAmount * 0.5)) * (slot.radiusMultiplier ?? 1.0);
                     targetX = pos.x + Math.cos(orbitAngle) * radius;
                     targetY = pos.y + Math.sin(orbitAngle) * radius;
                 } else {
-                    // Static offset formations (Grid, V-Shape, Cross)
                     targetX = pos.x + slot.offsetX;
                     targetY = pos.y + slot.offsetY;
                 }
                 
-                // Enhanced dive chance check with spacing
+                // Rotation transform
+                if (this.currentRotation !== 0) {
+                    const rx = targetX - pos.x;
+                    const ry = targetY - pos.y;
+                    const rot = this.currentRotation;
+                    targetX = pos.x + rx * Math.cos(rot) - ry * Math.sin(rot);
+                    targetY = pos.y + rx * Math.sin(rot) + ry * Math.cos(rot);
+                }
+                
+                // Dive check
                 let diveChance = this.currentDiveChance;
-                if (alien.type === 'kamikaze') diveChance *= 8; // Kamikazes dive MUCH more often
-                if (alien.type === 'boss') diveChance = 0; // Boss never dives
+                if (alien.type === 'kamikaze') diveChance *= 8;
+                if (alien.type === 'boss') diveChance = 0;
 
                 if (Math.random() < diveChance * delta && 
                     !this.aliens.some(a => a.isDiving && Math.abs(a.x - targetX) < 100)) {
@@ -393,20 +457,17 @@ class PatternFormation {
                     alien.lastFormationX = targetX;
                     alien.lastFormationY = targetY;
                     
-                    // Target player with prediction if available
                     if (this.player) {
                         const dx = this.player.x - targetX;
                         const dy = this.player.y - targetY;
                         const angle = Math.atan2(dy, dx);
                         const intensity = alien.type === 'kamikaze' ? 1.5 : this.diveCurveIntensity;
-                        alien.diveTargetX = this.player.x + (this.player.velocity?.x || 0) * 0.5;
                         alien.diveVelocityX = Math.cos(angle) * alien.diveVelocityY * intensity;
                     }
                 } else {
                     // Normal position update
-                    // Smooth transition if we have last positions
                     if (alien.lastX !== undefined) {
-                        const t = Math.min(1, this.time * 2); // Transition over 0.5 seconds
+                        const t = Math.min(1, this.time * 2);
                         alien.x = this.lerp(alien.lastX, targetX - alien.width / 2, t);
                         alien.y = this.lerp(alien.lastY, targetY - alien.height / 2, t);
                         if (t === 1) {
@@ -419,22 +480,19 @@ class PatternFormation {
                     }
                 }
             } else {
-                // Enhanced diving movement
+                // Diving movement
                 alien.diveVelocityY += this.diveAcceleration * delta;
                 alien.y += alien.diveVelocityY * delta;
 
-                // Curved path toward player
                 if (alien.diveVelocityX) {
                     if (this.player) {
-                        // Update dive direction toward player
                         const dx = this.player.x - alien.x;
-                        const angle = Math.atan2(0, dx); // Only track X movement
+                        const angle = Math.atan2(0, dx); 
                         alien.diveVelocityX += Math.cos(angle) * this.diveAcceleration * delta * 0.5;
                     }
                     alien.x += alien.diveVelocityX * delta;
                 }
 
-                // Return to formation when out of bounds
                 if (alien.y > this.virtualHeight + 50 || 
                     alien.x < -50 || 
                     alien.x > this.virtualWidth + 50) {
@@ -444,6 +502,9 @@ class PatternFormation {
                 }
             }
         });
+
+        // Remove off-screen minions
+        this.aliens = this.aliens.filter(a => !a.shouldRemove);
 
         // Update shooting
         if (this.config.shootingEnabled && this.aliens.length > 0) {

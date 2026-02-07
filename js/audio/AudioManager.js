@@ -44,6 +44,13 @@ class AudioManager {
         this.bossVoicePlaylist = [];
     }
 
+    async resumeContext() {
+        if (this.context.state === 'suspended') {
+            await this.context.resume();
+            console.log('AudioContext resumed');
+        }
+    }
+
     createAudioNodes(source, config = {}) {
         const gainNode = this.context.createGain();
         const panNode = this.context.createStereoPanner();

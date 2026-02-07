@@ -32,7 +32,7 @@ class CRTEffect {
 
         // Add video recorder with audio manager
         this.videoRecorder = new VideoRecorder(this.glCanvas, audioManager);
-        this.setupRecordingControls();
+        // this.setupRecordingControls(); // Removed: Handled by InputManager
     }
 
     async loadConfig() {
@@ -286,18 +286,6 @@ class CRTEffect {
 
         // Draw
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
-
-    setupRecordingControls() {
-        document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'r') {
-                if (!this.videoRecorder.isRecording()) {
-                    this.videoRecorder.startRecording();
-                } else {
-                    this.videoRecorder.stopRecording();
-                }
-            }
-        });
     }
 }
 

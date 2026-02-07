@@ -61,8 +61,8 @@ class Game {
         this.canvasManager = new CanvasManager(this.canvas);
         this.ctx = this.canvasManager.getContext();
 
-        // Initialize CRT effect with fixed dimensions
-        this.crtEffect = new CRTEffect(this.canvas, this.container);
+        // Initialize CRT effect with fixed dimensions, passing audio manager for recording
+        this.crtEffect = new CRTEffect(this.canvas, this.container, this.audioManager);
 
         // Then initialize other managers that need the context
         this.inputManager = new InputManager();
@@ -122,6 +122,21 @@ class Game {
         // Register input handlers
         this.inputManager.setDebugHandler(() => {
             this.debugWindow.visible = !this.debugWindow.visible;
+        });
+
+        this.inputManager.setRecordingHandler(() => {
+            if (this.crtEffect && this.crtEffect.videoRecorder) {
+                const recorder = this.crtEffect.videoRecorder;
+                if (recorder.isRecording()) {
+                    console.log('Stopping recording...');
+                    recorder.stopRecording().then(() => {
+                        console.log('Recording saved.');
+                    });
+                } else {
+                    console.log('Starting recording...');
+                    recorder.startRecording();
+                }
+            }
         });
 
         // Register screen handlers

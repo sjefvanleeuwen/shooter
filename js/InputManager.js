@@ -3,6 +3,7 @@ class InputManager {
         this.handlers = new Map();
         this.currentScreen = null;
         this.debugHandler = null;
+        this.recordingHandler = null;
         
         window.addEventListener('keydown', (e) => this.handleKeyDown(e));
     }
@@ -19,11 +20,23 @@ class InputManager {
         this.debugHandler = callback;
     }
 
+    setRecordingHandler(callback) {
+        this.recordingHandler = callback;
+    }
+
     handleKeyDown(e) {
         // Handle debug toggle
         if (e.key === 'f' || e.key === 'F') {
             if (this.debugHandler) {
                 this.debugHandler();
+            }
+            return;
+        }
+
+        // Handle recording toggle
+        if (e.key === 'r' || e.key === 'R') {
+            if (this.recordingHandler) {
+                this.recordingHandler();
             }
             return;
         }

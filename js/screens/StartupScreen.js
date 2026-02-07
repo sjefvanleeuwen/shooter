@@ -59,6 +59,10 @@ class StartupScreen {
 
     handleInput(key) {
         if (this.readyForInput && key === 'Enter') {
+            const audioManager = window.game.audioManager;
+            if (audioManager) {
+                audioManager.resumeContext();
+            }
             return 'intro';
         }
         return null;

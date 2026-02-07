@@ -22,9 +22,9 @@ class IntroScreen {
         this.finalScore = options.finalScore;
         this.highScore = options.highScore;
 
-        // Add audio
-        this.titleMusic = new Audio('./audio/xeno-war.mp3');
-        this.titleMusic.volume = 0.5; // 50% volume
+        // Audio controlled by Game's MusicPlayer
+        // this.titleMusic = new Audio('./audio/xeno-war.mp3');
+        // this.titleMusic.volume = 0.5; // 50% volume
         this.musicStarted = false;
     }
 
@@ -40,10 +40,12 @@ class IntroScreen {
                 this.pressSpaceVisible = true;
                 
                 // Play music when fade completes
+                /*
                 if (!this.musicStarted) {
                     this.titleMusic.play().catch(e => console.log('Audio playback failed:', e));
                     this.musicStarted = true;
                 }
+                */
             }
         }
         
