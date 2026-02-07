@@ -49,7 +49,11 @@ class StartupScreen {
             this.ctx.font = '24px "Press Start 2P"';
             this.ctx.fillStyle = '#00ff00';
             this.ctx.globalAlpha = 0.5 + Math.sin(Date.now() * 0.005) * 0.5;
-            this.ctx.fillText('PRESS ENTER TO CONTINUE', 
+            
+            const isMobile = window.game?.mobileControls?.isMobile;
+            const text = isMobile ? 'PRESS FIRE TO CONTINUE' : 'PRESS ENTER TO CONTINUE';
+            
+            this.ctx.fillText(text, 
                 this.virtualWidth / 2, 
                 this.virtualHeight * 0.7);
         }
@@ -58,7 +62,7 @@ class StartupScreen {
     }
 
     handleInput(key) {
-        if (this.readyForInput && key === 'Enter') {
+        if (this.readyForInput && (key === 'Enter' || key === ' ')) {
             const audioManager = window.game.audioManager;
             if (audioManager) {
                 audioManager.resumeContext();

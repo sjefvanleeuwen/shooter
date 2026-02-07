@@ -35,14 +35,20 @@ class CRTEffect {
 
         // Add video recorder with audio manager
         this.videoRecorder = new VideoRecorder(this.glCanvas, audioManager);
-        // this.setupRecordingControls(); // Removed: Handled by InputManager
+        
+        this.padding = { top: 0, bottom: 0, left: 0, right: 0 };
+    }
+
+    setPadding(padding) {
+        this.padding = { ...this.padding, ...padding };
+        this.resize();
     }
 
     resize() {
         // Keep 1:1 aspect ratio
         const aspect = 1.0; 
-        const availableWidth = window.innerWidth;
-        const availableHeight = window.innerHeight;
+        const availableWidth = window.innerWidth - (this.padding.left + this.padding.right);
+        const availableHeight = window.innerHeight - (this.padding.top + this.padding.bottom);
         
         let width, height;
         
@@ -56,6 +62,10 @@ class CRTEffect {
         
         this.glCanvas.style.width = `${width}px`;
         this.glCanvas.style.height = `${height}px`;
+        
+        if (this.padding.top > 0) {
+             this.glCanvas.style.marginTop = `${this.padding.top}px`;
+        }
     }
 
     async loadConfig() {

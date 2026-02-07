@@ -106,7 +106,11 @@ class IntroScreen {
             this.ctx.fillStyle = '#ffffff';
             this.ctx.font = '24px "Press Start 2P"';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('PRESS SPACE TO START', 
+
+            const isMobile = window.game?.mobileControls?.isMobile;
+            const text = isMobile ? 'PRESS FIRE TO START' : 'PRESS SPACE TO START';
+
+            this.ctx.fillText(text, 
                 this.virtualWidth / 2, 
                 this.virtualHeight * 0.7);
             this.ctx.restore();

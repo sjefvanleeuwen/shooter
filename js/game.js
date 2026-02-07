@@ -13,6 +13,7 @@ import GameStateManager from './managers/GameStateManager.js';
 import GameScreen from './screens/GameScreen.js';
 import CRTEffect from './effects/CRTEffect.js';  // Add this import
 import AudioManager from './audio/AudioManager.js';
+import MobileControls from './MobileControls.js';
 
 // Debug Log Switch
 const ENABLE_DEBUG_LOGS = false;
@@ -66,6 +67,14 @@ class Game {
 
         // Then initialize other managers that need the context
         this.inputManager = new InputManager();
+        this.mobileControls = new MobileControls();
+        
+        if (this.mobileControls.isMobile) {
+            this.container.style.alignItems = 'flex-start';
+            // Leave space at bottom for controls (approx 180px for big buttons + padding)
+            this.crtEffect.setPadding({ bottom: 180, top: 20 });
+        }
+
         this.gameState = new GameStateManager();
         this.hudManager = new HUDManager(this.ctx, this.virtualWidth, this.virtualHeight);
 
