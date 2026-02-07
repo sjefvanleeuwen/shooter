@@ -116,9 +116,10 @@ class GameScreen {
             const nextDifficulty = this.formation.difficulty + 1;
             let nextPattern;
 
-            // Delayed introduction of Big Boss: Level 7 instead of 5
-            if (nextDifficulty >= 7 && nextDifficulty % 7 === 0) {
-                // Boss wave every 7 levels
+            // Delayed introduction of Big Boss: Level 15 instead of 7
+            // This creates a much longer "Run" leading up to the climax
+            if (nextDifficulty >= 15 && nextDifficulty % 15 === 0) {
+                // Boss wave every 15 levels
                 nextPattern = 'boss_wave';
                 // Trigger boss voice
                 this.audioManager.playRandomBossVoice();
@@ -182,6 +183,26 @@ class GameScreen {
     handlePlayerHit() {
         if (this.gameState.handlePlayerHit()) {
             window.game.gameOver();
+        } else {
+            // If player survived (has lives left or was just hit), trigger shield effect
+            // We only trigger this if it was a valid hit that took a life 
+            // GameStateManager.handlePlayerHit returns true if lives <= 0 (Game Over)
+            // But we want to show shield even if they didn't die immediately
+            
+            // Check if player was actually hit (invulnerability was triggered in GameStateManager)
+            if (this.gameState.playerInvulnerable) {
+                this.shieldEffect.createRipple(
+                    this.player.x + this.player.width/2,
+                    this.player.y + this.player.height/2,
+                    '#ffaa00', // Orange color like an orange
+                    this.player.width * 0.8 // Size relative to player
+                );
+
+                // Play shield gone warning if down to last life
+                if (this.gameState.lives === 1) {
+                    this.audioManager.playSound('shield-gone');
+                }
+            }
         }
     }
 

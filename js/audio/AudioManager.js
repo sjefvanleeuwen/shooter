@@ -110,6 +110,8 @@ class AudioManager {
                 this.loadSound('laser', './audio/player-shoot.mp3'),
                 this.loadSound('alien-laser', './audio/alien-shoot.mp3'),
                 this.loadSound('forcefield', './audio/alien-forcefield.flac'),
+                this.loadSound('player-forcefield', './audio/player-forcefield.wav'),
+                this.loadSound('shield-gone', './audio/shield-gone.mp3'),
                 
                 // Boss Voices
                 this.loadSound('boss_hope', './audio/boss/boss - hope is a lie.mp3'),

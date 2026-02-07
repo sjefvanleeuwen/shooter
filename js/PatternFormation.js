@@ -31,7 +31,13 @@ class PatternFormation {
         // Add difficulty progression parameters
         this.difficulty = options.difficulty || 1;
         this.maxDifficulty = 10; // After this, reset and speed up
-        this.baseFormationRadius = 120; // Reduced from 150
+        
+        // Properly load pattern first so we can check its preferred radius
+        this.pattern = patterns[options.pattern || 'circle'];
+        
+        // Use pattern radius if available, otherwise default to 120
+        this.baseFormationRadius = this.pattern.spacing?.radius || 120;
+        
         this.config.formationRadius = this.baseFormationRadius;
         this.radiusIncrease = 15; // Reduced from 20 to maintain proportion
         this.basePulseIntensity = 0.75; // Increased from 0.5
@@ -43,7 +49,7 @@ class PatternFormation {
         this.applyDifficultyModifiers();
 
         this.aliens = [];
-        this.pattern = patterns[options.pattern || 'circle'];
+        // this.pattern already set above
         this.time = 0;
         this.loopDuration = 10;
         
@@ -148,21 +154,24 @@ class PatternFormation {
         );
         
         // Adjust movement speed
-        this.config.speed = Math.min(1.9, 0.4 + (cycleDifficulty * 0.08));
+        // Starts slower (0.3) and ramps up to ~1.0x speed max
+        this.config.speed = 0.3 + (cycleDifficulty * 0.07);
 
         console.log(`Level ${this.difficulty} (Cycle ${cycleCount + 1}, Difficulty ${cycleDifficulty})`);
         console.log(`Formation Radius: ${this.config.formationRadius}`);
         console.log(`Pulse Intensity: ${this.config.pulseIntensity}`);
         console.log(`Pulse Speed: ${this.config.pulseSpeed}`);
+        console.log(`Movement Speed: ${this.config.speed}`);
 
         // Enhanced rotation speed calculation with direction changes
-        const baseIncrease = (cycleDifficulty - 1) * this.rotationSpeedIncrease;
+        // Reduced base rotation speed to match slower movement
+        const baseIncrease = (cycleDifficulty - 1) * (this.rotationSpeedIncrease * 0.5);
         const cycleBonus = cycleCount * this.rotationCycleBonus;
         
         // Calculate new rotation speed
         this.rotationSpeed = Math.min(
             this.maxRotationSpeed,
-            this.baseRotationSpeed + baseIncrease + cycleBonus
+            (this.baseRotationSpeed * 0.6) + baseIncrease + cycleBonus
         );
 
         // Change rotation direction every other level
@@ -215,7 +224,14 @@ class PatternFormation {
 
         // Base count from pattern, slightly more ships to start
         const baseCount = this.pattern.spacing?.count || 8;
-        const difficultyBonus = Math.floor((this.difficulty - 1) / 2); // +1 ship every 2 levels for steady ramp
+        
+        // Increase wave size significantly to make rounds longer
+        // Previously: +1 ship every 2 levels
+        // Now: +1 ship every level + base increase of 2
+        // If difficulty is 1: 8 + 2 + 0 = 10 ships (Old: 8)
+        // If difficulty is 5: 8 + 2 + 4 = 14 ships (Old: 10)
+        // If difficulty is 10: 8 + 2 + 9 = 19 ships (Old: 12)
+        const difficultyBonus = Math.floor(this.difficulty - 1) + 2; 
         const targetCount = baseCount + difficultyBonus;
 
         this.alienSlots = [];  // Reset slots structure
@@ -251,16 +267,33 @@ class PatternFormation {
             } else if (type === 'v_shape') {
                 const half = Math.floor(targetCount / 2);
                 const dist = i - half;
-                slot.offsetX = dist * spacing;
-                slot.offsetY = Math.abs(dist) * spacing * 0.8;
+                
+                // Cap spacing to prevent wide V from going offscreen
+                let dynamicSpacing = spacing;
+                if (half * spacing > 350) {
+                    dynamicSpacing = 350 / half;
+                }
+                
+                slot.offsetX = dist * dynamicSpacing;
+                slot.offsetY = Math.abs(dist) * dynamicSpacing * 0.8;
             } else if (type === 'cross') {
                 const mid = Math.floor(targetCount / 2);
+                const horizArmLen = Math.floor(mid/2);
+                
+                // Dynamic spacing to ensure cross fits in screen regardless of ship count
+                // Max radius approx 300px
+                let dynamicSpacing = spacing;
+                if (horizArmLen * spacing > 300) {
+                    dynamicSpacing = 300 / max(1, horizArmLen);
+                }
+
                 if (i <= mid) { // Horizontal
-                    slot.offsetX = (i - Math.floor(mid/2)) * spacing;
+                    slot.offsetX = (i - horizArmLen) * dynamicSpacing;
                     slot.offsetY = 0;
                 } else { // Vertical
+                    const vertArmLen = Math.floor((targetCount-mid)/2);
                     slot.offsetX = 0;
-                    slot.offsetY = (i - mid - Math.floor((targetCount-mid)/2)) * spacing;
+                    slot.offsetY = (i - mid - vertArmLen) * dynamicSpacing;
                 }
             }
             
@@ -281,12 +314,11 @@ class PatternFormation {
                     alienType = (globalIndex === 0) ? 'boss' : 'normal';
                 } else {
                     // Gradual introduction of Elites (Medium Bosses)
-                    // Level 1-2: Normal only
-                    // Level 3-4: 1 Elite per 5 ships
-                    // Level 5+: Improved Elite/Kamikaze distribution
-                    if (this.difficulty >= 3 && globalIndex % 5 === 0) {
+                    // Level 1-9: Normal only (Extended "Tutorial" phase)
+                    // Level 10-14: Lead into boss
+                    if (this.difficulty >= 10 && globalIndex % 5 === 0) {
                         alienType = 'elite';
-                    } else if (this.difficulty >= 5 && (globalIndex + 2) % 5 === 0) {
+                    } else if (this.difficulty >= 12 && (globalIndex + 2) % 5 === 0) {
                         alienType = 'kamikaze';
                     }
                 }
@@ -301,9 +333,9 @@ class PatternFormation {
 
                 if (alienType === 'boss') {
                     // Significant health boost for boss
-                    // Base 1500 + 500 per difficulty level
-                    // Old was fixed 75, which is way too low
-                    alienOptions.health = 1500 + (this.difficulty * 500);
+                    // Reduced to ~1/3 of previous formula per user request
+                    // Oldest: 1500+500d. Previous: 200+100d. New: 70 + 35d
+                    alienOptions.health = 70 + (this.difficulty * 35);
                 }
 
                 const alien = new Alien(this.ctx, alienOptions);
@@ -353,8 +385,10 @@ class PatternFormation {
     }
 
     update(delta) {
-        // Update continuous time
-        this.time = (this.time + delta) % this.loopDuration;
+        // Update continuous time with difficulty-based speed
+        // Use defaults if speed is not set
+        const speed = this.config.speed || 1.0;
+        this.time = (this.time + (delta * speed)) % this.loopDuration;
         const progress = this.time / this.loopDuration;
 
         // Get central position from pattern
@@ -371,11 +405,30 @@ class PatternFormation {
         
         // Clamp position to stay on screen
         const shipHalfWidth = this.pattern.isBoss ? 200 : 50;
-        const formationMargin = this.pattern.isBoss ? 0 : (this.maxFormationOffset || this.config.formationRadius);
-        const totalMargin = shipHalfWidth + formationMargin + 40; 
-
+        
+        // Calculate max possible pulse expansion
+        // pulseAmount = 1.0 + (pulseIntensity * 7.5) * 0.5 (used in radius calc)
+        // Correct formula: (formationRadius + maxPulse) * maxRadiusMultiplier
+        const maxPulseAmount = (this.config.pulseIntensity * 7.5) * 0.5;
+        const formationBase = (this.maxFormationOffset || this.config.formationRadius);
+        
+        // Use a more generous effective radius for safety calculation
+        // This ensures even the furthest possible excursion is accounted for
+        const effectiveRadius = formationBase + maxPulseAmount + 40; 
+        
+        // Dynamic horizontal margin
+        const totalMargin = shipHalfWidth + effectiveRadius + 20; 
+        
+        // Horizontal Clamping
         pos.x = Math.max(totalMargin, Math.min(this.virtualWidth - totalMargin, pos.x));
-        pos.y = Math.max(this.verticalOffset, Math.min(this.maxVerticalPosition, pos.y));
+
+        // Vertical Clamping
+        // Ensure formation never dips below safe zone (player area)
+        // Player is at bottom, safe zone around 85% height
+        const maxSafeY = (this.virtualHeight * 0.85) - effectiveRadius - shipHalfWidth;
+        const clampedMaxY = Math.min(this.maxVerticalPosition, maxSafeY);
+        
+        pos.y = Math.max(this.verticalOffset, Math.min(clampedMaxY, pos.y));
         
         // Update rotation
         this.currentRotation += this.rotationSpeed * delta * this.rotationDirection;

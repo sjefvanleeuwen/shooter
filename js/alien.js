@@ -14,14 +14,14 @@ class Alien {
             this.width *= 1.5;
             this.height *= 1.5;
             this.health = 8; 
-            this.maxHealth = 8;
         } else if (this.type === 'kamikaze') {
             this.health = 1;
         } else if (this.type === 'boss') {
             this.width = 400; 
             this.height = 400;
             this.health = 75; 
-            this.maxHealth = 75;
+        } else {
+            this.health = 1;
         }
 
         this.virtualWidth = options.virtualWidth || 1920;
@@ -32,7 +32,15 @@ class Alien {
         
         this.speed = options.speed || 100;
         this.direction = 1; 
-        this.health = options.health || (this.type === 'normal' ? 1 : this.health);
+
+        // Apply health override from options if present
+        if (options.health) {
+            this.health = options.health;
+        }
+        
+        // Ensure maxHealth is synchronized with the final determined health
+        this.maxHealth = this.health;
+
         this.isKamikaze = this.type === 'kamikaze';
         this.hitFlash = 0;
         
@@ -56,12 +64,13 @@ class Alien {
         if (shadowCache[key]) return;
         
         const canvas = document.createElement('canvas');
-        canvas.width = img.width + 40; // Add padding for blur
-        canvas.height = img.height + 40;
+        canvas.width = img.width + 100; // Add padding for blur
+        canvas.height = img.height + 100;
         const ctx = canvas.getContext('2d');
         
-        ctx.filter = 'brightness(0) blur(10px)';
-        ctx.drawImage(img, 20, 20);
+        // Increase blur amount significantly
+        ctx.filter = 'brightness(0) blur(20px) opacity(0.7)';
+        ctx.drawImage(img, 50, 50); // Offset to account for larger canvas
         
         // Use ImageBitmap if available
         if (typeof createImageBitmap !== 'undefined') {
@@ -86,6 +95,34 @@ class Alien {
         if (this.img.complete) {
             ctx.save();
             
+            // Draw shadow first
+            if (shadowCache[this.shadowKey]) {
+                ctx.save();
+                // Draw with offset for height illusion
+                // Shadow offset should be roughly same as padding (50) minus some perspective shift (e.g. 20)
+                // So (x + 50) - 20 = x + 30
+                
+                // Adjust for size differences:
+                // The shadow cache has padding. We need to center it relative to the alien.
+                // Shadow Cache Size = Img + 100
+                // Alien Size = this.width / this.height (scaled)
+                
+                const shadowScaleX = this.width / this.img.width;
+                const shadowScaleY = this.height / this.img.height;
+                
+                // Position shadow relative to alien, shifted down/right
+                const shadowX = this.x - (50 * shadowScaleX) + (20 * shadowScaleX);
+                const shadowY = this.y - (50 * shadowScaleY) + (60 * shadowScaleY);
+                
+                ctx.drawImage(shadowCache[this.shadowKey], 
+                    shadowX, 
+                    shadowY, 
+                    this.width + (100 * shadowScaleX), 
+                    this.height + (100 * shadowScaleY));
+                
+                ctx.restore();
+            }
+
             // Base filter for the alien type
             let baseFilter = 'none';
             if (this.type === 'elite') {

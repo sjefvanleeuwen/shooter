@@ -14,8 +14,14 @@ class PowerShield {
         // Play shield hit sound with random pitch and panning
         if (audioManager) {
             const pan = (x / 1024) * 2 - 1; // 1024 is virtualWidth
-            audioManager.playSound('forcefield', {
-                volume: 0.4,
+             // Determine which sound to play based on color/type
+             // Orange = Player shield
+             const isPlayer = color === '#ffaa00' || color === '#ff8800';
+             const soundKey = isPlayer ? 'player-forcefield' : 'forcefield';
+             const volume = isPlayer ? 0.6 : 0.4;
+             
+            audioManager.playSound(soundKey, {
+                volume: volume,
                 pitch: 0.8 + Math.random() * 0.4, // Random pitch between 0.8 and 1.2
                 pan: pan
             });
