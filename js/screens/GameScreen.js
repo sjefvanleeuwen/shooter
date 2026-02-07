@@ -4,6 +4,7 @@ import PatternFormation from '../PatternFormation.js';
 import ImageBackgroundScroller from '../imageBackgroundScroller.js';
 import { patterns } from '../patterns/formationPatterns.js';
 import ShieldEffect from '../effects/ShieldEffect.js';
+import CloudOverlay from '../effects/CloudOverlay.js';
 
 const ENABLE_AMBIENT_LIGHTING = false;
 
@@ -49,12 +50,17 @@ class GameScreen {
         this.laserEngineRight = new LaserEngine(this.ctx, this.audioManager);
 
         this.shieldEffect = new ShieldEffect(this.ctx, this.audioManager);
+        this.cloudOverlay = new CloudOverlay(this.ctx, {
+            virtualWidth: this.virtualWidth,
+            virtualHeight: this.virtualHeight
+        });
 
         // Initialize user firepower
         this.updatePlayerFirepower(1);
 
         // Initialize formation with points callback
-        const patternNames = Object.keys(patterns);
+        // Filter out boss_wave from initial pattern selection
+        const patternNames = Object.keys(patterns).filter(p => p !== 'boss_wave');
         const startPattern = patternNames[Math.floor(Math.random() * patternNames.length)];
 
         this.formation = new PatternFormation(this.ctx, {
@@ -73,6 +79,7 @@ class GameScreen {
 
     update(delta) {
         this.bgScroller.update(delta);
+        this.cloudOverlay.update(delta);
         this.player.update(delta);
         
         this.shieldEffect.update(delta);
@@ -210,6 +217,9 @@ class GameScreen {
         // Draw background
         this.bgScroller.draw();
         
+        // Draw Cloud Overlay (Background Layer)
+        this.cloudOverlay.draw();
+
         // Draw player with effects
         this.drawPlayer();
         

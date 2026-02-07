@@ -42,8 +42,8 @@ class LaserParticle {
         this.x = x;
         this.y = y;
         this.initialX = x;
-        this.width = 4;     // Reduced from 8 to 4.
-        this.height = 16;   // Reduced from 32 to 16.
+        this.width = 6;     // Thicker: 4 -> 6
+        this.height = 24;   // Longer: 16 -> 24
         this.vy = -1200;     // Fast upward velocity
         this.life = 2.0;     // Longer life to reach top
         this.maxLife = this.life;
@@ -64,24 +64,36 @@ class LaserParticle {
         ctx.save();
         const alpha = Math.max(this.life / this.maxLife, 0);
         
-        // Create gradient for bullet
+        ctx.globalCompositeOperation = 'lighter';
+
+        // 1. Draw the broad intense glow (Outer Glow)
+        ctx.shadowColor = `rgba(0, 200, 255, ${0.6 * alpha})`; // intense cyan
+        ctx.shadowBlur = 15; // Increased blur for "glowy" feel
+        ctx.fillStyle = `rgba(0, 200, 255, ${0.4 * alpha})`;
+        ctx.fillRect(this.x - this.width, this.y, this.width * 2, this.height); // Wide soft glow
+        
+        // Reset shadow for core
+        ctx.shadowBlur = 0;
+
+        // 2. Draw the core laser (Sharper, clear contrast)
         const gradient = ctx.createLinearGradient(
             this.x, this.y,
             this.x, this.y + this.height
         );
         
-        gradient.addColorStop(0, `rgba(0, 247, 255, ${alpha})`);
-        gradient.addColorStop(0.5, `rgba(255, 255, 255, ${alpha})`);
-        gradient.addColorStop(1, `rgba(0, 247, 255, ${alpha})`);
+        // Hot white center with cyan edges
+        gradient.addColorStop(0, `rgba(180, 240, 255, ${alpha})`);   // Light Cyan tip
+        gradient.addColorStop(0.2, `rgba(255, 255, 255, ${alpha})`); // White core
+        gradient.addColorStop(0.8, `rgba(255, 255, 255, ${alpha})`); // White core
+        gradient.addColorStop(1, `rgba(0, 200, 255, ${alpha})`);     // Cyan tail
         
         ctx.fillStyle = gradient;
         ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
+
+        // 3. Inner bright core for "contrast"
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.9 * alpha})`;
+        ctx.fillRect(this.x - (this.width * 0.3), this.y + 2, this.width * 0.6, this.height - 4);
         
-        // Add glow effect
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.shadowColor = 'rgba(0, 200, 255, 0.8)';
-        ctx.shadowBlur = 8;  // Reduced from 15 to 8.
-        ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
         ctx.restore();
     }
 }

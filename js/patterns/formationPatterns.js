@@ -85,7 +85,8 @@ export const patterns = {
         type: 'functional',
         isBoss: true,
         func: (t) => ({
-            x: 0.5 + Math.sin(t * Math.PI * 2) * 0.2, // increased frequency to match loop
+            // More complex sway: slight evade + primary loop
+            x: 0.5 + Math.sin(t * Math.PI * 2) * 0.2 + Math.sin(t * Math.PI * 5) * 0.1, 
             y: 0.15 + Math.cos(t * Math.PI * 2) * 0.05
         }),
         speed: 0.05,

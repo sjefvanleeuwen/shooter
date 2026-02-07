@@ -71,9 +71,15 @@ class PatternFormation {
         this.patternDuration = 15; // seconds per pattern
         this.patternTimer = 0;
 
+        this.swayTime = 0; // Independent high-speed timer for sway effects
+
         this.respawnDelay = 2; // seconds to wait before respawning
         this.respawnTimer = 0;
         this.isRespawning = false;
+
+        // Boss behavior
+        this.bossVoiceTimer = 0;
+        this.bossVoiceInterval = 12; // Seconds between potential voice lines
 
         // Adjust vertical position to be higher and stay higher
         this.verticalOffset = this.virtualHeight * 0.2; // 20% from top
@@ -106,15 +112,15 @@ class PatternFormation {
         this.explosionEffect = new ExplosionEffect(ctx, this.audioManager);
 
         // Enhanced rotation parameters
-        this.baseRotationSpeed = 1.0;  // Increased from 0.5
-        this.rotationSpeedIncrease = 0.4; // Increased from 0.3
-        this.maxRotationSpeed = 6.0; // Increased from 5.0
+        this.baseRotationSpeed = 0.5;  // Reduced from 1.0 to fix "too fast" spinning
+        this.rotationSpeedIncrease = 0.2; // Reduced from 0.4
+        this.maxRotationSpeed = 3.0; // Reduced from 6.0
         this.currentRotation = 0;
         this.rotationSpeed = this.baseRotationSpeed;
         this.rotationDirection = 1; // 1 or -1 for direction
         
         // Add rotation boost per cycle
-        this.rotationCycleBonus = 0.4; // Additional rotation speed per cycle
+        this.rotationCycleBonus = 0.2; // Reduced from 0.4
 
         // Enhanced diving parameters
         this.baseDiveChance = 0.005; // Increased from 0.002 - more frequent dives
@@ -389,6 +395,7 @@ class PatternFormation {
         // Use defaults if speed is not set
         const speed = this.config.speed || 1.0;
         this.time = (this.time + (delta * speed)) % this.loopDuration;
+        this.swayTime += delta; // Increment independent of pattern speed
         const progress = this.time / this.loopDuration;
 
         // Get central position from pattern
@@ -442,12 +449,23 @@ class PatternFormation {
         if (this.pattern.isBoss) {
             const boss = this.aliens.find(a => a.type === 'boss');
             if (boss) {
+                // Minion logic
                 this.minionTimer = (this.minionTimer || 0) + delta;
                 const spawnRate = Math.max(0.15, 0.6 - (this.difficulty * 0.04));
                 
                 if (this.minionTimer > spawnRate) {
                     this.minionTimer = 0;
                     this.spawnMinion();
+                }
+
+                // Random voice logic - use configured interval or default 8s
+                this.bossVoiceTimer = (this.bossVoiceTimer || 0) + delta;
+                const interval = this.bossVoiceInterval || 8; 
+                if (this.bossVoiceTimer > interval) {
+                    this.bossVoiceTimer = 0;
+                    if (this.audioManager && Math.random() < 0.9) { // High chance to play
+                        this.audioManager.playRandomBossVoice();
+                    }
                 }
             }
         }
@@ -481,6 +499,21 @@ class PatternFormation {
                     const radius = (this.config.formationRadius + (pulseAmount * 0.5)) * (slot.radiusMultiplier ?? 1.0);
                     targetX = pos.x + Math.cos(orbitAngle) * radius;
                     targetY = pos.y + Math.sin(orbitAngle) * radius;
+
+                    // Add boss sway logic correctly this time
+                    if (this.pattern.isBoss) {
+                        // Use this.swayTime for continuous smooth noise-like movement
+                        // Frequencies: 0.5 (slow), 1.3 (medium), 2.1 (fast)
+                        const swayX = Math.sin(this.swayTime * 0.5) * 150 + 
+                                      Math.sin(this.swayTime * 1.3) * 75 + 
+                                      Math.sin(this.swayTime * 2.1) * 30;
+                        
+                        const swayY = Math.cos(this.swayTime * 0.7) * 50 + 
+                                      Math.sin(this.swayTime * 1.7) * 20;
+                        
+                        targetX += swayX;
+                        targetY += swayY;
+                    }
                 } else {
                     targetX = pos.x + slot.offsetX;
                     targetY = pos.y + slot.offsetY;
