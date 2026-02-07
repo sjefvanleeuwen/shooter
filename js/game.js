@@ -214,10 +214,12 @@ class Game {
         
         // Draw HUD if in game screen
         if (this.currentScreen === 'game') {
+            const boss = this.screens.game.getActiveBoss();
             this.hudManager.draw(
                 this.gameState.lives,
                 this.gameState.score,
-                this.gameState.highScore
+                this.gameState.highScore,
+                boss
             );
         }
         

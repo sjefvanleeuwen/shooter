@@ -202,6 +202,11 @@ class GameScreen {
         this.particleEngine3.draw();
     }
 
+    getActiveBoss() {
+        if (!this.formation || !this.formation.aliens) return null;
+        return this.formation.aliens.find(a => a.type === 'boss');
+    }
+
     drawPlayer() {
         if (!this.player.img.complete) return;
 

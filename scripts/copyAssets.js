@@ -179,15 +179,27 @@ async function copyAssets() {
             await fs.ensureDir(destPath);
 
             if (dir.process) {
-                // Process and copy files with transformation
-                const files = await fs.readdir(srcPath);
-                for (const file of files) {
-                    if (file.match(/\.(png|jpg|jpeg)$/i)) {
-                        const srcFile = path.join(srcPath, file);
-                        const destFile = path.join(destPath, path.basename(file, path.extname(file)) + '.png');
-                        await processImage(srcFile, destFile, dir.options);
+                // Helper to recursively process directories
+                const processDirectory = async (currentSrc, currentDest) => {
+                    await fs.ensureDir(currentDest);
+                    const items = await fs.readdir(currentSrc, { withFileTypes: true });
+                    
+                    for (const item of items) {
+                        const itemSrcPath = path.join(currentSrc, item.name);
+                        
+                        if (item.isDirectory()) {
+                            // Recursively process subdirectories
+                            const itemDestPath = path.join(currentDest, item.name);
+                            await processDirectory(itemSrcPath, itemDestPath);
+                        } else if (item.isFile() && item.name.match(/\.(png|jpg|jpeg)$/i)) {
+                            // Process image files
+                            const itemDestPath = path.join(currentDest, path.basename(item.name, path.extname(item.name)) + '.png');
+                            await processImage(itemSrcPath, itemDestPath, dir.options);
+                        }
                     }
-                }
+                };
+
+                await processDirectory(srcPath, destPath);
             } else {
                 // Simple copy for non-processed assets
                 await fs.copy(srcPath, destPath);
