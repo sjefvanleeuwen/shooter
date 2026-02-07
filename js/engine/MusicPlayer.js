@@ -1,18 +1,8 @@
 import AudioManager from './AudioManager.js';
 
 class MusicPlayer {
-    constructor() {
-        this.tracks = [
-            './audio/music/XENOWAR - Cyberdyne Systems.m4a',
-            './audio/music/XENOWAR - Cyberwave.m4a',
-            './audio/music/XENOWAR - Midnight Pursuit.m4a',
-            './audio/music/XENOWAR - Power Surge.m4a',
-            './audio/music/XENOWAR - Surge Protocol.m4a',
-            './audio/music/XENOWAR - Overclocked Fury.mp3',
-            './audio/music/XENOWAR - Dark Matter Protocol.mp3',
-            './audio/music/XENOWAR - Plasma Rain.mp3',
-            './audio/music/XENOWAR - Galactic Outlaws.mp3'
-        ];
+    constructor(tracks = []) {
+        this.tracks = tracks;
         
         // Add playlist management
         this.playlist = [...this.tracks]; // Copy tracks for shuffling

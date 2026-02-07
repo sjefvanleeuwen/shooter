@@ -24,26 +24,27 @@ export const assets = {
     ],
 
     /* ── Sound-effects (loaded by AudioManager) ───────────── */
-    sfx: [
-        './audio/explosion.mp3',
-        './audio/player-shoot.mp3',
-        './audio/alien-shoot.mp3',
-        './audio/alien-forcefield.flac',
-        './audio/player-forcefield.wav',
-        './audio/shield-gone.mp3',
-        './audio/player - energize shields.mp3',
-        './audio/xeno-war.mp3',
+    sfx: {
+        'explosion': './audio/explosion.mp3',
+        'laser': './audio/player-shoot.mp3',
+        'alien-laser': './audio/alien-shoot.mp3',
+        'forcefield': './audio/alien-forcefield.flac',
+        'player-forcefield': './audio/player-forcefield.wav',
+        'shield-gone': './audio/shield-gone.mp3',
+        'energize-shields': './audio/player - energize shields.mp3',
+        'xeno-war': './audio/xeno-war.mp3',
+        
         // Boss voices
-        './audio/boss/boss - hope is a lie.mp3',
-        './audio/boss/boss - i am your final mistake.mp3',
-        './audio/boss/boss - i divour heros like you.mp3',
-        './audio/boss/boss - i will erase you from existence.mp3',
-        './audio/boss/boss - run while you still can.mp3',
-        './audio/boss/boss - this galaxy will be your grave.mp3',
-        './audio/boss/boss - you are already dead.mp3',
-        './audio/boss/boss - your end is innevitable.mp3',
-        './audio/boss/boss - your prepare for total anihilation.mp3',
-    ],
+        'boss_hope': './audio/boss/boss - hope is a lie.mp3',
+        'boss_mistake': './audio/boss/boss - i am your final mistake.mp3',
+        'boss_devour': './audio/boss/boss - i divour heros like you.mp3',
+        'boss_erase': './audio/boss/boss - i will erase you from existence.mp3',
+        'boss_run': './audio/boss/boss - run while you still can.mp3',
+        'boss_galaxy': './audio/boss/boss - this galaxy will be your grave.mp3',
+        'boss_dead': './audio/boss/boss - you are already dead.mp3',
+        'boss_inevitable': './audio/boss/boss - your end is innevitable.mp3',
+        'boss_annihilation': './audio/boss/boss - your prepare for total anihilation.mp3',
+    },
 
     /* ── Music tracks (loaded on-demand by MusicPlayer) ───── */
     music: [

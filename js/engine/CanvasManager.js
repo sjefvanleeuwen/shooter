@@ -23,13 +23,14 @@ class CanvasManager {
     }
 
     setupCanvas() {
-        const displayWidth = window.innerWidth;
-        const displayHeight = window.innerHeight;
-        this.scale = Math.min(displayWidth / this.virtualWidth, displayHeight / this.virtualHeight);
-        this.canvas.width = displayWidth;
-        this.canvas.height = displayHeight;
-        this.offsetX = (displayWidth - (this.virtualWidth * this.scale)) / 2;
-        this.offsetY = (displayHeight - (this.virtualHeight * this.scale)) / 2;
+        // Keep the internal buffer at fixed virtual resolution
+        // The actual display scaling is handled by CRTEffect's glCanvas
+        this.canvas.width = this.virtualWidth;
+        this.canvas.height = this.virtualHeight;
+        
+        this.scale = 1.0;
+        this.offsetX = 0;
+        this.offsetY = 0;
         this.applyTransform();
     }
     

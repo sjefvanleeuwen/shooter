@@ -1,4 +1,5 @@
-import AssetPreloader from '../utils/AssetPreloader.js';
+import AssetPreloader from '../../engine/AssetPreloader.js';
+import assets from '../config/assetManifest.js';
 
 class StartupScreen {
     constructor(ctx, options = {}) {
@@ -36,7 +37,7 @@ class StartupScreen {
             this.preloadCurrentFile = url.split('/').pop();
         };
 
-        preloader.checkAll().then(result => {
+        preloader.checkAll(assets).then(result => {
             this.preloadDone = true;
             this.preloadMissing = result.missing;
 

@@ -58,6 +58,13 @@ class Alien {
         }
         this.img = spriteCache[src];
         this.shadowKey = src; // Key to access shadowCache
+        
+        // Use root-relative path for Vite
+        if (src.startsWith('./')) {
+            this.img.src = src.substring(2);
+        } else {
+            this.img.src = src;
+        }
     }
 
     generateShadow(key, img) {

@@ -1,5 +1,5 @@
-import buttonBlueUrl from '../sprites/ui/button-blue.png';
-import buttonRedUrl from '../sprites/ui/button-red.png';
+import buttonBlueUrl from '../../sprites/ui/button-blue.png';
+import buttonRedUrl from '../../sprites/ui/button-red.png';
 
 export default class MobileControls {
     constructor() {

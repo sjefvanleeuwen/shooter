@@ -1,4 +1,4 @@
-import { GLBLoader } from '../utils/GLBLoader.js';
+import { GLBLoader } from '../../engine/GLBLoader.js';
 
 export default class ShieldDropManager {
     constructor(gameScreen) {

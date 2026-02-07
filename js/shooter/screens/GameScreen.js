@@ -1,6 +1,6 @@
-import Player from '../player.js';
-import { ParticleEngine, LaserEngine } from '../particleEngine.js';
-import PatternFormation from '../PatternFormation.js';
+import Player from '../entities/player.js';
+import { ParticleEngine, LaserEngine } from '../../engine/particleEngine.js';
+import PatternFormation from '../entities/PatternFormation.js';
 import ImageBackgroundScroller from '../imageBackgroundScroller.js';
 import { patterns } from '../patterns/formationPatterns.js';
 import ShieldEffect from '../effects/ShieldEffect.js';
@@ -134,7 +134,9 @@ class GameScreen {
                 // Boss wave every 15 levels
                 nextPattern = 'boss_wave';
                 // Trigger boss voice
-                this.audioManager.playRandomBossVoice();
+                if (window.game && window.game.playRandomBossVoice) {
+                    window.game.playRandomBossVoice();
+                }
             } else {
                 const patternNames = Object.keys(patterns).filter(p => p !== 'boss_wave');
                 nextPattern = patternNames[Math.floor(Math.random() * patternNames.length)];

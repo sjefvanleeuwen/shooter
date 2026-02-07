@@ -1,4 +1,4 @@
-import VideoRecorder from '../utils/VideoRecorder.js';
+import VideoRecorder from './VideoRecorder.js';
 
 class CRTEffect {
     constructor(targetCanvas, container, audioManager = null) {
@@ -60,8 +60,8 @@ class CRTEffect {
             width = availableHeight * aspect;
         }
         
-        this.glCanvas.style.width = `${width}px`;
-        this.glCanvas.style.height = `${height}px`;
+        this.glCanvas.style.width = `${Math.floor(width)}px`;
+        this.glCanvas.style.height = `${Math.floor(height)}px`;
         
         if (this.padding.top > 0) {
              this.glCanvas.style.marginTop = `${this.padding.top}px`;
@@ -70,8 +70,12 @@ class CRTEffect {
 
     async loadConfig() {
         try {
-            // Update path to use the correct location in dist
-            const response = await fetch('./config/crt-effect.json');
+            // Try to load from the root config folder first
+            let response = await fetch('/config/crt-effect.json');
+            if (!response.ok) {
+                // Try relative path as fallback
+                response = await fetch('./config/crt-effect.json');
+            }
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -271,7 +275,8 @@ class CRTEffect {
     }
 
     setScale(scale) {
-        this.glCanvas.style.transform = `scale(${scale})`;
+        // No longer using CSS transform scaling as it conflicts with the new resize logic
+        // This is now handled by setting glCanvas style width/height directly in resize()
     }
 
     render(time) {

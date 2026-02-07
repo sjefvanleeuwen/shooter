@@ -16,7 +16,7 @@ class Player {
 
         // Load sprite image.
         this.img = new Image();
-        this.img.src = './sprites/player.png';  // Updated path
+        this.img.src = 'sprites/player.png';  // Remove ./ to let Vite handle it from root or public
 
         this.setupInput();
 

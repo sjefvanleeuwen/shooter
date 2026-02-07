@@ -1,5 +1,3 @@
-import assets from '../config/assetManifest.js';
-
 /**
  * AssetPreloader
  * ──────────────
@@ -11,7 +9,7 @@ import assets from '../config/assetManifest.js';
  * Usage:
  *   const preloader = new AssetPreloader();
  *   preloader.onProgress = (loaded, total, url) => { … };
- *   const result = await preloader.checkAll();   // { ok, missing[], total, loaded }
+ *   const result = await preloader.checkAll(myManifest);   // { ok, missing[], total, loaded }
  */
 export default class AssetPreloader {
     constructor() {
@@ -25,10 +23,11 @@ export default class AssetPreloader {
      * Verify every asset in the manifest is reachable.
      * Images are loaded as <img> elements (validates decode).
      * Audio / models / other binaries use a HEAD fetch.
+     * @param {Object} manifest
      * @returns {Promise<{ok:boolean, missing:string[], total:number, loaded:number}>}
      */
-    async checkAll() {
-        const urls = this._collectURLs();
+    async checkAll(manifest) {
+        const urls = this._collectURLs(manifest);
         const total = urls.length;
         let loaded = 0;
         const missing = [];
@@ -57,11 +56,14 @@ export default class AssetPreloader {
     /* ── internals ──────────────────────────────────────────── */
 
     /** Flatten every category in the manifest into one URL list. */
-    _collectURLs() {
+    _collectURLs(manifest) {
         const all = [];
-        for (const category of Object.values(assets)) {
+        for (const category of Object.values(manifest)) {
             if (Array.isArray(category)) {
                 all.push(...category);
+            } else if (typeof category === 'object' && category !== null) {
+                // Handle named assets (like sfx: { key: url })
+                all.push(...Object.values(category));
             }
         }
         return all;

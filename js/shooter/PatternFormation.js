@@ -1,8 +1,8 @@
 import Alien from './alien.js';
 import { patterns } from './patterns/formationPatterns.js';
-import SplineCurve from './math/SplineCurve.js';
-import BezierPath from './math/BezierPath.js';
-import AlienLaser from './LaserParticle.js';
+import SplineCurve from '../engine/math/SplineCurve.js';
+import BezierPath from '../engine/math/BezierPath.js';
+import AlienLaser from './effects/LaserParticle.js';
 import ExplosionEffect from './effects/ExplosionEffect.js';
 
 class PatternFormation {
@@ -480,8 +480,8 @@ class PatternFormation {
                 const interval = this.bossVoiceInterval || 8; 
                 if (this.bossVoiceTimer > interval) {
                     this.bossVoiceTimer = 0;
-                    if (this.audioManager && Math.random() < 0.9) { // High chance to play
-                        this.audioManager.playRandomBossVoice();
+                    if (window.game && window.game.playRandomBossVoice && Math.random() < 0.9) { // High chance to play
+                        window.game.playRandomBossVoice();
                     }
                 }
             }
