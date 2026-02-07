@@ -338,10 +338,27 @@ class PatternFormation {
                 };
 
                 if (alienType === 'boss') {
-                    // Significant health boost for boss
-                    // Reduced to ~1/3 of previous formula per user request
-                    // Oldest: 1500+500d. Previous: 200+100d. New: 70 + 35d
-                    alienOptions.health = 70 + (this.difficulty * 35);
+                    // Capped progression for boss health
+                    // User Request: Start with less power, increase slightly, cap at "current" max.
+                    
+                    // Original "Current" formula at level 15: 70 + (15 * 35) = 595.
+                    // New Formula:
+                    // Start (Level 15): 250 (Much easier intro)
+                    // End (Level 60): 600 (The requested "current" max)
+                    
+                    const minHealth = 125;
+                    const maxHealth = 600;
+                    
+                    // Boss appears every 15 levels. 
+                    // Encounters: 1st (L15), 2nd (L30), 3rd (L45), 4th (L60)
+                    // We want to scale from minHealth to maxHealth over ~3-4 encounters
+                    
+                    // (Diff from min to max) / number of steps => 350 / 45 difficulty levels ~= 8 health per level
+                    // But we only want to count from level 15 onwards.
+                    
+                    const scalingHealth = minHealth + Math.max(0, this.difficulty - 15) * 8;
+                    
+                    alienOptions.health = Math.min(maxHealth, scalingHealth);
                 }
 
                 const alien = new Alien(this.ctx, alienOptions);

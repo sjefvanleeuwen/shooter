@@ -17,13 +17,13 @@ export default class ImageBackgroundScroller {
         this.layers = [];
 
         // Generate indices and shuffle them
-        const indices = Array.from({length: 17}, (_, i) => i + 1);
+        const indices = Array.from({length: 21}, (_, i) => i + 1);
         for (let i = indices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [indices[i], indices[j]] = [indices[j], indices[i]];
         }
         
-        for (let i = 0; i < 17; i++) {
+        for (let i = 0; i < 21; i++) {
             const img = new Image();
             img.src = `./backgrounds/level0/${indices[i]}.png`;
             
