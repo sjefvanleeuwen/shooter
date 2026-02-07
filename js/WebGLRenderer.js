@@ -99,6 +99,16 @@ export default class WebGLRenderer {
         this.matrixStack[this.matrixStack.length-1] = this.multiply(this.currentMatrix, [c,s,0, -s,c,0, 0,0,1]);
     }
 
+    strokeRect(x, y, w, h) {
+        this.save();
+        this.translate(x, y);
+        this.fillRect(0, 0, w, this.lineWidth || 1);
+        this.fillRect(0, h - (this.lineWidth || 1), w, this.lineWidth || 1);
+        this.fillRect(0, 0, this.lineWidth || 1, h);
+        this.fillRect(w - (this.lineWidth || 1), 0, this.lineWidth || 1, h);
+        this.restore();
+    }
+
     set fillStyle(v) {
         if (typeof v === 'string') {
             if (v.startsWith('#')) {
