@@ -112,6 +112,7 @@ class AudioManager {
                 this.loadSound('forcefield', './audio/alien-forcefield.flac'),
                 this.loadSound('player-forcefield', './audio/player-forcefield.wav'),
                 this.loadSound('shield-gone', './audio/shield-gone.mp3'),
+                this.loadSound('energize-shields', './audio/player - energize shields.mp3'),
                 
                 // Boss Voices
                 this.loadSound('boss_hope', './audio/boss/boss - hope is a lie.mp3'),

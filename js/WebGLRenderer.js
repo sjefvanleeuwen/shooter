@@ -73,6 +73,366 @@ export default class WebGLRenderer {
             brightness: this.gl.getUniformLocation(program, 'u_brightness'),
             flash: this.gl.getUniformLocation(program, 'u_flash')
         };
+
+        // --- 3D Shader Setup (PBR Approximation) ---
+        const vs3d = `#version 300 es
+            in vec3 a_position;
+            in vec3 a_normal;
+            in vec2 a_texCoord;
+            uniform mat4 u_projection;
+            uniform mat4 u_view;
+            uniform mat4 u_model;
+            out vec3 v_normal;
+            out vec2 v_texCoord;
+            out vec3 v_fragPos;
+            void main() {
+                vec4 worldPos = u_model * vec4(a_position, 1.0);
+                gl_Position = u_projection * u_view * worldPos;
+                v_normal = mat3(u_model) * a_normal; 
+                v_texCoord = a_texCoord;
+                v_fragPos = worldPos.xyz;
+            }`;
+        const fs3d = `#version 300 es
+            precision highp float;
+            in vec3 v_normal;
+            in vec2 v_texCoord;
+            in vec3 v_fragPos;
+            
+            uniform sampler2D u_texture;
+            uniform bool u_useTexture;
+            uniform sampler2D u_emissive;
+            uniform bool u_useEmissive;
+            uniform sampler2D u_metallicRoughness;
+            uniform bool u_useMetallicRoughness;
+            
+            uniform vec4 u_baseColorFactor;
+            uniform float u_metallicFactor;
+            uniform float u_roughnessFactor;
+            uniform vec3 u_emissiveFactor;
+            
+            uniform vec3 u_viewPos;
+
+            out vec4 outColor;
+
+            void main() {
+                // Base Color
+                vec4 baseColor = u_baseColorFactor;
+                if (u_useTexture) {
+                    baseColor *= texture(u_texture, v_texCoord);
+                }
+                if (baseColor.a < 0.1) discard;
+
+                // Normals & view for specular
+                vec3 N = normalize(v_normal);
+                vec3 V = normalize(u_viewPos - v_fragPos);
+                vec3 L = normalize(vec3(0.5, -0.3, 1.0));
+                vec3 H = normalize(V + L);
+                
+                float NdotL = max(dot(N, L), 0.0);
+                
+                // Darken factor: only darken surfaces facing away from light
+                // 0.6 = darkest shadow, 1.0 = fully lit
+                float shade = mix(0.6, 1.0, NdotL);
+                
+                vec3 color = baseColor.rgb * shade;
+                
+                // Shiny specular highlight
+                float roughness = u_roughnessFactor;
+                if (u_useMetallicRoughness) {
+                    roughness *= texture(u_metallicRoughness, v_texCoord).g;
+                }
+                float shininess = mix(32.0, 256.0, 1.0 - roughness);
+                float spec = pow(max(dot(N, H), 0.0), shininess);
+                color += vec3(spec * 0.6);
+
+                // Emissive: fluorescent neon orange
+                if (u_useEmissive) {
+                    vec3 eTex = texture(u_emissive, v_texCoord).rgb;
+                    float strength = max(eTex.r, max(eTex.g, eTex.b));
+                    // Force pure neon orange where emissive exists
+                    vec3 neonOrange = vec3(1.0, 0.4, 0.0);
+                    color += neonOrange * strength * 3.0;
+                }
+
+                color = clamp(color, 0.0, 1.0);
+                outColor = vec4(color, baseColor.a);
+            }`;
+        
+        const p3d = this.gl.createProgram();
+        const vs3dObj = this.gl.createShader(this.gl.VERTEX_SHADER);
+        this.gl.shaderSource(vs3dObj, vs3d); this.gl.compileShader(vs3dObj);
+        
+        // Debug shader compilation
+        if (!this.gl.getShaderParameter(vs3dObj, this.gl.COMPILE_STATUS)) {
+            console.error('3D VS Error:', this.gl.getShaderInfoLog(vs3dObj));
+        }
+
+        const fs3dObj = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+        this.gl.shaderSource(fs3dObj, fs3d); this.gl.compileShader(fs3dObj);
+        
+        if (!this.gl.getShaderParameter(fs3dObj, this.gl.COMPILE_STATUS)) {
+            console.error('3D FS Error:', this.gl.getShaderInfoLog(fs3dObj));
+        }
+
+        this.gl.attachShader(p3d, vs3dObj); this.gl.attachShader(p3d, fs3dObj);
+        this.gl.linkProgram(p3d);
+        
+        this.program3d = p3d;
+        this.locs3d = {
+            pos: this.gl.getAttribLocation(p3d, 'a_position'),
+            normal: this.gl.getAttribLocation(p3d, 'a_normal'),
+            tex: this.gl.getAttribLocation(p3d, 'a_texCoord'),
+            proj: this.gl.getUniformLocation(p3d, 'u_projection'),
+            view: this.gl.getUniformLocation(p3d, 'u_view'),
+            model: this.gl.getUniformLocation(p3d, 'u_model'),
+            texture: this.gl.getUniformLocation(p3d, 'u_texture'),
+            useTex: this.gl.getUniformLocation(p3d, 'u_useTexture'),
+            emissive: this.gl.getUniformLocation(p3d, 'u_emissive'),
+            useEmissive: this.gl.getUniformLocation(p3d, 'u_useEmissive'),
+            metallicRoughness: this.gl.getUniformLocation(p3d, 'u_metallicRoughness'),
+            useMetallicRoughness: this.gl.getUniformLocation(p3d, 'u_useMetallicRoughness'),
+            // PBR
+            baseColor: this.gl.getUniformLocation(p3d, 'u_baseColorFactor'),
+            metallic: this.gl.getUniformLocation(p3d, 'u_metallicFactor'),
+            roughness: this.gl.getUniformLocation(p3d, 'u_roughnessFactor'),
+            emissiveFactor: this.gl.getUniformLocation(p3d, 'u_emissiveFactor'),
+            viewPos: this.gl.getUniformLocation(p3d, 'u_viewPos')
+        };
+    }
+
+    create3DModel(data) {
+        if (!data || !data.positions) return null;
+        
+        const vao = this.gl.createVertexArray();
+        this.gl.bindVertexArray(vao);
+        
+        // Positions
+        const posBuf = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, posBuf);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, data.positions, this.gl.STATIC_DRAW);
+        this.gl.enableVertexAttribArray(this.locs3d.pos);
+        this.gl.vertexAttribPointer(this.locs3d.pos, 3, this.gl.FLOAT, false, 0, 0);
+        
+        // Normals
+        if (data.normals) {
+            const normBuf = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, normBuf);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, data.normals, this.gl.STATIC_DRAW);
+            this.gl.enableVertexAttribArray(this.locs3d.normal);
+            this.gl.vertexAttribPointer(this.locs3d.normal, 3, this.gl.FLOAT, false, 0, 0);
+        }
+
+        // UVs
+        if (data.uvs) {
+            const uvBuf = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, uvBuf);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, data.uvs, this.gl.STATIC_DRAW);
+            this.gl.enableVertexAttribArray(this.locs3d.tex);
+            this.gl.vertexAttribPointer(this.locs3d.tex, 2, this.gl.FLOAT, false, 0, 0);
+        }
+
+        // Texture
+        let texture = null;
+        if (data.texture) {
+            // data.texture is a Blob
+            const img = new Image();
+            img.src = URL.createObjectURL(data.texture);
+            // We need to wait for load, or just set it later. 
+            // For simplicity, we create a texture object immediately and update it on load
+            texture = this.gl.createTexture();
+            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+            // Put a single pixel placeholder
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
+            
+            img.onload = () => {
+                this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+                this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+                this.gl.generateMipmap(this.gl.TEXTURE_2D);
+                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
+                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
+            };
+        }
+
+        // Emissive Map
+        let emissive = null;
+        if (data.emissive) {
+            const img = new Image();
+            img.src = URL.createObjectURL(data.emissive);
+            emissive = this.gl.createTexture();
+            this.gl.bindTexture(this.gl.TEXTURE_2D, emissive);
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
+            
+            img.onload = () => {
+                this.gl.bindTexture(this.gl.TEXTURE_2D, emissive);
+                this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+                this.gl.generateMipmap(this.gl.TEXTURE_2D);
+                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
+                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
+            };
+        }
+
+        // Metallic Roughness Map
+        let metallicRoughness = null;
+        if (data.metallicRoughness) {
+            const img = new Image();
+            img.src = URL.createObjectURL(data.metallicRoughness);
+            metallicRoughness = this.gl.createTexture();
+            this.gl.bindTexture(this.gl.TEXTURE_2D, metallicRoughness);
+            // Default: Metal=1, Rough=1 (White)
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
+            
+            img.onload = () => {
+                this.gl.bindTexture(this.gl.TEXTURE_2D, metallicRoughness);
+                this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+                this.gl.generateMipmap(this.gl.TEXTURE_2D);
+                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
+                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
+            };
+        }
+
+        // Indices
+        let indexBuf = null;
+        if (data.indices) {
+            indexBuf = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, indexBuf);
+            this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, data.indices, this.gl.STATIC_DRAW);
+        }
+
+        this.gl.bindVertexArray(null);
+
+        const result = {
+            vao,
+            vertexCount: data.vertexCount,
+            hasIndices: !!data.indices,
+            indexType: data.indexType || this.gl.UNSIGNED_SHORT,
+            texture: texture,
+            emissive: emissive,
+            metallicRoughness: metallicRoughness,
+            material: data.material || {}
+        };
+
+        console.log('3D Model created:', {
+            hasTexture: !!texture,
+            hasEmissive: !!emissive,
+            hasMetalRough: !!metallicRoughness,
+            material: data.material
+        });
+
+        return result;
+    }
+
+    draw3DModel(model, x, y, size, rotation) {
+        if (!model || !this.program3d) return;
+
+        this.gl.useProgram(this.program3d);
+        this.gl.bindVertexArray(model.vao);
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.CULL_FACE);
+        this.gl.disable(this.gl.BLEND); // Opaque 3D: no blending
+        
+        // Bind Texture
+        if (model.texture) {
+            this.gl.activeTexture(this.gl.TEXTURE0);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, model.texture);
+            this.gl.uniform1i(this.locs3d.texture, 0);
+            this.gl.uniform1i(this.locs3d.useTex, 1);
+        } else {
+            this.gl.uniform1i(this.locs3d.useTex, 0);
+        }
+
+        // Bind Emissive
+        if (model.emissive) {
+            this.gl.activeTexture(this.gl.TEXTURE1);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, model.emissive);
+            this.gl.uniform1i(this.locs3d.emissive, 1);
+            this.gl.uniform1i(this.locs3d.useEmissive, 1);
+        } else {
+            this.gl.uniform1i(this.locs3d.useEmissive, 0);
+        }
+
+        // Bind Metallic Roughness
+        if (model.metallicRoughness) {
+            this.gl.activeTexture(this.gl.TEXTURE2);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, model.metallicRoughness);
+            this.gl.uniform1i(this.locs3d.metallicRoughness, 2);
+            this.gl.uniform1i(this.locs3d.useMetallicRoughness, 1);
+        } else {
+            this.gl.uniform1i(this.locs3d.useMetallicRoughness, 0);
+        }
+
+        // PBR Uniforms
+        const mat = model.material || {};
+        this.gl.uniform4fv(this.locs3d.baseColor, mat.baseColorFactor || [1,1,1,1]);
+        this.gl.uniform1f(this.locs3d.metallic, mat.metallicFactor !== undefined ? mat.metallicFactor : 1.0);
+        this.gl.uniform1f(this.locs3d.roughness, mat.roughnessFactor !== undefined ? mat.roughnessFactor : 1.0);
+        this.gl.uniform3fv(this.locs3d.emissiveFactor, mat.emissiveFactor || [0,0,0]);
+
+        // Clear depth buffer only
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+
+        // --- Matrix Math (Minimal) ---
+        // Projection (Ortho matching 2D coords)
+        // 0,0 at top-left, virtualWidth,virtualHeight at bottom-right
+        // Z is -1000 to 1000
+        const w = 1024; // Virtual Width
+        const h = 1024; // Virtual Height
+        const left=0, right=w, bottom=h, top=0, near=-1000, far=1000;
+        
+        const proj = new Float32Array([
+            2/(right-left), 0, 0, 0,
+            0, 2/(top-bottom), 0, 0,
+            0, 0, -2/(far-near), 0,
+            -(right+left)/(right-left), -(top+bottom)/(top-bottom), -(far+near)/(far-near), 1
+        ]);
+        
+        // View (Identity)
+        const view = new Float32Array([
+            1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1
+        ]);
+        
+        // Model Matrix: Translate, then Rotate, then Scale
+        // Translation
+        const tx = x, ty = y, tz = 0;
+        
+        // Rotation (Y axis) & Tilt (X axis = 20 deg)
+        const c = Math.cos(rotation);
+        const s = Math.sin(rotation);
+        const tilt = Math.cos(0.3); // Slight tilt forward
+        const stilt = Math.sin(0.3);
+        
+        // Manual matrix construction for minimal dependency
+        const modelMat = new Float32Array([
+            size * c, size * s * stilt, size * s * tilt, 0,
+            0,        size * tilt,       -size * stilt,     0,
+            -size * s, size * c * stilt, size * c * tilt, 0,
+            tx,       ty,               0,               1
+        ]);
+
+        this.gl.uniformMatrix4fv(this.locs3d.proj, false, proj);
+        this.gl.uniformMatrix4fv(this.locs3d.view, false, view);
+        this.gl.uniformMatrix4fv(this.locs3d.model, false, modelMat);
+        
+        // Simple View Position: Camera is at z=1000ish maybe? 
+        // Our projection is ortho, but specular needs a view vector.
+        // Let's assume camera is directly in front.
+        this.gl.uniform3f(this.locs3d.viewPos, x, y, 1000.0);
+
+        if (model.hasIndices) {
+            this.gl.drawElements(this.gl.TRIANGLES, model.vertexCount, model.indexType, 0);
+        } else {
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, model.vertexCount);
+        }
+        
+        this.gl.disable(this.gl.DEPTH_TEST);
+        this.gl.disable(this.gl.CULL_FACE);
+        this.gl.enable(this.gl.BLEND); // Re-enable for 2D
+        this.gl.bindVertexArray(null);
+        
+        // Restore 2D program so subsequent draws work
+        this.gl.useProgram(this.program);
     }
 
     initBuffers() {

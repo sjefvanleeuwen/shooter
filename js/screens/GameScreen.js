@@ -5,6 +5,7 @@ import ImageBackgroundScroller from '../imageBackgroundScroller.js';
 import { patterns } from '../patterns/formationPatterns.js';
 import ShieldEffect from '../effects/ShieldEffect.js';
 import CloudOverlay from '../effects/CloudOverlay.js';
+import ShieldDropManager from '../managers/ShieldDropManager.js';
 
 const ENABLE_AMBIENT_LIGHTING = false;
 
@@ -54,6 +55,8 @@ class GameScreen {
             virtualWidth: this.virtualWidth,
             virtualHeight: this.virtualHeight
         });
+        
+        this.shieldDropManager = new ShieldDropManager(this);
 
         // Initialize user firepower
         this.updatePlayerFirepower(1);
@@ -82,6 +85,8 @@ class GameScreen {
         this.cloudOverlay.update(delta);
         this.player.update(delta);
         
+        this.shieldDropManager.update(delta);
+
         this.shieldEffect.update(delta);
         this.updateParticles(delta);
         this.updateFormation(delta);
@@ -229,6 +234,9 @@ class GameScreen {
         // Draw effects
         this.shieldEffect.draw();
         
+        // Draw drops
+        this.shieldDropManager.draw();
+
         // Draw particle effects
         this.laserEngineLeft.draw();
         this.laserEngineRight.draw();

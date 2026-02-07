@@ -42,6 +42,11 @@ const assetDirs = [
         process: false
     },
     {
+        src: '3d',
+        dest: 'dist/3d',
+        process: false
+    },
+    {
         src: 'backgrounds',
         dest: 'dist/backgrounds',
         process: true,
