@@ -9,14 +9,25 @@ const config = JSON.parse(
     fs.readFileSync(path.join(projectRoot, 'config/image-processing.json'), 'utf8')
 );
 
+// Determine build mode (default to modern if not specified)
+const buildMode = process.env.BUILD_MODE || config.general.defaultMode || 'modern';
+const modeConfig = config.modes[buildMode];
+
+console.log(`Building assets in ${buildMode.toUpperCase()} mode...`);
+
+if (!modeConfig) {
+    console.error(`Invalid build mode: ${buildMode}. Available modes: ${Object.keys(config.modes).join(', ')}`);
+    process.exit(1);
+}
+
 const assetDirs = [
     {
         src: 'sprites',
         dest: 'dist/sprites',
         process: true,
         options: {
-            resizeMap: config.sprites.dimensions,
-            ...config.sprites.processing
+            resizeMap: modeConfig.sprites.dimensions,
+            ...modeConfig.sprites.processing
         }
     },
     {
@@ -29,8 +40,8 @@ const assetDirs = [
         dest: 'dist/backgrounds',
         process: true,
         options: {
-            ...config.backgrounds.dimensions,
-            ...config.backgrounds.processing
+            ...modeConfig.backgrounds.dimensions,
+            ...modeConfig.backgrounds.processing
         }
     }
 ];
