@@ -25,10 +25,16 @@ const assetDirs = [
         src: 'sprites',
         dest: 'dist/sprites',
         process: true,
+        exclude: ['ui'],
         options: {
             resizeMap: modeConfig.sprites.dimensions,
             ...modeConfig.sprites.processing
         }
+    },
+    {
+        src: 'sprites/ui',
+        dest: 'dist/sprites/ui',
+        process: false
     },
     {
         src: 'audio',
@@ -196,6 +202,11 @@ async function copyAssets() {
                     const items = await fs.readdir(currentSrc, { withFileTypes: true });
                     
                     for (const item of items) {
+                        // Handle exclusions
+                        if (dir.exclude && dir.exclude.includes(item.name)) {
+                            continue;
+                        }
+
                         const itemSrcPath = path.join(currentSrc, item.name);
                         
                         if (item.isDirectory()) {
