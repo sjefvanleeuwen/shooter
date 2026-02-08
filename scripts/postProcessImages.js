@@ -1,69 +1,80 @@
-import imagemin from 'imagemin';
-import imageminPngquant from 'imagemin-pngquant';
-import fs from 'fs-extra';
-import path from 'path';
-import { fileURLToPath } from 'url';
+﻿import imagemin from "imagemin";
+import imageminPngquant from "imagemin-pngquant";
+import fs from "fs-extra";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.resolve(__dirname, '..');
-const config = JSON.parse(
-    fs.readFileSync(path.join(projectRoot, 'config/image-processing.json'), 'utf8')
-);
+const projectRoot = path.resolve(__dirname, "..");
 
-// Determine build mode (default to modern if not specified)
-const buildMode = process.env.BUILD_MODE || config.general.defaultMode || 'modern';
-const modeConfig = config.modes[buildMode];
+async function optimizeGame(gameId) {
+    const gameRoot = path.join(projectRoot, "games", gameId);
+    const imageConfigPath = path.join(gameRoot, "config", "image-processing.json");
+    
+    if (!await fs.pathExists(imageConfigPath)) {
+        console.warn(`No image-processing config for ${gameId}, skipping.`);
+        return;
+    }
 
-console.log(`Running post-process optimization in ${buildMode.toUpperCase()} mode...`);
+    const config = await fs.readJson(imageConfigPath);
+    const buildMode = process.env.BUILD_MODE || config.general?.defaultMode || "modern";
+    const modeConfig = config.modes?.[buildMode];
 
-if (!modeConfig) {
-    console.error(`Invalid build mode: ${buildMode}`);
-    process.exit(1);
-}
+    if (!modeConfig) {
+        console.warn(`No mode config for ${buildMode} in ${gameId}, skipping.`);
+        return;
+    }
 
-async function optimizeImages() {
-    const directories = ['sprites', 'backgrounds'].map(dir => 
-        path.join(projectRoot, 'dist', dir)
+    console.log(`Optimizing ${gameId} (${buildMode})...`);
+    
+    const directories = ["sprites", "backgrounds"].map(dir =>
+        path.join(projectRoot, "dist/games", gameId, dir)
     );
 
     for (const dir of directories) {
         if (!await fs.pathExists(dir)) continue;
-
-        console.log(`Optimizing images in ${dir}...`);
         
-        // Helper to recursively process directories
         const processDir = async (currentDir) => {
             const items = await fs.readdir(currentDir, { withFileTypes: true });
-            const isSpritesDir = currentDir.includes('sprites');
-            
-            // Use modeConfig instead of config
+            const isSpritesDir = currentDir.includes(`${path.sep}sprites`);
             const compressionConfig = isSpritesDir 
-                ? modeConfig.sprites.processing.compression
-                : modeConfig.backgrounds.processing.compression;
+                ? modeConfig.sprites?.processing?.compression
+                : modeConfig.backgrounds?.processing?.compression;
+
+            if (!compressionConfig) return;
 
             for (const item of items) {
                 const itemPath = path.join(currentDir, item.name);
-                
                 if (item.isDirectory()) {
                     await processDir(itemPath);
                 } else if (item.isFile() && item.name.match(/\.(png|jpg|jpeg)$/i)) {
                     try {
                         await imagemin([itemPath], {
                             destination: currentDir,
-                            plugins: [
-                                imageminPngquant(compressionConfig)
-                            ]
+                            plugins: [imageminPngquant(compressionConfig)]
                         });
-                        console.log(`Optimized: ${item.name}`);
                     } catch (err) {
                         console.error(`Error optimizing ${item.name}:`, err.message);
                     }
                 }
             }
         };
-
         await processDir(dir);
     }
 }
 
-optimizeImages().catch(console.error);
+async function main() {
+    const gameIdArg = process.argv[2];
+    if (gameIdArg && gameIdArg !== "all") {
+        await optimizeGame(gameIdArg);
+    } else {
+        const gamesDir = path.join(projectRoot, "games");
+        const items = await fs.readdir(gamesDir, { withFileTypes: true });
+        for (const i of items) {
+            if (i.isDirectory()) await optimizeGame(i.name);
+        }
+    }
+    console.log("Optimization complete!");
+}
+
+main().catch(console.error);

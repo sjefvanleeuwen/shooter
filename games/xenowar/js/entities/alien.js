@@ -45,7 +45,7 @@ class Alien {
         this.hitFlash = 0;
         
         // Shared sprite loading
-        const src = './sprites/alien1.png';
+        const src = 'games/xenowar/sprites/alien1.png';
         if (!spriteCache[src]) {
             const img = new Image();
             img.src = src;

@@ -4,8 +4,7 @@ class InputManager {
         this.currentScreen = null;
         this.debugHandler = null;
         this.recordingHandler = null;
-        this.captureHandler = null;
-        this.keys = new Set();
+        this.keys = new Set(); // Track currently pressed keys
         
         window.addEventListener('keydown', (e) => this.handleKeyDown(e));
         window.addEventListener('keyup', (e) => this.handleKeyUp(e));
@@ -31,20 +30,8 @@ class InputManager {
         this.recordingHandler = callback;
     }
 
-    setCaptureHandler(callback) {
-        this.captureHandler = callback;
-    }
-
     handleKeyDown(e) {
         this.keys.add(e.key);
-
-        // Capture screenshot
-        if (e.key === 'c' || e.key === 'C') {
-            if (this.captureHandler) {
-                this.captureHandler();
-            }
-            return;
-        }
 
         // Handle debug toggle
         if (e.key === 'f' || e.key === 'F') {

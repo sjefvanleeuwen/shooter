@@ -1,67 +1,16 @@
-import fs from 'fs-extra';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import sharp from 'sharp';
+﻿import fs from "fs-extra";
+import path from "path";
+import { fileURLToPath } from "url";
+import sharp from "sharp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.resolve(__dirname, '..');
-const config = JSON.parse(
-    fs.readFileSync(path.join(projectRoot, 'config/image-processing.json'), 'utf8')
-);
-
-// Determine build mode (default to modern if not specified)
-const buildMode = process.env.BUILD_MODE || config.general.defaultMode || 'modern';
-const modeConfig = config.modes[buildMode];
-
-console.log(`Building assets in ${buildMode.toUpperCase()} mode...`);
-
-if (!modeConfig) {
-    console.error(`Invalid build mode: ${buildMode}. Available modes: ${Object.keys(config.modes).join(', ')}`);
-    process.exit(1);
-}
-
-const assetDirs = [
-    {
-        src: 'sprites',
-        dest: 'dist/sprites',
-        process: true,
-        exclude: ['ui'],
-        options: {
-            resizeMap: modeConfig.sprites.dimensions,
-            ...modeConfig.sprites.processing
-        }
-    },
-    {
-        src: 'sprites/ui',
-        dest: 'dist/sprites/ui',
-        process: false
-    },
-    {
-        src: 'audio',
-        dest: 'dist/audio',
-        process: false
-    },
-    {
-        src: '3d',
-        dest: 'dist/3d',
-        process: false
-    },
-    {
-        src: 'backgrounds',
-        dest: 'dist/backgrounds',
-        process: true,
-        options: {
-            ...modeConfig.backgrounds.dimensions,
-            ...modeConfig.backgrounds.processing
-        }
-    }
-];
+const projectRoot = path.resolve(__dirname, "..");
 
 async function verifyImageDimensions(filePath, expectedWidth, expectedHeight) {
     try {
         const metadata = await sharp(filePath).metadata();
         const matches = metadata.width === expectedWidth && metadata.height === expectedHeight;
-        console.log(`Verifying ${path.basename(filePath)}: ${metadata.width}x${metadata.height} (Expected: ${expectedWidth}x${expectedHeight}) - ${matches ? 'OK' : 'MISMATCH'}`);
+        console.log(`Verifying ${path.basename(filePath)}: ${metadata.width}x${metadata.height} (Expected: ${expectedWidth}x${expectedHeight}) - ${matches ? "OK" : "MISMATCH"}`);
         return matches;
     } catch (err) {
         console.error(`Error verifying ${filePath}:`, err);
@@ -71,57 +20,51 @@ async function verifyImageDimensions(filePath, expectedWidth, expectedHeight) {
 
 async function processImage(srcPath, destPath, options) {
     try {
-        // Force delete destination file if it exists
+        const safeOptions = options || {};
         if (await fs.pathExists(destPath)) {
             await fs.remove(destPath);
-            console.log(`Removed existing file: ${destPath}`);
         }
 
-        const tempDir = path.join(projectRoot, 'temp');
+        const tempDir = path.join(projectRoot, "temp");
         await fs.ensureDir(tempDir);
         const tempFile = path.join(tempDir, `temp_${path.basename(destPath)}`);
 
-        // Get specific dimensions for sprites if available
         const filename = path.basename(srcPath);
-        const dimensions = options.resizeMap?.[filename] || {
-            width: options.width || TARGET_SIZE,
-            height: options.height || TARGET_SIZE
+        const dimensions = safeOptions.resizeMap?.[filename] || {
+            width: safeOptions.width || 1024,
+            height: safeOptions.height || 1024
         };
 
-        console.log(`Processing ${filename} to ${dimensions.width}x${dimensions.height}`);
-
-        // Special handling for backgrounds - single pass processing
-        if (options.skipPostProcess) {
+        if (safeOptions.skipPostProcess) {
             await sharp(srcPath)
-                .resize(options.width, options.height, {
-                    fit: options.fit || 'contain',
-                    position: options.position || 'center',
-                    background: { r: 0, g: 0, b: 0, alpha: 0 }  // Transparent background
+                .resize(dimensions.width, dimensions.height, {
+                    fit: safeOptions.fit || "contain",
+                    position: safeOptions.position || "center",
+                    background: { r: 0, g: 0, b: 0, alpha: 0 }
                 })
                 .png({
-                    palette: options.palette,
-                    colors: options.colors,
-                    quality: options.quality || 60,
+                    palette: safeOptions.palette,
+                    colors: safeOptions.colors,
+                    quality: safeOptions.quality || 60,
                     compressionLevel: 9,
                     effort: 10,
                     adaptiveFiltering: true,
-                    dither: options.compression?.dithering ?? 0.5
+                    dither: safeOptions.compression?.dithering ?? 0.5
                 })
                 .toFile(destPath);
         } else {
-            // First pass with specific dimensions
             await sharp(srcPath)
                 .resize(dimensions.width, dimensions.height, {
-                    fit: options.fit || 'contain',
-                    position: options.position || 'center',
-                    background: { r: 0, g: 0, b: 0, alpha: 0 }  // Transparent background
+                    fit: safeOptions.fit || "contain",
+                    position: safeOptions.position || "center",
+                    background: { r: 0, g: 0, b: 0, alpha: 0 }
                 })
                 .normalize()
                 .median(3)
                 .png({
-                    palette: options.palette, // Respect config
-                    colors: options.colors,
-                    quality: 100, // Keep first pass high quality
+                    palette: safeOptions.palette,
+                    colors: safeOptions.colors,
+                    quality: 100,
                     compressionLevel: 9,
                     adaptiveFiltering: true,
                     effort: 10,
@@ -129,118 +72,108 @@ async function processImage(srcPath, destPath, options) {
                 })
                 .toFile(tempFile);
 
-            // Second pass: Optimize with configured settings
             await sharp(tempFile)
                 .png({
-                    quality: options.quality || 40, 
+                    quality: safeOptions.quality || 40,
                     compressionLevel: 9,
                     effort: 10,
                     adaptiveFiltering: true,
-                    palette: options.palette, // Respect config
-                    colors: options.colors,
-                    dither: options.compression?.dithering ?? 0.5
+                    palette: safeOptions.palette,
+                    colors: safeOptions.colors,
+                    dither: safeOptions.compression?.dithering ?? 0.5
                 })
                 .toFile(destPath);
 
-            // Clean up temp file
             await fs.remove(tempFile);
         }
-        
-        // Log compression results
-        const originalStats = await fs.stat(srcPath);
-        const finalStats = await fs.stat(destPath);
-        const compressionRatio = ((originalStats.size - finalStats.size) / originalStats.size * 100).toFixed(2);
-        
-        console.log(`Processed: ${path.basename(srcPath)}`);
-        console.log(`  Original: ${(originalStats.size / 1024).toFixed(2)}KB`);
-        console.log(`  Final: ${(finalStats.size / 1024).toFixed(2)}KB`);
-        console.log(`  Compression: ${compressionRatio}%`);
-        console.log(`Processed ${filename}: ${dimensions.width}x${dimensions.height}`);
 
-        // Verify dimensions after processing
         const isCorrectSize = await verifyImageDimensions(destPath, dimensions.width, dimensions.height);
         if (!isCorrectSize) {
             console.error(`WARNING: ${path.basename(destPath)} has incorrect dimensions!`);
         }
-
     } catch (err) {
         console.error(`Error processing ${srcPath}:`, err);
     }
 }
 
-// Add cleanup function for temp directory
-async function cleanup() {
-    const tempDir = path.join(projectRoot, 'temp');
-    if (await fs.pathExists(tempDir)) {
-        await fs.remove(tempDir);
+async function copyAssetsForGame(gameId) {
+    const gameRoot = path.join(projectRoot, "games", gameId);
+    if (!await fs.pathExists(gameRoot)) {
+        console.warn(`Skipping missing game: ${gameId}`);
+        return;
     }
-}
 
-// Update main function to include cleanup
-async function copyAssets() {
-    try {
-        // Clean dist directories first
-        for (const dir of assetDirs) {
-            const destPath = path.resolve(projectRoot, dir.dest);
-            if (await fs.pathExists(destPath)) {
-                await fs.remove(destPath);
-                console.log(`Cleaned directory: ${destPath}`);
-            }
-        }
+    const imageConfigPath = path.join(gameRoot, "config", "image-processing.json");
+    let config = null;
+    if (await fs.pathExists(imageConfigPath)) {
+        config = await fs.readJson(imageConfigPath);
+    }
 
-        await cleanup(); // Clean up before starting
-        for (const dir of assetDirs) {
-            const srcPath = path.resolve(projectRoot, dir.src);
-            const destPath = path.resolve(projectRoot, dir.dest);
-            
-            if (!fs.existsSync(srcPath)) {
-                console.warn(`Warning: Source directory ${dir.src} not found`);
-                continue;
-            }
+    const buildMode = process.env.BUILD_MODE || config?.general?.defaultMode || "modern";
+    const modeConfig = config?.modes?.[buildMode] || null;
 
+    console.log(`Building assets for ${gameId} in ${buildMode.toUpperCase()} mode...`);
+
+    const rel = (...parts) => parts.join("/");
+    const assetDirs = [
+        { src: rel("games", gameId, "screen.png"), dest: rel("dist", "games", gameId, "screen.png"), isFile: true },
+        { src: rel("games", gameId, "config"), dest: rel("dist", "games", gameId, "config") },
+        { src: rel("games", gameId, "sprites"), dest: rel("dist", "games", gameId, "sprites"), process: !!modeConfig, exclude: ["ui"], options: modeConfig ? { resizeMap: modeConfig.sprites?.dimensions, ...modeConfig.sprites?.processing } : undefined },
+        { src: rel("games", gameId, "sprites", "ui"), dest: rel("dist", "games", gameId, "sprites", "ui") },
+        { src: rel("games", gameId, "audio"), dest: rel("dist", "games", gameId, "audio") },
+        { src: rel("games", gameId, "3d"), dest: rel("dist", "games", gameId, "3d") },
+        { src: rel("games", gameId, "backgrounds"), dest: rel("dist", "games", gameId, "backgrounds"), process: !!modeConfig, options: modeConfig ? { ...modeConfig.backgrounds?.dimensions, ...modeConfig.backgrounds?.processing } : undefined }
+    ];
+
+    for (const dir of assetDirs) {
+        const srcPath = path.resolve(projectRoot, dir.src);
+        const destPath = path.resolve(projectRoot, dir.dest);
+        
+        if (!await fs.pathExists(srcPath)) continue;
+
+        if (dir.isFile) {
+            await fs.ensureDir(path.dirname(destPath));
+            await fs.copy(srcPath, destPath);
+        } else if (dir.process && dir.options) {
+            const processDirectory = async (currentSrc, currentDest) => {
+                await fs.ensureDir(currentDest);
+                const items = await fs.readdir(currentSrc, { withFileTypes: true });
+                for (const item of items) {
+                    if (dir.exclude && dir.exclude.includes(item.name)) continue;
+                    const itemSrcPath = path.join(currentSrc, item.name);
+                    const itemDestPath = path.join(currentDest, item.name.replace(/\.(png|jpg|jpeg)$/i, ".png"));
+                    if (item.isDirectory()) await processDirectory(itemSrcPath, itemDestPath);
+                    else if (item.isFile() && item.name.match(/\.(png|jpg|jpeg)$/i)) await processImage(itemSrcPath, itemDestPath, dir.options);
+                }
+            };
+            await processDirectory(srcPath, destPath);
+        } else {
             await fs.ensureDir(destPath);
-
-            if (dir.process) {
-                // Helper to recursively process directories
-                const processDirectory = async (currentSrc, currentDest) => {
-                    await fs.ensureDir(currentDest);
-                    const items = await fs.readdir(currentSrc, { withFileTypes: true });
-                    
-                    for (const item of items) {
-                        // Handle exclusions
-                        if (dir.exclude && dir.exclude.includes(item.name)) {
-                            continue;
-                        }
-
-                        const itemSrcPath = path.join(currentSrc, item.name);
-                        
-                        if (item.isDirectory()) {
-                            // Recursively process subdirectories
-                            const itemDestPath = path.join(currentDest, item.name);
-                            await processDirectory(itemSrcPath, itemDestPath);
-                        } else if (item.isFile() && item.name.match(/\.(png|jpg|jpeg)$/i)) {
-                            // Process image files
-                            const itemDestPath = path.join(currentDest, path.basename(item.name, path.extname(item.name)) + '.png');
-                            await processImage(itemSrcPath, itemDestPath, dir.options);
-                        }
-                    }
-                };
-
-                await processDirectory(srcPath, destPath);
-            } else {
-                // Simple copy for non-processed assets
-                await fs.copy(srcPath, destPath);
-            }
-            
-            console.log(`Copied ${dir.src} to ${dir.dest}`);
+            await fs.copy(srcPath, destPath);
         }
-        console.log('Asset copying complete!');
-        await cleanup(); // Clean up after finishing
-    } catch (err) {
-        console.error('Error copying assets:', err);
-        await cleanup(); // Clean up on error
-        process.exit(1);
     }
 }
 
-copyAssets();
+async function main() {
+    const gameIdArg = process.argv[2];
+    const tempDir = path.join(projectRoot, "temp");
+    await fs.remove(tempDir);
+
+    if (gameIdArg && gameIdArg !== "all") {
+        await copyAssetsForGame(gameIdArg);
+    } else {
+        const gamesDir = path.join(projectRoot, "games");
+        const items = await fs.readdir(gamesDir, { withFileTypes: true });
+        const gameIds = items.filter(i => i.isDirectory()).map(i => i.name);
+        for (const id of gameIds) {
+            await copyAssetsForGame(id);
+        }
+    }
+    await fs.remove(tempDir);
+    console.log("Asset copying complete!");
+}
+
+main().catch(err => {
+    console.error(err);
+    process.exit(1);
+});

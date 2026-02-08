@@ -1,9 +1,9 @@
 import Alien from './alien.js';
-import { patterns } from './patterns/formationPatterns.js';
-import SplineCurve from '../engine/math/SplineCurve.js';
-import BezierPath from '../engine/math/BezierPath.js';
-import AlienLaser from './effects/LaserParticle.js';
-import ExplosionEffect from './effects/ExplosionEffect.js';
+import { patterns } from '../patterns/formationPatterns.js';
+import SplineCurve from '../../../../js/engine/math/SplineCurve.js';
+import BezierPath from '../../../../js/engine/math/BezierPath.js';
+import AlienLaser from '../effects/LaserParticle.js';
+import ExplosionEffect from '../effects/ExplosionEffect.js';
 
 class PatternFormation {
     constructor(ctx, options = {}) {

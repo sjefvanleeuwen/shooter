@@ -1,0 +1,48 @@
+{
+  "modes": {
+    "modern": {
+      "sprites": {
+        "dimensions": {},
+        "processing": {
+          "fit": "contain",
+          "position": "center",
+          "palette": false,
+          "quality": 95,
+          "compression": {
+            "quality": [0.9, 1.0],
+            "speed": 1,
+            "strip": true,
+            "dithering": 0,
+            "effort": 10,
+            "adaptiveFiltering": true
+          }
+        }
+      },
+      "backgrounds": {
+        "dimensions": {
+          "width": 1024,
+          "height": 1024
+        },
+        "processing": {
+          "fit": "fill",
+          "palette": false,
+          "quality": 90,
+          "compression": {
+            "quality": [0.8, 1.0],
+            "speed": 1,
+            "effort": 10,
+            "dithering": 0,
+            "adaptiveFiltering": true
+          }
+        }
+      }
+    }
+  },
+  "general": {
+    "tempDir": "temp",
+    "outputFormat": "png",
+    "skipExisting": false,
+    "verifyDimensions": true,
+    "defaultMode": "modern"
+  }
+}

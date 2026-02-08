@@ -1,8 +1,9 @@
 import VideoRecorder from './VideoRecorder.js';
 
 class CRTEffect {
-    constructor(targetCanvas, container, audioManager = null) {
+    constructor(targetCanvas, container, audioManager = null, configPath = null) {
         this.gameCanvas = targetCanvas;
+        this.configPath = configPath;
 
         // Create WebGL canvas with fixed 1024x1024 dimensions
         this.glCanvas = document.createElement('canvas');
@@ -23,7 +24,8 @@ class CRTEffect {
         // Init WebGL with correct size
         this.gl = this.glCanvas.getContext('webgl2', {
             premultipliedAlpha: false,
-            alpha: false
+            alpha: false,
+            preserveDrawingBuffer: true
         });
 
         // Load CRT configuration
@@ -70,12 +72,20 @@ class CRTEffect {
 
     async loadConfig() {
         try {
-            // Try to load from the root config folder first
-            let response = await fetch('/config/crt-effect.json');
+            let response;
+            if (this.configPath) {
+                response = await fetch(this.configPath);
+            }
+            
+            if (!response || !response.ok) {
+                // Try local fallback if specific path failed or wasn't provided
+                response = await fetch('/config/crt-effect.json');
+            }
             if (!response.ok) {
-                // Try relative path as fallback
+                // Try relative path as secondary fallback
                 response = await fetch('./config/crt-effect.json');
             }
+            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -299,18 +309,24 @@ class CRTEffect {
         gl.uniform1f(this.timeLoc, time * 0.001);
 
         // Set CRT effect uniforms from config
-        if (this.config) {  // Add check for config
-            gl.uniform1f(this.uniformLocations.scanlineIntensity, this.config.scanline.intensity);
-            gl.uniform1f(this.uniformLocations.scanlineCount, this.config.scanline.count);
-            gl.uniform1f(this.uniformLocations.rollingSpeed, this.config.scanline.rollingSpeed);
-            gl.uniform1f(this.uniformLocations.vignetteStrength, this.config.screenEffects.vignetteStrength);
-            gl.uniform1f(this.uniformLocations.brightness, this.config.screenEffects.brightness);
-            gl.uniform1f(this.uniformLocations.curvature, this.config.screenEffects.curvature);
-            gl.uniform1f(this.uniformLocations.rgbShift, this.config.colorEffects.rgbShift);
-            gl.uniform1f(this.uniformLocations.horizontalBlur, this.config.blur.horizontal);
-            gl.uniform1f(this.uniformLocations.flickerSpeed, this.config.distortion.flickerSpeed);
-            gl.uniform1f(this.uniformLocations.flickerIntensity, this.config.distortion.flickerIntensity);
-            gl.uniform1f(this.uniformLocations.noiseAmount, this.config.distortion.noiseAmount);
+        if (this.config) {
+            const s = this.config.scanline || { intensity: 0, count: 0, rollingSpeed: 0 };
+            const e = this.config.screenEffects || { vignetteStrength: 0, brightness: 1, curvature: 0 };
+            const c = this.config.colorEffects || { rgbShift: 0 };
+            const b = this.config.blur || { horizontal: 0 };
+            const d = this.config.distortion || { flickerSpeed: 0, flickerIntensity: 0, noiseAmount: 0 };
+
+            gl.uniform1f(this.uniformLocations.scanlineIntensity, s.intensity);
+            gl.uniform1f(this.uniformLocations.scanlineCount, s.count);
+            gl.uniform1f(this.uniformLocations.rollingSpeed, s.rollingSpeed);
+            gl.uniform1f(this.uniformLocations.vignetteStrength, e.vignetteStrength);
+            gl.uniform1f(this.uniformLocations.brightness, e.brightness);
+            gl.uniform1f(this.uniformLocations.curvature, e.curvature);
+            gl.uniform1f(this.uniformLocations.rgbShift, c.rgbShift);
+            gl.uniform1f(this.uniformLocations.horizontalBlur, b.horizontal);
+            gl.uniform1f(this.uniformLocations.flickerSpeed, d.flickerSpeed);
+            gl.uniform1f(this.uniformLocations.flickerIntensity, d.flickerIntensity);
+            gl.uniform1f(this.uniformLocations.noiseAmount, d.noiseAmount);
         }
 
         // Set attributes

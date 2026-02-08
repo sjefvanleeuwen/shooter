@@ -1,4 +1,4 @@
-import { GLBLoader } from '../../engine/GLBLoader.js';
+import { GLBLoader } from '../../../../js/engine/GLBLoader.js';
 
 export default class ShieldDropManager {
     constructor(gameScreen) {
@@ -20,7 +20,7 @@ export default class ShieldDropManager {
 
     async initialize() {
         try {
-            const data = await GLBLoader.load('./3d/shield_s.glb');
+            const data = await GLBLoader.load('games/xenowar/3d/shield_s.glb');
             if (this.ctx && this.ctx.create3DModel) {
                 this.shieldModel = this.ctx.create3DModel(data);
                 this.initialized = true;

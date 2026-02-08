@@ -25,7 +25,7 @@ export default class ImageBackgroundScroller {
         
         for (let i = 0; i < 21; i++) {
             const img = new Image();
-            img.src = `./backgrounds/level0/${indices[i]}.png`;
+            img.src = `games/xenowar/backgrounds/level0/${indices[i]}.png`;
             
             const layerObj = {
                 image: img,

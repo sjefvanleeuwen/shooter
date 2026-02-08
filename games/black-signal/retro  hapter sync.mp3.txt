@@ -1,0 +1,1730 @@
+00:00:00,530 --> 00:00:01,900 [Speaker 0]
+You can describe it. 
+
+00:00:01,900 --> 00:00:39,320 [Speaker 1]
+Sure, no problem. Um, so basically, it's a inside out observation/question. Um, I think in the year and a bit that I've now been here, um, I've seen the chapter influence in terms of the quality of work that we provide and how we align between each other. It's great progress, but it's only been in IT. Um, so the way of working between us and business hasn't really improved, and the question is whether the chapters shouldn't be across the business. So not just have the influence on the IT way of working, but have an influence on the cross-borders way of working. 
+
+00:00:39,320 --> 00:00:39,860 [Speaker 0]
+Mm-hmm. 
+
+00:00:39,860 --> 00:00:54,760 [Speaker 1]
+So that was, uh, one observation. I think, I can definitely see the improvement in the IT side of it, but how can we also make that improvement on the company side of it? Um, it should make it also easier for us to work with business if we have those kind of aligned ways of working between us. 
+
+00:00:54,760 --> 00:01:00,650 [Speaker 0]
+Yeah. So you were opening the doors by default from setting up the chapter by, uh, inviting them? 
+
+00:01:00,650 --> 00:01:00,910 [Speaker 1]
+Yeah. 
+
+00:01:00,910 --> 00:01:11,940 [Speaker 0]
+Right? So that's good. Then, uh, if that's well received, why not anywhere else? Like maybe with product in the BA team, for example, right? Um, because they're closely aligned. 
+
+00:01:11,940 --> 00:01:12,860 [Speaker 1]
+Yeah. 
+
+00:01:12,860 --> 00:01:15,810 [Speaker 0]
+Yeah, I can... Uh, that's a very good point. Yeah. 
+
+00:01:15,810 --> 00:01:19,020 [Speaker 1]
+Yeah. Because I can see the, the, it being an improvement point- 
+
+00:01:19,020 --> 00:01:19,030 [Speaker 0]
+Mm-hmm 
+
+00:01:19,030 --> 00:01:20,280 [Speaker 1]
+... that we could do with them. 
+
+00:01:20,280 --> 00:01:20,550 [Speaker 0]
+Yep. 
+
+00:01:20,550 --> 00:01:27,690 [Speaker 2]
+Yeah. Even for us as BAs, uh, a relationship with the business is important, but I, uh, see potential to improve that even more. Yeah. 
+
+00:01:27,690 --> 00:01:27,720 [Speaker 1]
+Yeah. 
+
+00:01:27,720 --> 00:01:34,820 [Speaker 2]
+So maybe also in the way this, the, the chapters are set up, we can also look, uh, into that. Yeah, it's a good suggestion. 
+
+00:01:34,820 --> 00:01:35,270 [Speaker 0]
+Yeah. 
+
+00:01:35,270 --> 00:01:35,860 [Speaker 1]
+Yeah. 
+
+00:01:35,860 --> 00:01:46,300 [Speaker 2]
+Don't necessarily have the answer for it or how we could, uh, yeah, catch towards the business in that sense, but it- I think it really, uh, it would be nice to, uh- 
+
+00:01:46,300 --> 00:01:49,450 [Speaker 0]
+Yeah, maybe it's more a what, uh, still in the what right now- 
+
+00:01:49,450 --> 00:01:49,450 [Speaker 1]
+Yeah 
+
+00:01:49,450 --> 00:01:53,520 [Speaker 0]
+... what we need to have to be, uh, getting to operational excellence. 
+
+00:01:53,520 --> 00:01:53,610 [Speaker 1]
+Yeah. 
+
+00:01:53,610 --> 00:02:02,100 [Speaker 0]
+So operational excellence could have also, also been part of there, so it's kind of, like, misleading, but yeah. Um, I like the idea. 
+
+00:02:02,100 --> 00:02:02,500 [Speaker 2]
+Yeah. 
+
+00:02:02,500 --> 00:02:02,790 [Speaker 0]
+Yeah. 
+
+00:02:02,790 --> 00:02:39,700 [Speaker 2]
+And that, that links up to one of the things I did write down to the right about influence of the teams. Like, for, uh, the BAs, for us, it's very important that we evenly spread out into at least the IT organization. Now, with Hester on board, in each team, we have a BA representative, and because of that, we are evenly spread out. We, uh, really see that T-shape chapter influence as a positive thing. Yeah, so we have the teams who are more working on the products, and then we have the chapter, for us as BA, more on the, the skill set and the technical, uh, way of how you achieve, um, yeah, the BA approach. 
+
+00:02:39,700 --> 00:02:44,329 [Speaker 3]
+Yeah, that's also in line with the... I wrote down in Ne- in Dutch it's borgen, and I think- 
+
+00:02:44,329 --> 00:02:44,360 [Speaker 0]
+Mm-hmm 
+
+00:02:44,360 --> 00:02:51,200 [Speaker 3]
+... the right English word is securing. It's making sure that what we discuss in the chapters- 
+
+00:02:51,200 --> 00:02:51,840 [Speaker 2]
+Yeah 
+
+00:02:51,840 --> 00:02:59,500 [Speaker 3]
+... uh, what we think of all the processes is actually, um, [mic thudding] um, well, being secured. I don't like the English word, but- 
+
+00:02:59,500 --> 00:02:59,960 [Speaker 0]
+Mm. 
+
+00:02:59,960 --> 00:03:01,030 [Speaker 3]
+That, [chuckles] uh- 
+
+00:03:01,030 --> 00:03:01,030 [Speaker 2]
+Yeah 
+
+00:03:01,030 --> 00:03:02,420 [Speaker 3]
+... that's what borgen in- 
+
+00:03:02,420 --> 00:03:02,540 [Speaker 0]
+Mm-hmm 
+
+00:03:02,540 --> 00:03:06,880 [Speaker 3]
+... all the teams, the, um... And they're doing it in the same way. 
+
+00:03:06,880 --> 00:03:07,080 [Speaker 2]
+Yeah. 
+
+00:03:07,080 --> 00:03:08,900 [Speaker 3]
+Um. 
+
+00:03:08,900 --> 00:03:09,040 [Speaker 2]
+Yeah. 
+
+00:03:09,040 --> 00:03:23,660 [Speaker 0]
+So, yeah, I had that, too. So, like, more, more on the what side. So what is needed for that? So if you see a CTO saying ten percent or twenty percent, uh, should be allotted to the chapters, which is very in practice, you know- 
+
+00:03:23,660 --> 00:03:23,710 [Speaker 2]
+Mm 
+
+00:03:23,710 --> 00:03:26,100 [Speaker 0]
+... Sakura needs to be finished, and that needs to be- 
+
+00:03:26,100 --> 00:03:26,140 [Speaker 2]
+Yeah. 
+
+00:03:26,140 --> 00:03:28,980 [Speaker 0]
+So that's difficult to assert that influence. 
+
+00:03:28,980 --> 00:03:29,170 [Speaker 2]
+Yeah. 
+
+00:03:29,170 --> 00:03:47,920 [Speaker 0]
+Uh, so it also needs to come from bottom up. Indeed, the definition of ready, definition of done. Uh, chapters might, uh, fulfill part of those definition of readies and dones. I think there's no definition of ready officially in Scrum, but it at least the DoD is. Um, 
+
+00:03:47,920 --> 00:03:51,080 [Speaker 0]
+monitoring, for example, um, 
+
+00:03:51,080 --> 00:03:52,510 [Speaker 0]
+like now FNO needs- 
+
+00:03:52,510 --> 00:03:52,510 [Speaker 2]
+Yeah 
+
+00:03:52,510 --> 00:03:54,080 [Speaker 0]
+... to have Peppol ready, right? 
+
+00:03:54,080 --> 00:03:54,810 [Speaker 2]
+Yep. 
+
+00:03:54,810 --> 00:03:57,400 [Speaker 0]
+And if we don't, we can possibly get a fine of five- 
+
+00:03:57,400 --> 00:03:57,410 [Speaker 2]
+Yes 
+
+00:03:57,410 --> 00:03:59,800 [Speaker 0]
+... hundred euros per invoice not connected to Peppol. 
+
+00:03:59,800 --> 00:04:00,840 [Speaker 2]
+Yes. 
+
+00:04:00,840 --> 00:04:10,320 [Speaker 0]
+So that's a big risk. So you see the business then has a big- bigger influence, [chuckles] circle of influence. They already, almost already ha- always have, but- 
+
+00:04:10,320 --> 00:04:10,620 [Speaker 2]
+Mm-hmm 
+
+00:04:10,620 --> 00:04:27,960 [Speaker 0]
+... in this case, even more so. So, uh, the monitoring chapter literally falls apart, uh, also because operations is not complete now, and then FNO needs to do Peppol, and our first case, as presented in the IT kickoff, was we're going to work on that. 
+
+00:04:27,960 --> 00:04:28,599 [Speaker 2]
+Yeah. 
+
+00:04:28,600 --> 00:04:31,580 [Speaker 0]
+So, uh, no, we're not. [chuckles] 
+
+00:04:31,580 --> 00:04:35,840 [Speaker 2]
+No. Mm-hmm. But not... You're not gonna monitor then on, uh, Peppol? 
+
+00:04:35,840 --> 00:04:38,840 [Speaker 0]
+There's gonna be some monitoring processes there, but that's not- 
+
+00:04:38,840 --> 00:04:39,320 [Speaker 2]
+Yeah 
+
+00:04:39,320 --> 00:04:41,210 [Speaker 0]
+... the monitoring that we were talking about. 
+
+00:04:41,210 --> 00:04:41,219 [Speaker 2]
+Yeah. 
+
+00:04:41,220 --> 00:04:46,420 [Speaker 0]
+We're talking about the generic implementation of monitoring enablement at all- 
+
+00:04:46,420 --> 00:04:46,480 [Speaker 2]
+Mm-hmm 
+
+00:04:46,480 --> 00:04:48,140 [Speaker 0]
+... with FNO, which is not in place. 
+
+00:04:48,140 --> 00:04:54,060 [Speaker 2]
+Yes, which, which should be part of the user story to, yeah, implement, uh, solutions there. 
+
+00:04:54,060 --> 00:04:59,700 [Speaker 0]
+Yeah, but it's too big for them, too big of a risk. They rather go with Peppol online- 
+
+00:04:59,700 --> 00:04:59,880 [Speaker 2]
+Yeah 
+
+00:04:59,880 --> 00:05:05,760 [Speaker 0]
+... without observability, and it's always been the case. That's why, uh... So anyway, so that's- 
+
+00:05:05,760 --> 00:05:06,120 [Speaker 2]
+Mm-hmm. 
+
+00:05:06,120 --> 00:05:15,500 [Speaker 0]
+Uh, so first of all, uh, what happens then, IT presents, we need to cancel it. So we have all the things in place, like, you know, you were organizing that to- 
+
+00:05:15,500 --> 00:05:15,820 [Speaker 3]
+Yep 
+
+00:05:15,820 --> 00:05:20,720 [Speaker 0]
+... spread the word. There's also influence when, when chapters can- 
+
+00:05:20,720 --> 00:05:20,800 [Speaker 3]
+Yeah 
+
+00:05:20,800 --> 00:05:24,820 [Speaker 0]
+... we, uh, we would like it to have the chapters present at, uh, IT, uh, presents. 
+
+00:05:24,820 --> 00:05:25,580 [Speaker 3]
+Yep. 
+
+00:05:25,580 --> 00:05:28,260 [Speaker 0]
+'Cause then, like at the IT kickoff we do now, that- 
+
+00:05:28,260 --> 00:05:28,540 [Speaker 3]
+Yeah 
+
+00:05:28,540 --> 00:05:30,740 [Speaker 0]
+... that wasn't in place then before either. 
+
+00:05:30,740 --> 00:05:31,210 [Speaker 2]
+Mm-hmm. 
+
+00:05:31,210 --> 00:05:31,280 [Speaker 0]
+So- 
+
+00:05:31,280 --> 00:05:37,640 [Speaker 2]
+Often there are things we can share with the whole organization, right? Some, uh, new way of working or a new method or a new template. 
+
+00:05:37,640 --> 00:05:38,400 [Speaker 0]
+So that's part of- 
+
+00:05:38,400 --> 00:05:38,660 [Speaker 2]
+Can share 
+
+00:05:38,660 --> 00:05:39,760 [Speaker 0]
+... a new procedure or new- 
+
+00:05:39,760 --> 00:05:40,080 [Speaker 2]
+Yeah 
+
+00:05:40,080 --> 00:05:42,580 [Speaker 0]
+... well, not a procedure. It's already in place. Use it. 
+
+00:05:42,580 --> 00:05:42,920 [Speaker 3]
+Yeah. 
+
+00:05:42,920 --> 00:05:47,740 [Speaker 0]
+It's free time to say how wonderful your chapter is, right? So- 
+
+00:05:47,740 --> 00:05:48,280 [Speaker 2]
+Yes. 
+
+00:05:48,280 --> 00:05:48,900 [Speaker 0]
+Sell it. 
+
+00:05:48,900 --> 00:06:01,560 [Speaker 2]
+Yeah. And it sells itself because, hey, um, people will know if you... I think if you explain it the right way, people will know why- which value is there, right? And why it's important. Uh-
+
+00:06:02,780 --> 00:06:09,640 [Speaker 0]
+... but that needs influence and, uh, a different, uh, way of value stream and, and giving precedent to- 
+
+00:06:09,640 --> 00:06:09,659 [Speaker 4]
+Yeah. 
+
+00:06:09,659 --> 00:06:18,919 [Speaker 0]
+But with Peppol, it's, uh, maybe-- Well, it's also, uh, way too late that they started. I'm not gonna do a retro on that, but- [laughing] 
+
+00:06:18,919 --> 00:06:21,140 [Speaker 4]
+I did a retro for Peppol, actually. 
+
+00:06:21,140 --> 00:06:21,959 [Speaker 2]
+Yeah, I think- 
+
+00:06:21,960 --> 00:06:24,039 [Speaker 0]
+But, but, but they do now already- 
+
+00:06:24,039 --> 00:06:24,050 [Speaker 4]
+Yeah 
+
+00:06:24,050 --> 00:06:25,690 [Speaker 0]
+... far from, but it's always been a problem. Now, this is- 
+
+00:06:25,690 --> 00:06:25,690 [Speaker 4]
+Yeah 
+
+00:06:25,690 --> 00:06:29,280 [Speaker 0]
+... more important right now, right? So yeah, that's like if you- 
+
+00:06:29,280 --> 00:06:29,289 [Speaker 4]
+Mm-hmm 
+
+00:06:29,289 --> 00:06:36,320 [Speaker 0]
+... put the business in, uh, in certain chapters, it might be at least get more awareness. 
+
+00:06:36,320 --> 00:06:37,340 [Speaker 4]
+Yeah, within business. 
+
+00:06:37,340 --> 00:06:38,530 [Speaker 0]
+Yes. 
+
+00:06:38,530 --> 00:06:43,099 [Speaker 4]
+And if the drive comes from that side, then it's easier to implement it. 
+
+00:06:43,099 --> 00:06:56,599 [Speaker 0]
+So the what is also, uh, in the involve the business, if you can, in your chapter, invite them. IT presents, use the, the, the ceremonies that are there, and then, uh, the how we just, uh, also discussed. 
+
+00:06:56,599 --> 00:06:56,840 [Speaker 4]
+Yeah. 
+
+00:06:56,840 --> 00:07:08,440 [Speaker 2]
+Sounds like a good idea. For me, one of the most important things with the, the, the chapter is also just the value it gives for the team members. And I, uh, I'm not sure about the English word, but I want to keep it, uh, laagdrempelig. 
+
+00:07:08,440 --> 00:07:09,080 [Speaker 0]
+Mm-hmm. 
+
+00:07:09,080 --> 00:07:11,940 [Speaker 2]
+Yeah, so everyone knows what that means, laagdrempelig? 
+
+00:07:11,940 --> 00:07:12,850 [Speaker 0]
+Low-key. 
+
+00:07:12,850 --> 00:07:12,880 [Speaker 2]
+Low-key. 
+
+00:07:12,880 --> 00:07:13,459 [Speaker 4]
+Easygoing, low-key. 
+
+00:07:13,460 --> 00:07:14,219 [Speaker 2]
+Yeah, easygoing. 
+
+00:07:14,219 --> 00:07:14,270 [Speaker 4]
+Yeah. 
+
+00:07:14,270 --> 00:08:13,239 [Speaker 2]
+Uh, so that all members have a feeling that they want to be part of it, they want to be part of a little community of people working on the same su-subject. And what's very important is that we, uh, share our issues, but also share our successes, and then these successes are input for s- a standardized way of working. So that leads to the operational excellence, because then we find out what works best for this organization. And with that approach, I feel like sometimes I only need one or two hours on average from people in the chapter right now, and because they don't have a feeling it's, it's a burden, it works really well for us, and they want to be part of it. And sometimes it's just also a place of sharing what's going on, if you're stuck with something, also privately, just as a, yeah, a little community. And so we've got that part pretty well covered, I think. But then maybe, uh, for us, there's room to be more promotional to the outside as well, connect more with others. Yeah. 
+
+00:08:13,239 --> 00:08:15,999 [Speaker 0]
+So 
+
+00:08:16,000 --> 00:08:23,299 [Speaker 0]
+the how in the chapter lead, think is a value- valuable, because then we can all get aligned on the values that each chapter should have- 
+
+00:08:23,299 --> 00:08:23,308 [Speaker 2]
+Yeah 
+
+00:08:23,308 --> 00:08:24,558 [Speaker 0]
+... or should strive for, right? 
+
+00:08:24,560 --> 00:08:24,900 [Speaker 2]
+Yeah. 
+
+00:08:24,900 --> 00:08:26,020 [Speaker 0]
+That's, uh, from the leads. 
+
+00:08:26,020 --> 00:08:26,980 [Speaker 2]
+Yes. 
+
+00:08:26,980 --> 00:08:30,140 [Speaker 0]
+Uh, lead by example, as they say. That's- 
+
+00:08:30,140 --> 00:08:30,980 [Speaker 2]
+Yeah. 
+
+00:08:30,980 --> 00:08:31,220 [Speaker 0]
+Okay. 
+
+00:08:31,220 --> 00:08:33,059 [Speaker 2]
+That's a good one. 
+
+00:08:33,059 --> 00:08:35,579 [Speaker 0]
+Um, 
+
+00:08:35,579 --> 00:08:47,800 [Speaker 0]
+yeah, that, that's part of it ties kind of into the golden paths, uh, which is, uh, not only how do we implement things end-to-end, observability through monitoring, good business requirement and analysis before we start to build. 
+
+00:08:47,800 --> 00:08:49,020 [Speaker 2]
+Yeah. 
+
+00:08:49,020 --> 00:09:03,060 [Speaker 0]
+Uh, [chuckles] good, uh, well, for you, it's like, uh, more data stewardness with the, with the business. Um, and then for agile way of work, you also have, I think, a lot of things that can, uh, also im- 
+
+00:09:03,060 --> 00:09:03,660 [Speaker 4]
+Yeah 
+
+00:09:03,660 --> 00:09:09,219 [Speaker 0]
+... prove, but then the thing, the golden path is, is it aligned 
+
+00:09:09,220 --> 00:09:14,300 [Speaker 0]
+as a, as a golden path? Is this what we want to achieve on the horizontals over the teams? 
+
+00:09:14,300 --> 00:09:16,800 [Speaker 2]
+With the chapter, with the main goal of the chapters? Yeah. 
+
+00:09:16,800 --> 00:09:17,400 [Speaker 0]
+Yes. 
+
+00:09:17,400 --> 00:09:42,480 [Speaker 2]
+But for, for me, I think that, uh, really fits. It's, it's a place of people with the same skill set, trying to improve their way of working, their skill set for the work field, and there's a sense of belonging. I think these three together is more than enough for a good basis of why we should have a chapter, and it's shouldn't be more complicated than that, uh, to me, because, uh, that simplicity, it adds value. 
+
+00:09:42,480 --> 00:09:44,659 [Speaker 0]
+Yeah. So that's in the chapter, but I'm also- 
+
+00:09:44,660 --> 00:09:44,670 [Speaker 2]
+Yeah 
+
+00:09:44,670 --> 00:09:47,469 [Speaker 0]
+... zooming out on the chapter lead sync. So the common- 
+
+00:09:47,469 --> 00:09:47,469 [Speaker 2]
+Okay. Yeah 
+
+00:09:47,469 --> 00:09:48,980 [Speaker 0]
+... lead leadership values- 
+
+00:09:48,980 --> 00:09:49,010 [Speaker 2]
+Yes 
+
+00:09:49,010 --> 00:09:49,680 [Speaker 0]
+... right? So. 
+
+00:09:49,680 --> 00:10:44,550 [Speaker 2]
+Yeah, I think we, in my opinion, we then align what works for us. So how, how to set up a chapter or to set up a guild, a team, what works there, and, uh, yeah, we can share our experiences with each other, and it's also very good. Uh, I've been there five, six times now. For me, it has been a very, uh, valuable, uh, place of information that I didn't hear anywhere else. So I think in our position, we often hear, uh, organizational changes or new templates, or interpersonal changes quite early, and it's nice to be in sync and aligned on that and apply it to our own, uh, chapters. And if we meet once every two weeks, it's a perfect rhythm for me at least. Uh, I've experienced so far a good rhythm, not too, not too often, not too sparse, sparse. Um, yeah, to share with each other. Yeah. 
+
+00:10:44,550 --> 00:10:44,579 [Speaker 4]
+Yeah. 
+
+00:10:44,579 --> 00:11:03,440 [Speaker 2]
+But I, I also think it adds, adds value if we talk about what the chapters are working on, because if I'm hearing it correctly, this is now, like, purely process and, uh, talking about the chapter organization. But I think the most value is also if, if we as chapter leads talk about what we're working on- 
+
+00:11:03,440 --> 00:11:03,599 [Speaker 0]
+Yeah 
+
+00:11:03,599 --> 00:11:08,860 [Speaker 2]
+... in the chapter and where does it, um, uh, touch each other? 
+
+00:11:08,860 --> 00:11:09,280 [Speaker 0]
+Yeah. 
+
+00:11:09,280 --> 00:11:16,240 [Speaker 2]
+Uh, where do we need to-- Where do we need each other, or where do we need to act as a group, uh, in the same direction? 
+
+00:11:16,240 --> 00:11:17,440 [Speaker 0]
+Yeah, good one. Yeah. 
+
+00:11:17,440 --> 00:11:20,829 [Speaker 2]
+Um, I think that's what adds the value here. 
+
+00:11:20,829 --> 00:11:20,880 [Speaker 0]
+Yeah. 
+
+00:11:20,880 --> 00:11:26,940 [Speaker 2]
+If we want to achieve operational excellence altogether, we shouldn't be on our own island then. 
+
+00:11:26,940 --> 00:11:28,579 [Speaker 0]
+It's also of the whole path. 
+
+00:11:28,579 --> 00:11:29,260 [Speaker 2]
+Yeah. 
+
+00:11:29,260 --> 00:11:30,849 [Speaker 4]
+Yeah. [chuckles] 
+
+00:11:30,849 --> 00:11:37,120 [Speaker 0]
+Yep. So you-- But, uh, in retrospect, uh, do you think we're not doing that, or are we doing it, or could we? 
+
+00:11:37,120 --> 00:11:41,200 [Speaker 2]
+Maybe not, uh, not, uh, enough yet. 
+
+00:11:41,200 --> 00:11:41,440 [Speaker 0]
+Right. 
+
+00:11:41,440 --> 00:12:00,169 [Speaker 2]
+So I do think that we discuss things where the chapters, uh, touch each other, um, but it's still on a very, um, high level, more like, okay, we, uh, um, discussed that we're gonna take this ne- next step together, and then that's it. 
+
+00:12:00,169 --> 00:12:00,940 [Speaker 0]
+Yeah. No, it- 
+
+00:12:00,940 --> 00:12:01,310 [Speaker 2]
+[chuckles] 
+
+00:12:01,310 --> 00:12:05,329 [Speaker 0]
+... Yeah, I understand, but, you know, w- when you have QA chapter and BA chapter- 
+
+00:12:05,329 --> 00:12:05,329 [Speaker 2]
+Mm 
+
+00:12:05,329 --> 00:12:15,424 [Speaker 0]
+... they might align on more topics, uh, than maybe, um, well, I'm saying it, um-... uh, monitoring chapter versus agile way of work, for example- 
+
+00:12:15,424 --> 00:12:15,464 [Speaker 2]
+Yeah. 
+
+00:12:15,464 --> 00:12:19,454 [Speaker 0]
+Right? It, uh, 'cause it's like a technical thing. 
+
+00:12:19,454 --> 00:12:19,484 [Speaker 2]
+Yeah. 
+
+00:12:19,484 --> 00:12:23,384 [Speaker 0]
+And the q- quality assurance and, uh, business requirements go hand in hand- 
+
+00:12:23,384 --> 00:12:23,394 [Speaker 2]
+Yeah 
+
+00:12:23,394 --> 00:12:31,884 [Speaker 0]
+... because if the requirements weren't proper, then you're gonna have, um, uh, people mad from the UAT. Uh, this doesn't work the way we- 
+
+00:12:31,884 --> 00:12:31,894 [Speaker 2]
+Yeah 
+
+00:12:31,894 --> 00:12:42,574 [Speaker 0]
+... it said on the, should say on the tin. Uh, so release management chapter for me, for example, is very, uh, unreachable often. 
+
+00:12:42,574 --> 00:12:42,584 [Speaker 2]
+Mm. 
+
+00:12:42,584 --> 00:12:57,883 [Speaker 0]
+It's like there's an update, but I-- well, I could imagine what it could be for software developers and lead engineer, but not for the monitoring chapter per se, for example. I don't, don't have many connections, connectivity there- 
+
+00:12:57,884 --> 00:12:57,894 [Speaker 2]
+Mm 
+
+00:12:57,894 --> 00:13:11,664 [Speaker 0]
+... to be honest. Uh, brings me to the, uh, also another thing maybe, or do we still want to revisit this topic? 'Cause, uh, I had a, like a jump to the h- to the what in the, uh- 
+
+00:13:11,664 --> 00:13:12,524 [Speaker 5]
+That's okay, go for it. 
+
+00:13:12,524 --> 00:13:12,904 [Speaker 2]
+Yeah. 
+
+00:13:12,904 --> 00:13:15,684 [Speaker 0]
+In the attendance and, and, and tenants and proxy. 
+
+00:13:15,684 --> 00:13:16,564 [Speaker 5]
+Mm-hmm. 
+
+00:13:16,564 --> 00:13:23,994 [Speaker 0]
+So, uh, sometimes members aren't there, and there's no proxy, there's no other member being put forward. Um- 
+
+00:13:23,994 --> 00:13:25,024 [Speaker 2]
+In the chapter lead sync. 
+
+00:13:25,024 --> 00:13:26,194 [Speaker 0]
+In the chapter lead sync. 
+
+00:13:26,194 --> 00:13:26,204 [Speaker 2]
+Yeah. 
+
+00:13:26,204 --> 00:13:28,204 [Speaker 0]
+And I think that is vital- 
+
+00:13:28,204 --> 00:13:28,604 [Speaker 2]
+Yeah 
+
+00:13:28,604 --> 00:13:33,604 [Speaker 0]
+... to have at least the person who proxies, we're not gonna bite your head off. 
+
+00:13:33,604 --> 00:13:33,774 [Speaker 2]
+Mm-hmm. 
+
+00:13:33,774 --> 00:13:36,984 [Speaker 0]
+Uh, so it's not, uh, so to fulfill or anything. 
+
+00:13:36,984 --> 00:13:36,994 [Speaker 2]
+Mm-hmm. 
+
+00:13:36,994 --> 00:13:43,664 [Speaker 0]
+Uh, it might be that the person doesn't know enough a- much about the topics, but at least, um, can be there to give- 
+
+00:13:43,724 --> 00:13:43,734 [Speaker 2]
+Yeah 
+
+00:13:43,734 --> 00:13:46,504 [Speaker 0]
+... some input or receive some input back. 
+
+00:13:46,504 --> 00:13:52,304 [Speaker 2]
+So a replacement, if you can't be available, there's a replacement that, uh, can, uh, take the role. 
+
+00:13:52,304 --> 00:13:52,804 [Speaker 0]
+Yeah. 
+
+00:13:52,804 --> 00:13:58,644 [Speaker 5]
+I think that's a good agreement that we maybe didn't make explicit before. Um- 
+
+00:13:58,644 --> 00:13:59,104 [Speaker 2]
+Yep. 
+
+00:13:59,104 --> 00:14:01,344 [Speaker 0]
+I said it once or twice, but it maybe not- 
+
+00:14:01,344 --> 00:14:01,534 [Speaker 5]
+Yeah. 
+
+00:14:01,534 --> 00:14:24,374 [Speaker 2]
+Yeah, if you have the feeling that you missed it, of course, it's, uh, it's good to share, and in my opinion, it can be now to retro, but at any moment through chat or in the regular meetings, it's always, uh, good to share the feedback. And I, I have, I have the feeling that, uh, everyone is welcoming e- everything, yeah, also feedback. So, uh, I feel free to share. 
+
+00:14:24,374 --> 00:14:29,034 [Speaker 1]
+Yeah, it should basically be just be able to roll down. So chapter lead, and the chapter lead is not available, any other members- 
+
+00:14:29,034 --> 00:14:29,034 [Speaker 0]
+Yes 
+
+00:14:29,034 --> 00:14:30,534 [Speaker 1]
+... of that chapter should be able to- 
+
+00:14:30,534 --> 00:14:30,534 [Speaker 5]
+Exactly 
+
+00:14:30,534 --> 00:14:31,504 [Speaker 1]
+... to step in. 
+
+00:14:31,504 --> 00:14:34,133 [Speaker 0]
+Somebody, somebody from the business. [chuckles] 
+
+00:14:34,133 --> 00:14:34,544 [Speaker 5]
+[chuckles] 
+
+00:14:34,544 --> 00:14:34,864 [Speaker 2]
+Yes. 
+
+00:14:34,864 --> 00:14:48,754 [Speaker 1]
+Uh, that... The way I think of it is that, uh, the, what we do as the chapters should basically be guidelines for success, for how do we deliver value, and that should be in business as well. So if I'm thinking of it, like monitoring- 
+
+00:14:48,754 --> 00:14:48,754 [Speaker 5]
+Mm 
+
+00:14:48,754 --> 00:14:58,104 [Speaker 1]
+... should actually be very important for business, because if the monitoring isn't preemptively warning us of stuff going down, then business is gonna get it in the ear from a client. 
+
+00:14:58,104 --> 00:15:15,344 [Speaker 0]
+Yeah, like monitoring is a tech thing. CTO might say it's difficult to sell it to the business. If the business was in the monitoring chapter, they would know what we're working on and would have more input: "Hey, listen, if you guys are working on that, that's something we'd like to see already on a dashboard or whatever," right? "This is already very helpful for us." 
+
+00:15:15,344 --> 00:15:15,804 [Speaker 1]
+Yeah. 
+
+00:15:15,804 --> 00:15:25,724 [Speaker 0]
+Then, then you know, but now, now we don't, 'cause it's a technical party, so to speak. It's not, uh, it's like getting our own shit in order, uh, in the, by our backyard, backyard- 
+
+00:15:25,724 --> 00:15:25,804 [Speaker 1]
+Yeah 
+
+00:15:25,804 --> 00:15:26,924 [Speaker 0]
+... instead of- 
+
+00:15:26,924 --> 00:15:32,264 [Speaker 1]
+If my monitoring was up, I could say, "Ah, the reporting in this area is gonna be wrong because this data was not updated- 
+
+00:15:32,264 --> 00:15:32,274 [Speaker 0]
+Right 
+
+00:15:32,274 --> 00:15:33,044 [Speaker 1]
+... in this period." 
+
+00:15:33,044 --> 00:15:33,244 [Speaker 0]
+Right. 
+
+00:15:33,244 --> 00:15:35,404 [Speaker 1]
+We can preemptively tell business that, "Hey, this is gonna be wrong-" 
+
+00:15:35,404 --> 00:15:38,064 [Speaker 0]
+Proactive, yeah, proactively, uh, take action. Yeah. 
+
+00:15:38,064 --> 00:15:43,004 [Speaker 1]
+Yes, and then it's not a shock to them when something is wrong, or it's not a shock to the clients when something is- 
+
+00:15:43,004 --> 00:15:48,163 [Speaker 0]
+That's even worse. [chuckles] But that's, uh... Yeah. 
+
+00:15:48,164 --> 00:15:54,544 [Speaker 1]
+And also the, the ways of working that we learned from, like definition of ready and definition of done. 
+
+00:15:54,544 --> 00:15:54,964 [Speaker 5]
+Mm-hmm. 
+
+00:15:54,964 --> 00:15:58,124 [Speaker 1]
+Well, technically, it's only done when we do it with business. So business should also- 
+
+00:15:58,124 --> 00:15:59,564 [Speaker 5]
+Yeah 
+
+00:15:59,564 --> 00:16:01,764 [Speaker 1]
+... be what their contribution is to getting to done. 
+
+00:16:01,764 --> 00:16:02,693 [Speaker 5]
+Yeah, exactly. 
+
+00:16:02,693 --> 00:16:15,844 [Speaker 1]
+And if they have that method of working, and then it makes it easier for everybody. If the business and, if the business chapter, uh, business analyst side has it with business as well as to, "Hey, this is the inputs that are required to do this type of work," then 
+
+00:16:15,844 --> 00:16:16,644 [Speaker 1]
+great. 
+
+00:16:16,644 --> 00:16:16,774 [Speaker 0]
+Mm-hmm. 
+
+00:16:16,774 --> 00:16:29,824 [Speaker 1]
+And it's also definitely keep it simple, and it doesn't need to be anything explosively difficult. But if we're all aligned and business is being aligned at that same time, it just make everything easier. 
+
+00:16:29,883 --> 00:16:32,523 [Speaker 0]
+Yeah, but you cannot 
+
+00:16:32,524 --> 00:17:00,904 [Speaker 0]
+cover everything with the chapters because there are some stuff like when you... At b- business, so like for example, CPO, right? The personnel doesn't wanna receive that anymore on CCS, they wanna have an API integration, and that's basically the questions we get. It's a very simple question, yet the, the team didn't know, wasn't ready for build. Uh, product didn't know yet. BA, of course, didn't know yet because they can only w- write the business requirements when product knows. 
+
+00:17:00,904 --> 00:17:03,304 [Speaker 2]
+Yes, so when there is a request, then we want to, uh- 
+
+00:17:03,304 --> 00:17:18,024 [Speaker 0]
+Uh, and then the customer doesn't really know what they want. So, but it's already, "Yeah, it needs to be done in September," and it went by the beer, uh, uh, big room planning. It's on the planning. No chapter is going to prevent that because it's a specific 
+
+00:17:18,024 --> 00:17:24,003 [Speaker 0]
+part of our digital product and not one of the disciplines that we're in across the board, 'cause we're pretty generic, right? 
+
+00:17:24,003 --> 00:17:24,424 [Speaker 1]
+Yeah. 
+
+00:17:24,424 --> 00:17:32,124 [Speaker 0]
+Yeah. And so we should be, 'cause the team goes about the details, and we go about the horizontals. So I'm kind of worried, 
+
+00:17:32,124 --> 00:17:43,084 [Speaker 0]
+how much influence do we then really have on the- on those parts? I don't think we can prevent that. We can raise some awareness, but helps a little bit, but- 
+
+00:17:43,084 --> 00:18:00,364 [Speaker 1]
+Yeah, that, that's why my question is: How do you influence business with the chapters? Because I can see the influence on the IT side, and it is an improvement, but I think to get to the, the excellence stage, we need to basically get that influence into business as well. 
+
+00:18:00,364 --> 00:18:01,804 [Speaker 0]
+Value stream chapter- 
+
+00:18:01,804 --> 00:18:01,944 [Speaker 1]
+Yeah 
+
+00:18:01,944 --> 00:18:03,144 [Speaker 0]
+... something like that. 
+
+00:18:03,144 --> 00:18:07,964 [Speaker 1]
+So the, yeah, so the value streams basically start working in the way- 
+
+00:18:07,964 --> 00:18:09,614 [Speaker 0]
+Yeah, 'cause they're also not synced up, eh- 
+
+00:18:09,614 --> 00:18:09,614 [Speaker 1]
+Yeah 
+
+00:18:09,614 --> 00:18:17,304 [Speaker 0]
+... those two, B2B, B2B, B2C. So but the thing is, the business does not do this agile or Spotify model. 
+
+00:18:17,304 --> 00:18:17,364 [Speaker 5]
+No. 
+
+00:18:17,364 --> 00:18:18,964 [Speaker 0]
+So that's, uh- 
+
+00:18:18,964 --> 00:18:20,164 [Speaker 5]
+They don't even have-
+
+00:18:20,520 --> 00:18:24,120 [Speaker 6]
+... sometimes they don't even have backlogs and stuff like that, so. 
+
+00:18:24,120 --> 00:18:26,500 [Speaker 0]
+And then again, our influence, how much is that? [chuckles] 
+
+00:18:26,500 --> 00:18:37,400 [Speaker 2]
+That's then more on a, uh-- That's a good subject, right? Because, uh, what is the impact of the fact that the way of working with the business differs with IT so much? Uh, how... That's a big one then. And then, 
+
+00:18:37,400 --> 00:18:44,800 [Speaker 2]
+are our conversations going on well about the way of working for the business, or isn't that a, uh, an actual topic for them- 
+
+00:18:44,800 --> 00:18:44,900 [Speaker 6]
+Yeah 
+
+00:18:44,900 --> 00:18:48,300 [Speaker 2]
+... to align in a structured way of working? 
+
+00:18:48,300 --> 00:18:49,460 [Speaker 6]
+Yeah, so I also wrote- 
+
+00:18:49,460 --> 00:18:49,470 [Speaker 2]
+Mm-hmm 
+
+00:18:49,470 --> 00:18:51,200 [Speaker 6]
+... wrote down mandate. 
+
+00:18:51,200 --> 00:18:51,320 [Speaker 2]
+Yeah. 
+
+00:18:51,320 --> 00:19:08,460 [Speaker 6]
+It has to do with this, right? So what is the mandate of the, the chapters, uh, or maybe what is the focus of the scope of the chapters, um, in achieving operational excellence? I think that's the, the question here. [chuckles] 
+
+00:19:08,460 --> 00:19:09,660 [Speaker 1]
+Yeah. 
+
+00:19:09,660 --> 00:19:40,420 [Speaker 0]
+Yeah, I mean, it's a tough, tough one because we have the report coming Thursday as well, the outcome, which goes obviously about culture change. And, um, if you sit with the same business people all the time, or the same developers for that matter, and you don't sit with other people in different ways of work in chapters or horizontals, you keep talking in your own bubble, right? It's just you don't get the input, you don't get the insights. Um, so I'm all for it. If I could get a le- mandate as chapter lead, that would mean 
+
+00:19:40,420 --> 00:19:46,640 [Speaker 0]
+that, uh... or, uh, sorry, chapter lead, lead, sync lead. [chuckles] The lead of all the chapter leads. 
+
+00:19:46,640 --> 00:19:47,680 [Speaker 6]
+Yeah. 
+
+00:19:47,680 --> 00:19:49,040 [Speaker 0]
+That 
+
+00:19:49,040 --> 00:19:59,220 [Speaker 0]
+that is then the person who needs to get the mandate, uh, but also the help of, uh, the agile way of working, the coaching, agile coaching for the business, because they don't- 
+
+00:19:59,220 --> 00:19:59,290 [Speaker 6]
+They- 
+
+00:19:59,290 --> 00:20:00,180 [Speaker 0]
+... they have to be coached. 
+
+00:20:00,180 --> 00:20:02,200 [Speaker 6]
+Yeah, they don't know. [chuckles] 
+
+00:20:02,200 --> 00:20:03,340 [Speaker 0]
+Uh, they don't know. 
+
+00:20:03,340 --> 00:20:04,140 [Speaker 6]
+They don't have to. [chuckles] 
+
+00:20:04,140 --> 00:20:06,080 [Speaker 0]
+No. So- 
+
+00:20:06,080 --> 00:20:16,420 [Speaker 1]
+Well, as I'm saying, they, they also don't know that well how to engage with business analysts, and, and they don't know what they need to know to engage with the business analysts. They don't know what they need to know to engage with us. 
+
+00:20:16,420 --> 00:20:18,150 [Speaker 2]
+Don't feed with own consumptions. 
+
+00:20:18,150 --> 00:20:18,180 [Speaker 1]
+Yeah. 
+
+00:20:18,180 --> 00:20:19,940 [Speaker 2]
+There's a sign in front of us. Uh, 
+
+00:20:19,940 --> 00:20:20,400 [Speaker 1]
+Yeah. 
+
+00:20:20,400 --> 00:20:27,100 [Speaker 2]
+No, but, but honestly, they, uh, yeah, for some reason, do you have a feeling that they don't 
+
+00:20:27,100 --> 00:20:29,679 [Speaker 2]
+approach us for a specific reason or don't know how to? 
+
+00:20:29,679 --> 00:20:34,840 [Speaker 1]
+I think they don't-- I don't think they know what they need to approach us for in certain areas. 
+
+00:20:34,840 --> 00:20:35,340 [Speaker 2]
+Yeah. 
+
+00:20:35,340 --> 00:20:39,180 [Speaker 1]
+Sometimes the questions we get highlight that they don't understand. 
+
+00:20:39,180 --> 00:20:39,420 [Speaker 2]
+Yeah. 
+
+00:20:39,420 --> 00:20:40,360 [Speaker 6]
+Yeah, exactly. 
+
+00:20:40,360 --> 00:20:44,260 [Speaker 1]
+So I think that's why I'm, that's why I, my hope is that the chapters- 
+
+00:20:44,260 --> 00:20:44,290 [Speaker 0]
+Mm-hmm. 
+
+00:20:44,290 --> 00:20:46,500 [Speaker 1]
+Because I've seen the improvement for the year in Abetterworld. 
+
+00:20:46,500 --> 00:20:46,580 [Speaker 0]
+Mm-hmm. 
+
+00:20:46,580 --> 00:20:48,880 [Speaker 1]
+I've seen the improvement in IT. 
+
+00:20:48,880 --> 00:20:49,020 [Speaker 0]
+Mm-hmm. 
+
+00:20:49,020 --> 00:20:52,460 [Speaker 1]
+It would be great if that improvement can also feed through to business. 
+
+00:20:52,460 --> 00:21:06,920 [Speaker 2]
+I think that one of the actions that we could take is maybe that we, as chapter leads, uh, have an alignment with the business leads and then can inform them about which subject they have to be at, at which department. So we help them 
+
+00:21:06,920 --> 00:21:17,880 [Speaker 2]
+connecting with the right people earlier in the process, right? For example, if they have a new wish, they can con- contact the BA. If they want a, a report about a KPI, which is not there yet, they, uh, go to the data team, and so on. 
+
+00:21:17,880 --> 00:21:20,280 [Speaker 6]
+Yeah, but that's different than, than chapters, right? 
+
+00:21:20,280 --> 00:21:20,370 [Speaker 1]
+Mm-hmm. 
+
+00:21:20,370 --> 00:21:20,370 [Speaker 2]
+Yeah. 
+
+00:21:20,370 --> 00:21:21,500 [Speaker 6]
+Because then you're talking about- 
+
+00:21:21,500 --> 00:21:21,680 [Speaker 1]
+Yeah 
+
+00:21:21,680 --> 00:21:24,520 [Speaker 6]
+... roadmaps or, like, your backlog. 
+
+00:21:24,520 --> 00:21:26,400 [Speaker 1]
+No, this is more of the ways of working- 
+
+00:21:26,400 --> 00:21:26,520 [Speaker 6]
+Yeah 
+
+00:21:26,520 --> 00:21:31,450 [Speaker 1]
+... within their own business. So that, that when we're thinking of monitoring- 
+
+00:21:31,450 --> 00:21:31,480 [Speaker 0]
+Mm-hmm 
+
+00:21:31,480 --> 00:21:56,080 [Speaker 1]
+... and we're thinking of, "Oh, it's just monitoring of an IT to trigger th- certain things," like, "Oh, something has happened, raise an incident, or something's this, raise that." But also on the business side, that, hey, when something like this happens in monitoring and it raises an incident, that incident impacts your customer. So there needs to be, like, the way of thinking of, okay, monitoring doesn't just stop by IT. Monitoring actually goes down to relationship management with customers that, uh- 
+
+00:21:56,080 --> 00:21:56,660 [Speaker 0]
+Yeah. 
+
+00:21:56,660 --> 00:21:56,999 [Speaker 1]
+Yeah. 
+
+00:21:57,000 --> 00:22:11,060 [Speaker 0]
+Well, in that case, monitoring chapter could, for example, or any chapter could have their own backlog, and we have our own backlog. We just don't refine those insights ourselves with the business. So we're as guilty as because we don't enable the business, right? 
+
+00:22:11,060 --> 00:22:11,070 [Speaker 1]
+Yeah. 
+
+00:22:11,070 --> 00:22:12,640 [Speaker 0]
+You can also turn it around. 
+
+00:22:12,640 --> 00:22:12,780 [Speaker 1]
+Yeah. 
+
+00:22:12,780 --> 00:22:21,920 [Speaker 0]
+'Cause like you said, they don't know what's in it for me. They hear something about an incident in IT ops and a developer doing something, so they think, "Oh, well, that's their process. I'm, I'm..." 
+
+00:22:21,920 --> 00:22:23,219 [Speaker 1]
+Yeah. 
+
+00:22:23,220 --> 00:22:27,580 [Speaker 0]
+But they should know that it, it impacts their customer. Indeed, like you said. 
+
+00:22:27,580 --> 00:22:27,890 [Speaker 1]
+Yeah. 
+
+00:22:27,890 --> 00:22:37,280 [Speaker 0]
+So that aware-- actually, they should, uh, uh, really want to be in a chapter with your team, with the monitoring team- 
+
+00:22:37,280 --> 00:22:37,400 [Speaker 1]
+Yeah 
+
+00:22:37,400 --> 00:22:38,689 [Speaker 0]
+... or way of work team- 
+
+00:22:38,689 --> 00:22:38,749 [Speaker 1]
+Mm-hmm 
+
+00:22:38,749 --> 00:22:58,160 [Speaker 0]
+... to get acquainted with the way of work and see how they can give input, uh, in your chapter on, "Well, this is how we work." And then you say, "Yeah, but we could have a roadmap there, where we first start with," I don't know, "some sprint zeros or a, a, some design sprint thinking thing, idea," whatever you wanna do- 
+
+00:22:58,160 --> 00:22:58,500 [Speaker 6]
+Mm-hmm 
+
+00:22:58,500 --> 00:22:59,620 [Speaker 0]
+... to adopt that. 
+
+00:22:59,620 --> 00:23:22,639 [Speaker 1]
+It's not that they have to work in our way of working, but that they're aware of the way of working, so that they know what influence they can have and where they can improve the engagement, so that it's not a two-week delay before we get answers to questions that we po- pose to business. That if they know, "Hey, this is the guidance, and that guidance helps in us delivering the product to you, then help us help you." 
+
+00:23:22,640 --> 00:23:22,760 [Speaker 0]
+Mm-hmm. 
+
+00:23:22,760 --> 00:23:41,800 [Speaker 1]
+Um, and that's, I think, a way where the chapters can really work to work with business in it. 'Cause they don't have to be in our way of working, but if they're aware of the way of working, then subtle influences can start coming through. Like, hey, monitoring is important, so when we are setting a, a, setting up a new contract with- 
+
+00:23:41,800 --> 00:23:42,360 [Speaker 0]
+PostNL 
+
+00:23:42,360 --> 00:23:43,500 [Speaker 1]
+... PostNL or whoever- 
+
+00:23:43,500 --> 00:23:43,540 [Speaker 0]
+Mm 
+
+00:23:43,540 --> 00:23:52,470 [Speaker 1]
+... then certain terminologies that are in there actually go to monitoring. Certain terminologies are going to go to, yeah, customer care and things like that, and it- 
+
+00:23:52,470 --> 00:23:52,480 [Speaker 0]
+Yeah, but- 
+
+00:23:52,480 --> 00:23:54,160 [Speaker 1]
+All those building blocks need to be- 
+
+00:23:54,160 --> 00:24:03,060 [Speaker 0]
+Th- th- that's true, but the chapter should not be, uh... I mean, it's weird, we're talking about operational excellence here, but yet I'm saying the chapter shouldn't be in- involved in the operation thing. 
+
+00:24:03,060 --> 00:24:03,380 [Speaker 1]
+No. 
+
+00:24:03,380 --> 00:24:03,560 [Speaker 6]
+Yeah. 
+
+00:24:03,560 --> 00:24:23,360 [Speaker 0]
+So they, the, that means that they need to enable the people that are in the chapter across the teams, and that may be business, to actually, uh, start putting in the work. Like, so there's no definition of ready or done before monitoring is implemented. We write it down-... we know this, but it's not being done. 
+
+00:24:23,360 --> 00:24:24,040 [Speaker 1]
+Yeah. 
+
+00:24:24,040 --> 00:24:34,560 [Speaker 0]
+Right? It's not like the UAT says with the business owner, "Bim, [knocking] did you look properly at monitoring? Is it in-- Where is it in the release? I don't see it." 
+
+00:24:34,560 --> 00:24:34,700 [Speaker 1]
+Yeah. 
+
+00:24:34,700 --> 00:24:40,500 [Speaker 0]
+They don't, they don't. So it just happens. Goes through the gate. 
+
+00:24:40,500 --> 00:24:45,920 [Speaker 1]
+Yeah. And technically, if we're gonna fail at something in a contract, it's gonna be because we didn't monitor it. 
+
+00:24:45,920 --> 00:24:46,490 [Speaker 0]
+Exactly. 
+
+00:24:46,490 --> 00:24:46,520 [Speaker 1]
+Yeah. 
+
+00:24:46,520 --> 00:25:01,960 [Speaker 0]
+No observability. But the same thing goes for IT operations. With UAT, everything that gets... Well, now a release management thing, but everything that gets approved by UAT is not approved by IT operations. It is not. 
+
+00:25:01,960 --> 00:25:02,650 [Speaker 1]
+No. 
+
+00:25:02,650 --> 00:25:26,520 [Speaker 0]
+They just get-- This is strange, right? So with monitoring, we're with IT ops in there, and still we do not have the influence or the mandate. We don't feel the mandate either, or we could say, "You have to do this," but it's, it's, it's not being done because nobody at the quality gate on the deliverable says, [knocking] "This is missing. You have to-- You, you can't, you can't release this." 
+
+00:25:26,520 --> 00:25:31,080 [Speaker 1]
+No, currently, the influence you have is your personal relationships with 
+
+00:25:31,080 --> 00:25:34,220 [Speaker 1]
+other members. So Tobias is pushing 
+
+00:25:34,280 --> 00:25:36,180 [Speaker 1]
+the 
+
+00:25:36,180 --> 00:25:38,250 [Speaker 1]
+build chapters point in our- [laughing] 
+
+00:25:38,250 --> 00:25:40,300 [Speaker 7]
+[chuckles] Yeah. 
+
+00:25:40,300 --> 00:25:52,320 [Speaker 1]
+And, um, the Dave's influence on him is pushing it on our side, and the monitoring is pushing it on... Yeah, so it's not a, it's not a mandate, it's more of a personal relationships and personal influence that you can currently- 
+
+00:25:52,320 --> 00:25:52,490 [Speaker 7]
+You- 
+
+00:25:52,490 --> 00:25:53,060 [Speaker 1]
+... have. 
+
+00:25:53,060 --> 00:25:53,150 [Speaker 7]
+Yeah. 
+
+00:25:53,150 --> 00:25:54,360 [Speaker 0]
+Yeah. 
+
+00:25:54,420 --> 00:26:01,760 [Speaker 1]
+So it's not a, a gate where that's coming from. But in terms of that, getting to operational excellence, it needs to be more than just IT. It needs to be a- 
+
+00:26:01,760 --> 00:26:04,430 [Speaker 0]
+Exac-- I, I agree. Yeah. 
+
+00:26:04,430 --> 00:26:06,980 [Speaker 1]
+It needs to be a cultural change into business. 
+
+00:26:06,980 --> 00:26:08,140 [Speaker 0]
+Mm-hmm. 
+
+00:26:08,140 --> 00:26:17,740 [Speaker 1]
+Then the only way I can see that is if the chapters are actually business chap-- like, not IT business, but Inco eMobility chapters. 
+
+00:26:17,740 --> 00:26:18,880 [Speaker 0]
+Yeah, the whole company. 
+
+00:26:18,880 --> 00:26:19,000 [Speaker 1]
+Yeah. 
+
+00:26:19,000 --> 00:26:21,160 [Speaker 0]
+It's from, for everyone. It's not only for- 
+
+00:26:21,160 --> 00:26:21,240 [Speaker 1]
+Yeah, it's not only- 
+
+00:26:21,240 --> 00:26:45,140 [Speaker 2]
+But if, if hearing this, this conversation actually, uh, gives me some inspiration, like when, when we're having our two or bi-weekly meeting with the chapter leads, I think, and we can use a part of the meeting for the update, but also a part of the meeting to, uh, let this topic return o- on how we can connect with the rest of the organization to improve that, because I don't think this is solved in one session. 
+
+00:26:45,140 --> 00:26:46,580 [Speaker 0]
+Like a returning agenda- 
+
+00:26:46,580 --> 00:26:46,800 [Speaker 2]
+Yeah 
+
+00:26:46,800 --> 00:26:47,500 [Speaker 0]
+... standard. 
+
+00:26:47,500 --> 00:26:56,160 [Speaker 2]
+Besides that, we, what we have done in the past, that's like a little update on what's going on in your team, and do you have anything to share that's relevant? [sneezing] And the second part is, uh, how do we, uh- 
+
+00:26:56,160 --> 00:26:57,960 [Speaker 0]
+How can you improve your influence? 
+
+00:26:57,960 --> 00:27:00,180 [Speaker 2]
+Yeah. 
+
+00:27:00,180 --> 00:27:04,180 [Speaker 2]
+That would be nice then, so s- if I hear you, uh, 
+
+00:27:04,180 --> 00:27:06,709 [Speaker 2]
+saying all this. Yeah. 
+
+00:27:06,709 --> 00:27:16,260 [Speaker 1]
+Yeah. I think it's a good place to go, and because the, the returns on effort is reduced if we don't have business in it. 
+
+00:27:16,320 --> 00:27:27,120 [Speaker 0]
+What we did, though, with Bim, with Jeroen de Reuter, was that Jeroen came into the QA chapter to look at the overall strategy. We write a acceptance criteria for the UAT- 
+
+00:27:27,120 --> 00:27:27,720 [Speaker 1]
+Yeah 
+
+00:27:27,720 --> 00:27:48,640 [Speaker 0]
+... with a strategy for QA in there, Bim, business implementation management. Uh, so there is an article that went via the SteerCo as well. Now, I don't like SteerCos, but, um, uh... And I don't like programs. I like, I like agile and just having your backlog and a good value stream, but apparently there needs to be... But you know what I mean? It's- 
+
+00:27:48,640 --> 00:27:49,680 [Speaker 1]
+You need to influence the mandate. 
+
+00:27:49,680 --> 00:27:51,200 [Speaker 0]
+You need influence the mandate. 
+
+00:27:51,200 --> 00:27:51,640 [Speaker 1]
+Yeah. 
+
+00:27:51,640 --> 00:28:07,570 [Speaker 2]
+But what would help me a lot of times, maybe if we just draw on the board the different departments that we have and the actual people that own it, because I know the value stream leads with, uh, and the, the heads of, uh, the installation department, but maybe there are some departments that I can increase my cooperation with. And if- 
+
+00:28:07,570 --> 00:28:07,570 [Speaker 0]
+Yeah 
+
+00:28:07,570 --> 00:28:15,579 [Speaker 2]
+... we all know the, yeah, the stakeholder field, it may- might, uh, help me with, uh, contacting the right people. 
+
+00:28:15,580 --> 00:28:19,540 [Speaker 0]
+So when you are in innovation, let's say this is innovating ourselves, right? 
+
+00:28:19,540 --> 00:28:19,940 [Speaker 2]
+Yes. 
+
+00:28:19,940 --> 00:28:23,260 [Speaker 0]
+To improve. You have, uh, omgevings management- 
+
+00:28:23,260 --> 00:28:23,290 [Speaker 2]
+Yeah 
+
+00:28:23,290 --> 00:28:26,610 [Speaker 0]
+... it's called. Environment management, not sure if it's the right term. 
+
+00:28:26,610 --> 00:28:26,870 [Speaker 1]
+Mm-hmm. 
+
+00:28:26,870 --> 00:28:33,420 [Speaker 0]
+With your SWOT analysis, we don't have to do that. Who's your friend? Who's your foe? Who's your enemy, you know? Uh, who do I need to convince so- 
+
+00:28:33,420 --> 00:28:33,430 [Speaker 2]
+Mm-hmm 
+
+00:28:33,430 --> 00:28:35,070 [Speaker 0]
+... let's say, colleague, right? 
+
+00:28:35,070 --> 00:28:35,320 [Speaker 2]
+Yeah. Yeah. 
+
+00:28:35,320 --> 00:28:44,910 [Speaker 0]
+Uh, so that, uh, we had a colleague in innovation was completely-- she was completely focused on that, because we need to work with all kinds of external parties as well- 
+
+00:28:44,910 --> 00:28:44,920 [Speaker 2]
+Mm 
+
+00:28:44,920 --> 00:28:51,060 [Speaker 0]
+... to be innovative. So to truly innovate, you need connection. You cannot innovate in isolation. 
+
+00:28:51,060 --> 00:28:51,500 [Speaker 2]
+No. 
+
+00:28:51,500 --> 00:29:10,400 [Speaker 0]
+Nobody will understand what you're doing. So I think it's very good to write, to indeed look at the organizational chart. We need to look where they are, 'cause we got IT leadership. There are some charts there, but it's only about IT. I'm not sure where the business, uh, charts are. 
+
+00:29:10,400 --> 00:29:12,290 [Speaker 7]
+There is not. 
+
+00:29:12,290 --> 00:29:12,340 [Speaker 0]
+There is not? 
+
+00:29:12,340 --> 00:29:14,140 [Speaker 7]
+There is no overview of the business. 
+
+00:29:14,140 --> 00:29:15,820 [Speaker 0]
+So that's their first assignment. 
+
+00:29:15,820 --> 00:29:21,420 [Speaker 7]
+And this n- this is, uh, when I started here, I asked Leonie in the onboarding workshop. [chuckles] 
+
+00:29:21,420 --> 00:29:22,360 [Speaker 0]
+Literally, yeah. 
+
+00:29:22,360 --> 00:29:43,160 [Speaker 7]
+And, uh, Patricia was also there, and they both said, "Yeah, yeah, we need to do this." Um, I know that I made a start first, and Maarten made a start somewhere. Aaron did, uh, and it got nowhere. It's too much [chuckles] work from people outside of the- that whole area to do it, that they don't have the full overview. 
+
+00:29:43,160 --> 00:29:46,280 [Speaker 2]
+So invite Maarten and Leonie. We won't leave until- 
+
+00:29:46,280 --> 00:29:46,290 [Speaker 7]
+[laughing] 
+
+00:29:46,290 --> 00:29:49,040 [Speaker 2]
+... we have a picture. And if they don't know, they don't work for us. 
+
+00:29:49,040 --> 00:29:51,920 [Speaker 0]
+I, I think, I think that's one level maybe too high- 
+
+00:29:51,920 --> 00:29:51,930 [Speaker 2]
+Yeah 
+
+00:29:51,930 --> 00:29:53,160 [Speaker 0]
+... because we have leads- 
+
+00:29:53,160 --> 00:29:53,220 [Speaker 7]
+Mm 
+
+00:29:53,220 --> 00:29:57,060 [Speaker 0]
+... and the leads should know, like, uh, Eric should know who to go to and which per- 
+
+00:29:57,060 --> 00:29:57,080 [Speaker 7]
+Exactly 
+
+00:29:57,080 --> 00:30:00,340 [Speaker 0]
+... people are interesting assets to, et cetera. 
+
+00:30:00,340 --> 00:30:05,320 [Speaker 7]
+I would, I would expect that every lead or manager has the same one as we have in IT, right? 
+
+00:30:05,320 --> 00:30:06,410 [Speaker 2]
+Yeah, the one that Maarten- 
+
+00:30:06,410 --> 00:30:06,430 [Speaker 7]
+Because- 
+
+00:30:06,430 --> 00:30:07,240 [Speaker 2]
+... is always updating. 
+
+00:30:07,240 --> 00:30:07,390 [Speaker 7]
+Yeah. 
+
+00:30:07,390 --> 00:30:07,400 [Speaker 2]
+That's very clear. 
+
+00:30:07,400 --> 00:30:13,259 [Speaker 7]
+We have that one for IT, but I haven't seen anything similar to other- 
+
+00:30:13,260 --> 00:30:13,350 [Speaker 2]
+Yeah 
+
+00:30:13,350 --> 00:30:14,840 [Speaker 7]
+... teams or other departments. 
+
+00:30:14,840 --> 00:30:15,420 [Speaker 2]
+This will be really helpful. 
+
+00:30:15,420 --> 00:30:17,180 [Speaker 0]
+They all have leads. They all have leads. They're part of the- 
+
+00:30:17,180 --> 00:30:19,000 [Speaker 7]
+But they don't have, like, the overview- 
+
+00:30:19,000 --> 00:30:19,010 [Speaker 0]
+Yeah 
+
+00:30:19,010 --> 00:30:21,880 [Speaker 7]
+... on, uh, of the, of their team- 
+
+00:30:21,880 --> 00:30:21,890 [Speaker 0]
+Teams 
+
+00:30:21,890 --> 00:30:23,439 [Speaker 7]
+... or their, their organization. 
+
+00:30:23,440 --> 00:30:25,520 [Speaker 0]
+Oh, that's the only th- Oh, okay. Well, that's- 
+
+00:30:25,520 --> 00:30:26,840 [Speaker 7]
+I, I've never seen it. 
+
+00:30:26,840 --> 00:30:30,250 [Speaker 2]
+Do you rec- reconcile that one that Maarten is always updating, the one for IT? 
+
+00:30:30,250 --> 00:30:32,440 [Speaker 0]
+We, we-- We're at version fifteen now, since- 
+
+00:30:32,440 --> 00:30:34,310 [Speaker 2]
+Yeah, but I, I love it because it's so clear. 
+
+00:30:34,310 --> 00:30:34,319 [Speaker 0]
+Yeah, yeah. 
+
+00:30:34,320 --> 00:30:38,603 [Speaker 2]
+And if I-... need to know something, but, but having that for the other teams, that would really help for me to- 
+
+00:30:38,603 --> 00:30:45,882 [Speaker 0]
+But it could be that the reality will completely change from what's written down now, but that's okay. But at least you know who's who and what is what. 
+
+00:30:45,884 --> 00:30:49,063 [Speaker 2]
+Reality will always be rewritten. Yeah. 
+
+00:30:49,063 --> 00:30:52,313 [Speaker 1]
+At least if, even if the people in the thing is different- 
+
+00:30:52,313 --> 00:30:52,313 [Speaker 0]
+No, it's okay 
+
+00:30:52,313 --> 00:30:56,424 [Speaker 1]
+... at least if you know that that stream exists and that there's these kind of- 
+
+00:30:56,424 --> 00:31:02,244 [Speaker 0]
+I hope a lead per department knows what their people are doing, right? So, yeah, I mean, maybe it's not written down. 
+
+00:31:02,244 --> 00:31:02,833 [Speaker 6]
+Yeah. [chuckles] 
+
+00:31:02,833 --> 00:31:06,904 [Speaker 0]
+But maybe they can advise you without having everything on paper. 
+
+00:31:06,904 --> 00:31:06,934 [Speaker 1]
+Yeah. 
+
+00:31:06,934 --> 00:31:08,124 [Speaker 0]
+Uh, but yeah. 
+
+00:31:08,124 --> 00:31:22,783 [Speaker 1]
+Yeah, it might be worth it to bring in, like, the project managers, because there's so many of them within business, and they might be able to give more of like the... If it's not possible to get this, like, top-down view, maybe we can get, like, project-based views of the roles and the things that they're doing, because generally those projects- 
+
+00:31:22,783 --> 00:31:25,283 [Speaker 6]
+They're not, they're-- We don't have project managers, right? 
+
+00:31:25,283 --> 00:31:28,684 [Speaker 0]
+No, and nor should we. We should go to digital products, right? 
+
+00:31:28,684 --> 00:31:29,234 [Speaker 1]
+Yeah. 
+
+00:31:29,234 --> 00:31:31,764 [Speaker 0]
+So everything is value stream. 
+
+00:31:31,764 --> 00:31:37,843 [Speaker 1]
+We don't have project managers, but there's a lot of project managers in business. I keep getting reached out to by project managers for certain- 
+
+00:31:37,843 --> 00:31:42,123 [Speaker 6]
+But are, are, are-- Their roles are project managers? 
+
+00:31:42,123 --> 00:31:43,303 [Speaker 1]
+I'll double-check, but I think one of them was a project manager. 
+
+00:31:43,303 --> 00:31:46,603 [Speaker 0]
+Well, m- m- maybe their role is, but their function isn't. 
+
+00:31:46,603 --> 00:31:46,954 [Speaker 6]
+Oh, like that. 
+
+00:31:46,954 --> 00:31:49,244 [Speaker 0]
+There's a difference. 
+
+00:31:49,244 --> 00:31:49,674 [Speaker 1]
+Yeah. 
+
+00:31:49,674 --> 00:31:56,343 [Speaker 0]
+I, I think it's a residue from sales and, and, um, having a project like Albert Heijn and try to sell it, you know? 
+
+00:31:56,343 --> 00:31:56,404 [Speaker 6]
+Mm. 
+
+00:31:56,404 --> 00:31:56,744 [Speaker 1]
+Yeah. 
+
+00:31:56,744 --> 00:32:02,293 [Speaker 0]
+But that's not where we're going to as a tech company. We're going to, uh, value streams and- 
+
+00:32:02,293 --> 00:32:02,293 [Speaker 1]
+Yeah 
+
+00:32:02,293 --> 00:32:05,583 [Speaker 0]
+... uh, and not project, but value streams. We're not going to, uh- 
+
+00:32:05,583 --> 00:32:09,364 [Speaker 1]
+Then, uh, yeah, then it should be the value streams, too. 
+
+00:32:09,364 --> 00:32:23,333 [Speaker 0]
+I, I would expect that, uh, like, Sakura is a, is a myth, you know. It's, uh, always a moving target. The roadmap is too long, the market is volatile because it can change, and you see that we f- shift focus all the time. 
+
+00:32:23,333 --> 00:32:24,063 [Speaker 1]
+Yeah. 
+
+00:32:24,063 --> 00:32:27,404 [Speaker 0]
+So what is that long roadmap of that program then? 
+
+00:32:27,404 --> 00:32:37,614 [Speaker 2]
+Well, we can come to the conclusion that that approach isn't viable anymore, and we take a different approach. That's, uh... Isn't that, uh, what's slowly happening now? At least from my perspective, I haven't been involved, but, uh- 
+
+00:32:37,614 --> 00:32:43,352 [Speaker 0]
+Well, I hear it's, uh, Thursday, that's gonna happen. Or maybe, uh, targeted well. 
+
+00:32:43,352 --> 00:33:09,724 [Speaker 2]
+And then I think it's up to us as chapter leads just to realign with that and make sure that, uh, at least I think I will do it with my chapter, is to make sure that everyone is on board, understands everything, if there are questions, and just check in with everyone, and then see what it's gonna mean for our way of working. And if we are, we'll keep spread out, eh, into the organization to have our quality way of working, yeah, as high as possible for all the teams that are here. That's, I think, uh- 
+
+00:33:09,724 --> 00:33:10,184 [Speaker 0]
+Is that, uh- 
+
+00:33:10,184 --> 00:33:11,583 [Speaker 2]
+short-term approach. 
+
+00:33:11,583 --> 00:33:14,884 [Speaker 0]
+Don't know if anybody's a Star Wars fan, but this is like, this is the way. 
+
+00:33:14,884 --> 00:33:15,244 [Speaker 2]
+Yeah. 
+
+00:33:15,244 --> 00:33:16,444 [Speaker 0]
+Yeah. 
+
+00:33:16,444 --> 00:33:17,164 [Speaker 2]
+This is the way. 
+
+00:33:17,164 --> 00:33:17,364 [Speaker 0]
+This is- 
+
+00:33:17,364 --> 00:33:20,043 [Speaker 2]
+Obstacle is the way. Isn't that what they say, or this is the way? 
+
+00:33:20,043 --> 00:33:20,984 [Speaker 0]
+No, this is the way. 
+
+00:33:20,984 --> 00:33:22,184 [Speaker 2]
+This is the way. 
+
+00:33:22,184 --> 00:33:22,583 [Speaker 1]
+This way. 
+
+00:33:22,583 --> 00:33:27,144 [Speaker 2]
+I still have to play the new Star Wars game. It's really good, I heard, Battlefront. 
+
+00:33:27,144 --> 00:33:28,244 [Speaker 0]
+Okay, so- 
+
+00:33:28,244 --> 00:33:29,664 [Speaker 2]
+Yeah. 
+
+00:33:29,664 --> 00:33:41,343 [Speaker 0]
+Well, I do th- I do think when you look at the organization, that we have a very big opportunity to, to roll out chapters and also connect to the business a little more. Um, 
+
+00:33:41,343 --> 00:33:43,083 [Speaker 0]
+but that needs a culture change. 
+
+00:33:43,083 --> 00:33:43,322 [Speaker 1]
+Yeah. 
+
+00:33:43,323 --> 00:33:43,593 [Speaker 6]
+Yeah. 
+
+00:33:43,593 --> 00:33:46,254 [Speaker 0]
+And we cannot do that alone, so... 
+
+00:33:46,254 --> 00:33:46,264 [Speaker 1]
+No. 
+
+00:33:46,264 --> 00:34:00,543 [Speaker 2]
+But having an inviting hand is the first step, right? If we say, like: Okay, you can be part of our chapter if you're doing, uh, stuff related to data, and you feel, uh, connected, just join in, and, uh, we can improve our collaboration. 
+
+00:34:00,543 --> 00:34:02,204 [Speaker 0]
+Don't complain, but join in. 
+
+00:34:02,204 --> 00:34:02,352 [Speaker 2]
+Yeah. 
+
+00:34:02,352 --> 00:34:05,364 [Speaker 1]
+And I think for some of the chapters, it's easier. It will be easier to get- 
+
+00:34:05,364 --> 00:34:05,543 [Speaker 2]
+True 
+
+00:34:05,543 --> 00:34:06,904 [Speaker 1]
+... business to, to contribute. 
+
+00:34:06,904 --> 00:34:06,924 [Speaker 2]
+Yeah. 
+
+00:34:06,924 --> 00:34:12,743 [Speaker 1]
+But, um, in some chapters, it might be worth it just making, like, an observate- observer role 
+
+00:34:12,743 --> 00:34:23,904 [Speaker 1]
+and maybe getting somebody from customer care in for monitoring so that they, like, can see, "Ah, hey, if I-- If, if this was a monitoring trigger, I would not have two hundred calls." 
+
+00:34:23,964 --> 00:34:36,623 [Speaker 0]
+Right. But I, I, I thought when we started the conversation, that some chapters were difficult to unify with business needs, but as more as we talk, I would go beyond observation. I think 
+
+00:34:36,623 --> 00:34:48,534 [Speaker 0]
+if somebody, head of service desk or a lead or somebody who knows a lot about the process, we have Yisha, for example, been working here a very long time. He's not in a single chapter, as far as I... Well, maybe- 
+
+00:34:48,534 --> 00:34:49,264 [Speaker 2]
+That's true. No. 
+
+00:34:49,264 --> 00:34:49,822 [Speaker 0]
+No, he's not. 
+
+00:34:49,824 --> 00:34:50,563 [Speaker 2]
+No, he's not. 
+
+00:34:50,563 --> 00:34:54,322 [Speaker 0]
+So, uh, a lot of knowledge, has an opinion- 
+
+00:34:54,322 --> 00:34:55,353 [Speaker 1]
+And he's not in a chapter. 
+
+00:34:55,353 --> 00:34:56,364 [Speaker 0]
+He's not in a chapter. But we- 
+
+00:34:56,364 --> 00:35:00,014 [Speaker 2]
+So we ask he would join monitoring, considering his role in op, for example. 
+
+00:35:00,014 --> 00:35:00,864 [Speaker 0]
+Uh, right now, yes. 
+
+00:35:00,864 --> 00:35:01,044 [Speaker 2]
+Yes. 
+
+00:35:01,044 --> 00:35:01,554 [Speaker 0]
+For now, yes. 
+
+00:35:01,554 --> 00:35:01,564 [Speaker 2]
+Yeah. 
+
+00:35:01,564 --> 00:35:04,243 [Speaker 0]
+But Ben was in there, but Ben doesn't have time. But indeed. 
+
+00:35:04,243 --> 00:35:04,544 [Speaker 2]
+Yeah. 
+
+00:35:04,544 --> 00:35:19,064 [Speaker 0]
+Uh, so I think there's much more mutual, uh, benefits than, uh, than I thought initially, because, uh, the chapter don't on- don't make sense if you only focus them on IT. It's- 
+
+00:35:19,064 --> 00:35:20,224 [Speaker 1]
+Yeah. 
+
+00:35:20,224 --> 00:35:35,163 [Speaker 0]
+They need, they need, uh, generic input. Like, we always see these types of things go wrong. It's a very good input for a chapter to sta- change the strategy and for then the business-specific implementations that they're doing in the Scrum teams. 
+
+00:35:35,163 --> 00:35:42,283 [Speaker 1]
+Yeah. I mean, if you want monitoring, monitoring of... If a system is down, it's important, but for business, if that system's down, it's a big problem. 
+
+00:35:42,284 --> 00:36:00,663 [Speaker 0]
+Yeah, but could be like, oh, from a technical point of view, we're wanting to-- want to prevent that the system goes down, want to monitor that, and from the business view, that's never the problem. It's always there, and if it's not, we know fast enough and we turn it back on, then you might want to monitor other aspects than the sanity checks if a system is a... I don't know, right? 
+
+00:36:00,663 --> 00:36:17,804 [Speaker 1]
+Yeah. It, it can help us guide us into what adds value for business. Uh, what, what things... You always want to, at the end of the day, have monitoring across everything, but if you can have the, "Hey, these are critical, these are value add, and those are at some point," it could- 
+
+00:36:17,804 --> 00:36:40,480 [Speaker 0]
+Mm. We had a discussion with the UAT, with Jeroen. That was very good discussion. He said, uh: "So you do risk-based testing?" "Yes, we do." Completely different idea about risk-based testing. From a QA perspective, that means we cannot test everything, so we'll only, uh, look at what is the possible, uh, risk.... and then you have business risk as com- something completely different, right? 
+
+00:36:40,480 --> 00:36:41,440 [Speaker 1]
+Yeah. 
+
+00:36:41,440 --> 00:36:48,460 [Speaker 0]
+So, but there is a feedback loop, 'cause when are you choosing technical risk over business risk? 
+
+00:36:48,460 --> 00:36:48,660 [Speaker 1]
+Yeah. 
+
+00:36:48,660 --> 00:36:53,600 [Speaker 0]
+Right? So that, that needs to be weighted, and right now, that's sometimes really unclear. 
+
+00:36:53,600 --> 00:36:53,660 [Speaker 1]
+Yeah. 
+
+00:36:53,660 --> 00:36:55,100 [Speaker 0]
+I mean, sometimes always. 
+
+00:36:55,100 --> 00:36:56,420 [Speaker 2]
+Yeah. 
+
+00:36:56,420 --> 00:36:57,660 [Speaker 1]
+Yeah. Uh, definitely. 
+
+00:36:57,660 --> 00:36:58,620 [Speaker 0]
+So, yeah. 
+
+00:36:58,620 --> 00:37:26,480 [Speaker 1]
+Similar, similarly, you've got from the data side, you've got the reputational damage for if data is incorrect, and you've got, like, contractual damage, like fees and fines, if we're reporting something incorrectly. So those are very differently weighted things that we need to consider. And similarly, then in business about, okay, well, if Greenflux is missing data, what does that mean? Do we need to make that a critical point to get delivered or yeah, when does it need-- when is it important? 
+
+00:37:26,480 --> 00:37:26,979 [Speaker 2]
+Yeah. 
+
+00:37:26,980 --> 00:37:34,660 [Speaker 0]
+Yeah, you could have a, a job that takes a long time to do, uh, but the weight is very important, so it makes sense to pick that up. 
+
+00:37:34,660 --> 00:37:38,730 [Speaker 2]
+I have to go one minute. I didn't notice, but you saw it's one to four. Yeah. 
+
+00:37:38,730 --> 00:37:38,760 [Speaker 0]
+Oh. 
+
+00:37:38,760 --> 00:37:44,940 [Speaker 2]
+I think, uh, for me, conclusion is that we at least, uh, continue our bi-weekly meeting, and that we all see value in that. 
+
+00:37:44,940 --> 00:37:45,440 [Speaker 1]
+Yeah. 
+
+00:37:45,440 --> 00:37:54,320 [Speaker 3]
+Yeah. I also wrote down, uh, the frequency is now also aligned with all the chapter meetings, uh, so the- this sync is also aligned with that, so I think we should keep that. 
+
+00:37:54,320 --> 00:37:54,330 [Speaker 0]
+So- 
+
+00:37:54,330 --> 00:37:58,180 [Speaker 1]
+Can I reiterate that there needs to be someone in the meeting, so I can always just drop down. 
+
+00:37:58,180 --> 00:37:58,320 [Speaker 2]
+Yeah. 
+
+00:37:58,320 --> 00:37:59,920 [Speaker 1]
+If the lead can't be there, please put a- 
+
+00:37:59,920 --> 00:38:00,300 [Speaker 2]
+Yeah 
+
+00:38:00,300 --> 00:38:01,240 [Speaker 1]
+... substitute in. 
+
+00:38:01,240 --> 00:38:08,020 [Speaker 2]
+We agree with that. And also that, uh, we all, uh, we continue with, uh, the short update round, but also spend some time into- 
+
+00:38:08,020 --> 00:38:10,090 [Speaker 0]
+It's in a fixed agenda with the- 
+
+00:38:10,090 --> 00:38:29,180 [Speaker 2]
+Yeah, in our influence, because, uh, it was the, it was to me, the thing that stood most out in this round round, is that we want to be in touch more and connected more to the business and make sure that, uh, yeah, that the influence of the chapters are bigger and bigger, because then we can improve our goals. 
+
+00:38:29,180 --> 00:38:29,440 [Speaker 1]
+Yeah. 
+
+00:38:29,440 --> 00:38:38,900 [Speaker 2]
+Yeah. And, uh, I don't know. And, uh, if we are in, in time, we can have another round and keep doing this, yeah, right, and repeat the cycle, and every time a little step. 
+
+00:38:38,900 --> 00:38:39,280 [Speaker 0]
+Yeah. 
+
+00:38:39,280 --> 00:38:46,040 [Speaker 2]
+At least for, from my side, I enjoy, uh, having the chapter and it's, uh, yeah, adding value. 
+
+00:38:46,040 --> 00:38:56,220 [Speaker 1]
+Yeah. Uh, stepping into this for the first time, definitely, the chapters have added value to IT's processes and IT's improvements. So I think that, uh, definitely we can make it cross 
+
+00:38:56,220 --> 00:38:59,260 [Speaker 1]
+any going mobility that would be even better. 
+
+00:38:59,260 --> 00:39:01,940 [Speaker 0]
+Any final takeaways for you? 
+
+00:39:01,940 --> 00:39:04,680 [Speaker 3]
+Uh, everything has been said. [chuckles] 
+
+00:39:04,680 --> 00:39:05,580 [Speaker 0]
+Okay. 
+
+00:39:05,580 --> 00:39:07,540 [Speaker 2]
+And well, and, uh- 
+
+00:39:07,540 --> 00:39:08,640 [Speaker 0]
+See you the next one. 
+
+00:39:08,640 --> 00:39:09,240 [Speaker 2]
+Yes. 
+
+00:39:09,240 --> 00:39:10,680 [Speaker 0]
+Okay. 
+
+00:39:10,680 --> 00:39:11,719 [Speaker 0]
+Bye. [chair rolling] Okay.

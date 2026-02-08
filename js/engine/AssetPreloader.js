@@ -76,12 +76,22 @@ export default class AssetPreloader {
      */
     async _checkOne(url) {
         try {
+            const safeUrl = this._encodeURL(url);
             if (/\.(png|jpe?g|webp|gif|svg)$/i.test(url)) {
-                return await this._checkImage(url);
+                return await this._checkImage(safeUrl);
             }
-            return await this._checkFetch(url);
+            return await this._checkFetch(safeUrl);
         } catch {
             return false;
+        }
+    }
+
+    _encodeURL(url) {
+        try {
+            // encodeURI keeps path separators but escapes spaces and other unsafe chars
+            return encodeURI(url);
+        } catch {
+            return url;
         }
     }
 
@@ -99,7 +109,21 @@ export default class AssetPreloader {
     async _checkFetch(url) {
         try {
             const res = await fetch(url, { method: 'HEAD' });
-            return res.ok;
+            if (res.ok) return true;
+
+            // Some hosts don't support HEAD (405). Fall back to GET but abort immediately
+            // after headers are received to avoid downloading large binaries.
+            if (res.status === 405) {
+                const controller = new AbortController();
+                try {
+                    const getRes = await fetch(url, { method: 'GET', signal: controller.signal });
+                    return getRes.ok;
+                } finally {
+                    controller.abort();
+                }
+            }
+
+            return false;
         } catch {
             return false;
         }

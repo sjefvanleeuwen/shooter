@@ -16,7 +16,7 @@ class Player {
 
         // Load sprite image.
         this.img = new Image();
-        this.img.src = 'sprites/player.png';  // Remove ./ to let Vite handle it from root or public
+        this.img.src = 'games/xenowar/sprites/player.png';
 
         this.setupInput();
 

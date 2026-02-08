@@ -2,6 +2,21 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import fs from 'fs-extra';
 
+const selectedGame = process.env.VITE_GAME;
+const inputs = {
+  main: '/index.html',
+  xenowar: '/xenowar.html',
+  blackSignal: '/black-signal.html'
+};
+
+// If building a single game, only include launcher + that game.
+if (selectedGame === 'xenowar') {
+  delete inputs.blackSignal;
+}
+if (selectedGame === 'black-signal') {
+  delete inputs.xenowar;
+}
+
 export default defineConfig({
   base: './',
   server: {
@@ -15,9 +30,7 @@ export default defineConfig({
     copyPublicDir: true,  // Enable copying
     emptyOutDir: false,   // Don't empty the output directory
     rollupOptions: {
-      input: {
-        main: '/index.html'
-      },
+      input: inputs,
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name.includes('sprites/') || 
@@ -42,12 +55,32 @@ export default defineConfig({
     closeBundle: async () => {
       // Ensure config directory exists in dist
       await fs.ensureDir('dist/config');
-      // Copy CRT config
-      await fs.copy(
-        'config/crt-effect.json',
-        'dist/config/crt-effect.json'
-      );
-      console.log('CRT config copied to dist/config');
+      // Copy default CRT config if it exists (for base engine)
+      if (await fs.pathExists('config/crt-effect.json')) {
+        await fs.copy(
+          'config/crt-effect.json',
+          'dist/config/crt-effect.json'
+        );
+      }
+      // Also copy xenowar specific config for easy access
+      await fs.ensureDir('dist/games/xenowar/config');
+      if (await fs.pathExists('games/xenowar/config/crt-effect.json')) {
+        await fs.copy(
+          'games/xenowar/config/crt-effect.json',
+          'dist/games/xenowar/config/crt-effect.json'
+        );
+      }
+
+      // Copy Black Signal config
+      await fs.ensureDir('dist/games/black-signal/config');
+      if (await fs.pathExists('games/black-signal/config/crt-effect.json')) {
+        await fs.copy(
+          'games/black-signal/config/crt-effect.json',
+          'dist/games/black-signal/config/crt-effect.json'
+        );
+      }
+
+      console.log('Configs copied to dist');
     }
   }]
 });

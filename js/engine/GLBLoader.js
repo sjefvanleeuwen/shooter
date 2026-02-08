@@ -5,7 +5,13 @@ export class GLBLoader {
 
     static async load(url) {
         const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to load GLB from ${url}: ${response.status} ${response.statusText}`);
+        }
         const buffer = await response.arrayBuffer();
+        if (buffer.byteLength < 12) {
+            throw new Error(`Invalid GLB file at ${url}: file too small (${buffer.byteLength} bytes)`);
+        }
         return this.parse(buffer);
     }
 

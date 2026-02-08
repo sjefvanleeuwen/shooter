@@ -7,7 +7,7 @@ class IntroScreen {
         
         // Load logo
         this.logo = new Image();
-        this.logo.src = './sprites/xenowar.png';
+        this.logo.src = 'games/xenowar/sprites/xenowar.png';
         
         // Add some animation properties
         this.alpha = 0;

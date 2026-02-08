@@ -1,4 +1,4 @@
-import Engine from '../engine/Engine.js';
+import Engine from '../../../js/engine/Engine.js';
 import StartupScreen from './screens/StartupScreen.js';
 import IntroScreen from './screens/IntroScreen.js';
 import GameScreen from './screens/GameScreen.js';
@@ -13,7 +13,12 @@ export default class ShooterGame extends Engine {
             width: 1024,
             height: 1024,
             enableDebug: false,
-            musicTracks: assets.music
+            musicTracks: assets.music,
+            crtConfigPath: 'games/xenowar/config/crt-effect.json',
+            mobileControls: {
+                buttonBlueUrl: 'games/xenowar/sprites/ui/button-blue.png',
+                buttonRedUrl: 'games/xenowar/sprites/ui/button-red.png'
+            }
         });
 
         this.bossVoiceKeys = [

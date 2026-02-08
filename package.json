@@ -6,11 +6,17 @@
   "scripts": {
     "start": "vite",
     "clean": "rimraf dist",
-    "copy-assets": "node scripts/copyAssets.js",
-    "optimize": "node scripts/postProcessImages.js",
+    "copy-assets": "node scripts/copyAssets.js all",
+    "copy-assets:xenowar": "node scripts/copyAssets.js xenowar",
+    "copy-assets:black-signal": "node scripts/copyAssets.js black-signal",
+    "optimize": "node scripts/postProcessImages.js all",
+    "optimize:xenowar": "node scripts/postProcessImages.js xenowar",
+    "optimize:black-signal": "node scripts/postProcessImages.js black-signal",
     "prebuild": "npm run clean",
     "build": "npm run copy-assets && vite build",
     "postbuild": "npm run optimize",
+    "build:xenowar": "npm run clean && npm run copy-assets:xenowar && vite build && npm run optimize:xenowar",
+    "build:black-signal": "npm run clean && npm run copy-assets:black-signal && vite build && npm run optimize:black-signal",
     "preview": "vite preview"
   },
   "devDependencies": {

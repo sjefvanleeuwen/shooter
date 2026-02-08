@@ -1,5 +1,5 @@
 import Player from '../entities/player.js';
-import { ParticleEngine, LaserEngine } from '../../engine/particleEngine.js';
+import { ParticleEngine, LaserEngine } from '../../../../js/engine/particleEngine.js';
 import PatternFormation from '../entities/PatternFormation.js';
 import ImageBackgroundScroller from '../imageBackgroundScroller.js';
 import { patterns } from '../patterns/formationPatterns.js';

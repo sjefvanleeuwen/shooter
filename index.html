@@ -1,24 +1,147 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Space Shooter</title>
+    <title>Arcade Launcher</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; }
         body { 
             overflow: hidden;
-            background: black;
-        }
-        canvas {
-            display: block;
-            /* Removed border */
+            background: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
         * { font-family: 'Press Start 2P', cursive; }
+
+        .menu {
+            width: min(900px, 92vw);
+            padding: 32px;
+            border: 2px solid #222;
+            background: radial-gradient(circle at 50% 20%, #0a0a1a, #000 70%);
+        }
+
+        :root {
+            --thumbSize: clamp(120px, 18vw, 170px);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 22px;
+        }
+
+        p {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #cfcfcf;
+            margin-bottom: 24px;
+        }
+
+        .games {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        a.game {
+            display: grid;
+            grid-template-columns: 1fr var(--thumbSize);
+            grid-template-areas: "meta thumb";
+            gap: 16px;
+            text-decoration: none;
+            color: #fff;
+            padding: 18px 18px;
+            border: 2px solid #333;
+            background: #050510;
+            align-items: center;
+        }
+
+        a.game:hover {
+            border-color: #00ffcc;
+            box-shadow: 0 0 0 2px rgba(0, 255, 204, 0.2);
+        }
+
+        .title {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .thumb {
+            grid-area: thumb;
+            width: var(--thumbSize);
+            height: var(--thumbSize);
+            object-fit: cover;
+            image-rendering: pixelated;
+            border: 2px solid #222;
+            background: #000;
+        }
+
+        .meta {
+            grid-area: meta;
+            min-width: 0;
+            text-align: right;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #cfcfcf;
+        }
+
+        .badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 8px;
+            background: #ffcc00;
+            color: #000;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 520px) {
+            a.game {
+                grid-template-columns: 1fr;
+                grid-template-areas: "thumb" "meta";
+            }
+
+            .meta {
+                text-align: center;
+                margin-top: 12px;
+            }
+
+            .thumb {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1 / 1;
+            }
+        }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <script type="module" src="js/game.js"></script>
+    <div class="menu">
+        <h1>ARCADE LAUNCHER</h1>
+        <p>Select a game:</p>
+
+        <div class="games">
+            <a class="game" href="./black-signal.html">
+                <img class="thumb" src="./games/black-signal/screen.png" alt="BLACK SIGNAL thumbnail" loading="lazy" />
+                <div class="meta">
+                    <div class="title">BLACK SIGNAL</div>
+                    <div class="subtitle">Side-scroller • platforms • combat</div>
+                    <div class="badge">UNDER CONSTRUCTION</div>
+                </div>
+            </a>
+
+            <a class="game" href="./xenowar.html">
+                <img class="thumb" src="./games/xenowar/screen.png" alt="XENOWAR thumbnail" loading="lazy" />
+                <div class="meta">
+                    <div class="title">XENOWAR</div>
+                    <div class="subtitle">Top-down shooter • waves • boss</div>
+                </div>
+            </a>
+        </div>
+    </div>
 </body>
 </html>

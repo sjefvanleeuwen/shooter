@@ -21,6 +21,7 @@ export default class Engine {
     constructor(options = {}) {
         this.virtualWidth = options.width || 1024;
         this.virtualHeight = options.height || 1024;
+        this.gameId = options.gameId || 'game';
         
         // Debug Log Switch
         if (options.enableDebug === false) {
@@ -57,11 +58,17 @@ export default class Engine {
         this.inputManager = new InputManager();
         this.audioManager = AudioManager.getInstance();
         this.musicPlayer = new MusicPlayer(options.musicTracks || []);
-        this.mobileControls = new MobileControls();
+        this.mobileControls = new MobileControls(options.mobileControls || {});
         this.debugWindow = new DebugWindow();
 
         // CRT effect acts as the final output layer
-        this.crtEffect = new CRTEffect(this.canvas, this.container, this.audioManager);
+        this.crtEffect = new CRTEffect(this.canvas, this.container, this.audioManager, options.crtConfigPath);
+
+        // Hotkeys
+        this.pendingScreenshot = false;
+        this.inputManager.setCaptureHandler(() => {
+            this.pendingScreenshot = true;
+        });
 
         if (this.mobileControls.isMobile) {
             this.container.style.alignItems = 'flex-start';
@@ -81,6 +88,38 @@ export default class Engine {
         // Resize handling
         window.addEventListener('resize', () => this.resize());
         this.resize();
+    }
+
+    captureScreenshot() {
+        const canvas = this.crtEffect?.glCanvas || this.canvas;
+        if (!canvas) return;
+
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `${this.gameId}-screengrab-${timestamp}.png`;
+
+        const downloadBlob = (blob) => {
+            if (!blob) return;
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        };
+
+        // Prefer toBlob to avoid large base64 strings
+        if (canvas.toBlob) {
+            canvas.toBlob(downloadBlob, 'image/png');
+        } else {
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL('image/png');
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
     }
 
     /**
@@ -161,6 +200,11 @@ export default class Engine {
 
         // Final output through CRT shader
         this.crtEffect.render(performance.now());
+
+        if (this.pendingScreenshot) {
+            this.pendingScreenshot = false;
+            this.captureScreenshot();
+        }
     }
 
     /** Hook for subclasses to draw elements on top of the screen before CRT processing. */

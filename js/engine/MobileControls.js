@@ -1,11 +1,11 @@
-import buttonBlueUrl from '../../sprites/ui/button-blue.png';
-import buttonRedUrl from '../../sprites/ui/button-red.png';
-
 export default class MobileControls {
-    constructor() {
+    constructor(options = {}) {
         // Simple touch detection
         this.isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         if (!this.isMobile) return;
+
+        this.buttonBlueUrl = options.buttonBlueUrl || '';
+        this.buttonRedUrl = options.buttonRedUrl || '';
 
         console.log("Mobile device detected. Initializing touch controls.");
 
@@ -56,7 +56,8 @@ export default class MobileControls {
                 width: 80px;
                 height: 80px;
                 /* Fallback color so buttons are visible even if image fails */
-                background-color: transparent;
+                background-color: #333;
+                border: 2px solid #555;
                 /* background-image set via JS style */
                 background-size: cover;
                 background-position: center;
@@ -122,12 +123,12 @@ export default class MobileControls {
         
         this.leftBtn = document.createElement('div');
         this.leftBtn.className = 'btn';
-        this.leftBtn.style.backgroundImage = `url(${buttonBlueUrl})`;
+        if (this.buttonBlueUrl) this.leftBtn.style.backgroundImage = `url(${this.buttonBlueUrl})`;
         this.leftBtn.dataset.key = 'ArrowLeft';
 
         this.rightBtn = document.createElement('div');
         this.rightBtn.className = 'btn';
-        this.rightBtn.style.backgroundImage = `url(${buttonBlueUrl})`;
+        if (this.buttonBlueUrl) this.rightBtn.style.backgroundImage = `url(${this.buttonBlueUrl})`;
         this.rightBtn.dataset.key = 'ArrowRight';
 
         leftGroup.appendChild(this.leftBtn);
@@ -152,7 +153,7 @@ export default class MobileControls {
 
         this.fireBtn = document.createElement('div');
         this.fireBtn.className = 'btn fire-btn';
-        this.fireBtn.style.backgroundImage = `url(${buttonRedUrl})`;
+        if (this.buttonRedUrl) this.fireBtn.style.backgroundImage = `url(${this.buttonRedUrl})`;
         this.fireBtn.dataset.key = ' '; // Space
 
         rightGroup.appendChild(this.fireBtn);

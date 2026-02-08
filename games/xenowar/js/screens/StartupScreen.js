@@ -1,4 +1,4 @@
-import AssetPreloader from '../../engine/AssetPreloader.js';
+import AssetPreloader from '../../../../js/engine/AssetPreloader.js';
 import assets from '../config/assetManifest.js';
 
 class StartupScreen {
