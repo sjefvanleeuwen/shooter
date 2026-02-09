@@ -47,6 +47,7 @@ export default class ShooterGame extends Engine {
         }
 
         super({
+            gameId: 'xenowar',
             width: 1024,
             height: 1024,
             enableDebug: false,

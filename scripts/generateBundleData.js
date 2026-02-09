@@ -50,6 +50,7 @@ async function run() {
         path.join(projectRoot, 'games', game, 'backgrounds/level0'),
         path.join(projectRoot, 'games', game, 'audio'),
         path.join(projectRoot, 'games', game, '3d'),
+        path.join(projectRoot, 'games', game, 'fonts'),
         path.join(projectRoot, 'games', game, 'config')
     ];
 
@@ -86,6 +87,8 @@ async function run() {
                     bundleData[relativePath] = await getBase64(fullPath, mime);
                 } else if (ext === '.glb') {
                     bundleData[relativePath] = await getBase64(fullPath, 'model/gltf-binary');
+                } else if (ext === '.ttf') {
+                    bundleData[relativePath] = await getBase64(fullPath, 'font/ttf');
                 } else if (ext === '.json') {
                     bundleData[relativePath] = await getBase64(fullPath, 'application/json');
                 } else if (['.txt', '.html', '.css', '.js'].includes(ext)) {

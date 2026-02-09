@@ -40,6 +40,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    assetsInlineLimit: 1000000, // Inline files up to 1MB (covers fonts/images)
     sourcemap: true,
     copyPublicDir: true,  // Enable copying
     emptyOutDir: false,   // Don't empty the output directory
@@ -71,19 +72,18 @@ export default defineConfig({
       options: {
         compact: true,
         controlFlowFlattening: true,
-        controlFlowFlatteningThreshold: 0.75,
-        deadCodeInjection: true,
-        deadCodeInjectionThreshold: 0.4,
+        controlFlowFlatteningThreshold: 0.5,
+        deadCodeInjection: false,
         debugProtection: true,
         debugProtectionInterval: 0,
         disableConsoleOutput: true,
         identifierNamesGenerator: 'hexadecimal',
         log: false,
-        numbersToExpressions: true,
+        numbersToExpressions: false,
         renameGlobals: false,
         selfDefending: true,
         simplify: true,
-        splitStrings: true,
+        splitStrings: false,
         splitStringsChunkLength: 10,
         stringArray: true,
         stringArrayCallsTransform: true,

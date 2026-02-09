@@ -15,7 +15,7 @@
     "build": "npm run copy-assets && vite build",
     "postbuild": "npm run optimize",
     "build:xenowar": "npm run clean && npm run copy-assets:xenowar && vite build && npm run optimize:xenowar",
-    "build:xenowar:secure": "npm run clean && npm run copy-assets:xenowar && cross-env VITE_GAME=xenowar VITE_OBFUSCATE=true vite build && npm run optimize:xenowar",
+    "build:xenowar:secure": "npm run clean && node scripts/generateBundleData.js xenowar && cross-env VITE_GAME=xenowar VITE_SINGLE_FILE=true VITE_OBFUSCATE=true vite build",
     "build:xenowar:bundle": "npm run clean && node scripts/generateBundleData.js xenowar && cross-env VITE_GAME=xenowar VITE_SINGLE_FILE=true vite build",
     "build:black-signal": "npm run clean && npm run copy-assets:black-signal && vite build",
     "preview": "vite preview"

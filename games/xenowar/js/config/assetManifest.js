@@ -22,6 +22,11 @@ export const assets = {
         'games/xenowar/3d/shield_s.glb',
     ],
 
+    /* ── Fonts ────────────────────────────────────────────── */
+    fonts: [
+        'games/xenowar/fonts/PressStart2P-Regular.ttf',
+    ],
+
     /* ── Sound-effects (loaded by AudioManager) ───────────── */
     sfx: {
         'explosion': 'games/xenowar/audio/explosion.mp3',

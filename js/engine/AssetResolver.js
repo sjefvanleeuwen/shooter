@@ -18,9 +18,13 @@ export default class AssetResolver {
         // Try exact match
         if (bundleData[url]) return bundleData[url];
 
-        // Try relative path match (strip leading slash and domain)
-        const relativePath = url.replace(/^(?:https?:\/\/[^\/]+)?\//, '');
-        if (bundleData[relativePath]) return bundleData[relativePath];
+        // Normalise path: strip protocol, domain, and leading slash
+        const normalized = url.replace(/^(?:https?:\/\/[^\/]+)?\//, '');
+        if (bundleData[normalized]) return bundleData[normalized];
+
+        // Try matches without leading slash if one exists
+        const noLeadingSlash = url.startsWith('/') ? url.slice(1) : url;
+        if (bundleData[noLeadingSlash]) return bundleData[noLeadingSlash];
 
         return url;
     }

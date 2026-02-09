@@ -121,6 +121,7 @@ async function copyAssetsForGame(gameId) {
         { src: rel("games", gameId, "sprites"), dest: rel("dist", "games", gameId, "sprites"), process: !!modeConfig, exclude: ["ui"], options: modeConfig ? { resizeMap: modeConfig.sprites?.dimensions, ...modeConfig.sprites?.processing } : undefined },
         { src: rel("games", gameId, "sprites", "ui"), dest: rel("dist", "games", gameId, "sprites", "ui") },
         { src: rel("games", gameId, "audio"), dest: rel("dist", "games", gameId, "audio") },
+        { src: rel("games", gameId, "fonts"), dest: rel("dist", "games", gameId, "fonts") },
         { src: rel("games", gameId, "videos"), dest: rel("dist", "games", gameId, "videos") },
         { src: rel("games", gameId, "3d"), dest: rel("dist", "games", gameId, "3d") },
         { src: rel("games", gameId, "backgrounds"), dest: rel("dist", "games", gameId, "backgrounds"), process: !!modeConfig, options: modeConfig ? { ...modeConfig.backgrounds?.dimensions, ...modeConfig.backgrounds?.processing } : undefined }

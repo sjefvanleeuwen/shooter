@@ -17,6 +17,11 @@ export const assets = {
     music: [
         'games/black-signal/audio/music/Black Signal - Vastness of Unknown.mp3',
     ],
+
+    /* ── Fonts ────────────────────────────────────────────── */
+    fonts: [
+        'games/black-signal/fonts/PressStart2P-Regular.ttf',
+    ],
 };
 
 export default assets;

@@ -10,6 +10,7 @@ import MusicPlayer from './MusicPlayer.js';
 import CRTEffect from './CRTEffect.js';
 import DebugWindow from './DebugWindow.js';
 import MobileControls from './MobileControls.js';
+import AssetResolver from './AssetResolver.js';
 
 export default class Engine {
     /**
@@ -94,6 +95,9 @@ export default class Engine {
 
         // Global access
         window.engine = this;
+
+        // Font loading
+        this._loadFonts();
 
         // Resize handling
         window.addEventListener('resize', () => this.resize());
@@ -247,5 +251,37 @@ export default class Engine {
             requestAnimationFrame(loop);
         };
         requestAnimationFrame(loop);
+    }
+
+    async _loadFonts() {
+        // Try to load fonts from the bundle or filesystem
+        const fontPaths = [
+            `games/${this.gameId}/fonts/PressStart2P-Regular.ttf`,
+            `fonts/PressStart2P-Regular.ttf`
+        ];
+
+        for (const path of fontPaths) {
+            const resolvedUrl = AssetResolver.resolve(path);
+            
+            // Only try to load if it's bundled (data:) OR we don't have a bundle at all (dev mode)
+            if (resolvedUrl.startsWith('data:') || !window.gameBundleData) {
+                const font = new FontFace('Press Start 2P', `url(${resolvedUrl})`);
+                try {
+                    await font.load();
+                    document.fonts.add(font);
+                    console.log(`Font loaded: ${path} (${resolvedUrl.startsWith('data:') ? 'bundled' : 'filesystem'})`);
+                    return; // Successfully loaded
+                } catch (err) {
+                    // Only log error in bundled mode if it was actually in the bundle
+                    if (resolvedUrl.startsWith('data:')) {
+                        console.error('Failed to load font from bundle data URI:', err);
+                    }
+                }
+            }
+        }
+        
+        if (window.gameBundleData) {
+            console.warn('Press Start 2P font not found in bundle data.');
+        }
     }
 }
