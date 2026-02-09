@@ -28,11 +28,18 @@ class CRTEffect {
             preserveDrawingBuffer: true
         });
 
-        // Load CRT configuration
+        // Initialize setup immediately but mark as not ready until config loads
+        this.isReady = false;
+        
+        // Immediate setup
+        this.createShaders();
+        this.createBuffers();
+        this.createTexture();
+
+        // Load CRT configuration asynchronously
         this.loadConfig().then(() => {
-            this.createShaders();
-            this.createBuffers();
-            this.createTexture();
+            this.isReady = true;
+            console.log('CRT effect initialized and ready');
         });
 
         // Add video recorder with audio manager
@@ -300,7 +307,8 @@ class CRTEffect {
 
     render(time) {
         const gl = this.gl;
-        if (!this.program || !this.config) return; // Wait for initialization
+        if (!this.program) return; // Wait for shader compilation
+        if (!this.config) return;  // Wait for config (even default)
 
         // Ensure viewport matches canvas size
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -312,7 +320,7 @@ class CRTEffect {
         // Upload game canvas as texture
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.gameCanvas);
-
+        
         // Set uniforms
         gl.uniform2f(this.resolutionLoc, gl.canvas.width, gl.canvas.height);
         gl.uniform1f(this.timeLoc, time * 0.001);

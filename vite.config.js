@@ -35,6 +35,7 @@ export default defineConfig({
         assetFileNames: (assetInfo) => {
           if (assetInfo.name.includes('sprites/') || 
               assetInfo.name.includes('backgrounds/') ||
+              assetInfo.name.includes('videos/') ||
               assetInfo.name.includes('audio/')) {
             return assetInfo.name; // Keep original path
           }

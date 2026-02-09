@@ -1,5 +1,6 @@
 import Enemy from '../entities/Enemy.js';
 import GLBSpriteRenderer from '../rendering/GLBSpriteRenderer.js';
+import { VideoPlayer } from '../../../../js/engine/index.js';
 
 export default class GameScreen {
     constructor(ctx, options) {
@@ -85,8 +86,8 @@ export default class GameScreen {
 
         this.playerShip = {
             x: 3500,
-            y: 400,  // Slightly adjusted height
-            w: 960,  // Scaled down slightly from 1280 (1.5x the original 640)
+            y: 540,  // Lowered significantly to sink it into the ground for visual weight
+            w: 960,  
             h: 480,
             collected: false
         };
@@ -98,6 +99,16 @@ export default class GameScreen {
         this.lockedWorldYOffset = 0; // Captured offset for fixed background
         this.isBackgroundLocked = false; // Toggle for fixed vs dynamic background
         this.currentWorldYOffset = 0; // The actual offset used in drawing (for smoothing)
+
+        // Video Player for transitions
+        this.videoPlayer = new VideoPlayer(options.audioManager);
+        this.isVideoPlaying = false;
+        this.videoPlayer.load('/games/black-signal/videos/enter-ship.mp4').catch(err => {
+            console.warn('Enter ship video not found at root path, trying relative...', err);
+            this.videoPlayer.load('games/black-signal/videos/enter-ship.mp4').catch(err2 => {
+                 console.warn('Enter ship video not found, skipping.', err2);
+            });
+        });
 
         // Background Ships (Between stars and clouds)
         this.spaceships = [
@@ -257,13 +268,12 @@ export default class GameScreen {
         });
 
         // Ship Collection Check
-        if (!this.isFlying && !this.isTakingOff && !this.playerShip.collected) {
+        if (!this.isFlying && !this.isTakingOff && !this.playerShip.collected && !this.isVideoPlaying) {
             if (this.player.x < this.playerShip.x + this.playerShip.w &&
                 this.player.x + this.player.width > this.playerShip.x &&
                 this.player.y < this.playerShip.y + this.playerShip.h &&
                 this.player.y + this.player.height > this.playerShip.y) {
                 
-                this.isTakingOff = true;
                 this.playerShip.collected = true;
                 
                 // Align player center to ship center to prevent visual jump
@@ -272,6 +282,24 @@ export default class GameScreen {
 
                 this.player.vy = 0;
                 this.player.vx = 0;
+
+                console.log('Ship collision detected. Playing video...');
+                this._videoStartTime = performance.now();
+                this._skipAllowed = false; 
+                this.isVideoPlaying = true;
+                
+                this.videoPlayer.play().then(() => {
+                    console.log('Video play promise resolved.');
+                    this.videoPlayer.onEnded = () => {
+                        console.log('Video playback completed.');
+                        this.isVideoPlaying = false;
+                        this.isTakingOff = true;
+                    };
+                }).catch(err => {
+                    console.error('Video play error:', err);
+                    this.isVideoPlaying = false;
+                    this.isTakingOff = true;
+                });
             }
         }
 
@@ -292,6 +320,38 @@ export default class GameScreen {
         }
         if (!input.keys.has('b')) this._bPressed = false;
         
+        if (this.isVideoPlaying) {
+            const waitTime = performance.now() - (this._videoStartTime || 0);
+            
+            // Allow skip ONLY after user releases whatever key they were holding
+            // when they touched the ship (prevents accidental skip)
+            const keys = input.keys;
+            const skipKeysHeld = keys.has(' ') || keys.has('Enter') || keys.has('Escape');
+            
+            if (!this._skipAllowed && !skipKeysHeld) {
+                this._skipAllowed = true;
+            }
+
+            // Auto-skip if stuck loading too long (10s)
+            if (waitTime > 10000 && this.videoPlayer.video.readyState < 2) {
+                console.warn('Video stuck at readyState:', this.videoPlayer.video.readyState);
+                this.isVideoPlaying = false;
+                this.isTakingOff = true;
+            }
+
+            // Perform skip
+            if (waitTime > 500 && this._skipAllowed && skipKeysHeld) {
+                console.log('Video skipped by user');
+                this.videoPlayer.pause();
+                this.isVideoPlaying = false;
+                this.isTakingOff = true;
+                return;
+            }
+            
+            // Freeze logic during video
+            return;
+        }
+
         if (this.isTakingOff) {
             this.takeoffProgress += dt / this.takeoffDuration;
             if (this.takeoffProgress >= 1) {
@@ -632,6 +692,41 @@ export default class GameScreen {
         // Projectiles and UI always foreground
         this.drawPulses();
         this.drawUI();
+
+        // Draw Video Player if active
+        if (this.isVideoPlaying) {
+            this.ctx.save();
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0); // No camera offset/scaling
+            this.ctx.globalAlpha = 1.0;
+            this.ctx.globalCompositeOperation = 'source-over';
+            
+            // Fill background with solid black
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillRect(0, 0, this.virtualWidth, this.virtualHeight);
+            
+            const drawn = this.videoPlayer.draw(this.ctx, this.virtualWidth, this.virtualHeight);
+            
+            if (!drawn) {
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '24px "Press Start 2P"';
+                this.ctx.textAlign = 'center';
+                const rs = this.videoPlayer.video.readyState;
+                this.ctx.fillText(`TRANSITIONING... (RDY:${rs})`, this.virtualWidth / 2, this.virtualHeight / 2);
+            } else {
+                // FORCE rendering update: draw a 1px random-alpha pixel
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${0.01 + Math.random() * 0.05})`;
+                this.ctx.fillRect(Math.random() * this.virtualWidth, Math.random() * this.virtualHeight, 1, 1);
+            }
+
+            // Skip Hint
+            if (drawn) {
+                this.ctx.fillStyle = '#666666';
+                this.ctx.font = '16px "Press Start 2P"';
+                this.ctx.textAlign = 'right';
+                this.ctx.fillText('[SPACE] TO SKIP', this.virtualWidth - 50, this.virtualHeight - 50);
+            }
+            this.ctx.restore();
+        }
     }
 
     drawEnemies() {

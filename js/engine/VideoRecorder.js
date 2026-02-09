@@ -24,8 +24,14 @@ class VideoRecorder {
         
         const finalStream = new MediaStream(tracks);
 
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') 
+            ? 'video/webm;codecs=vp9' 
+            : 'video/webm';
+
         this.mediaRecorder = new MediaRecorder(finalStream, {
-            mimeType: 'video/webm;codecs=vp9'
+            mimeType: mimeType,
+            videoBitsPerSecond: 8000000, // Reduced from 8Mbps to 5Mbps for better perf
+            audioBitsPerSecond: 128000
         });
 
         this.mediaRecorder.ondataavailable = (e) => {
@@ -52,7 +58,9 @@ class VideoRecorder {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `xenowar-replay-${Date.now()}.webm`;
+                const prefix = window.engine?.gameId || 'game';
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                a.download = `${prefix}-replay-${timestamp}.webm`;
                 a.click();
                 URL.revokeObjectURL(url);
                 this.recording = false;

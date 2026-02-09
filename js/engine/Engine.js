@@ -70,6 +70,16 @@ export default class Engine {
             this.pendingScreenshot = true;
         });
 
+        this.inputManager.setRecordingHandler(() => {
+            if (!this.crtEffect || !this.crtEffect.videoRecorder) return;
+            const recorder = this.crtEffect.videoRecorder;
+            if (recorder.isRecording()) {
+                recorder.stopRecording();
+            } else {
+                recorder.startRecording();
+            }
+        });
+
         if (this.mobileControls.isMobile) {
             this.container.style.alignItems = 'flex-start';
             this.crtEffect.setPadding({ bottom: 180, top: 20 });
@@ -196,6 +206,24 @@ export default class Engine {
 
         if (this.debugWindow.visible) {
             this.debugWindow.draw(this.ctx);
+        }
+
+        // Draw Recording Indicator
+        if (this.crtEffect?.videoRecorder?.isRecording()) {
+            this.ctx.save();
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+            
+            // Blinking red square
+            if (Math.floor(performance.now() / 500) % 2 === 0) {
+                this.ctx.fillStyle = 'red';
+                this.ctx.fillRect(40, 40, 20, 20);
+            }
+            
+            this.ctx.fillStyle = 'white';
+            // Fallback font if Press Start 2P isn't loaded globally
+            this.ctx.font = '20px "Press Start 2P", cursive';
+            this.ctx.fillText('RECORDING', 75, 58);
+            this.ctx.restore();
         }
 
         // Final output through CRT shader

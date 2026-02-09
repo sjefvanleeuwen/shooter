@@ -569,27 +569,46 @@ export default class WebGLRenderer {
     }
 
     getTexture(img) {
-        if (typeof ImageBitmap !== 'undefined' && img instanceof ImageBitmap) {
-            // Pass through for ImageBitmap
-        } else if (!img.complete && !(img instanceof HTMLCanvasElement) && !(typeof OffscreenCanvas !== 'undefined' && img instanceof OffscreenCanvas)) {
+        if (!img) return null;
+
+        const isVideo = (img instanceof HTMLVideoElement);
+        const isCanvas = (img instanceof HTMLCanvasElement) || (typeof OffscreenCanvas !== 'undefined' && img instanceof OffscreenCanvas);
+        const isBitmap = (typeof ImageBitmap !== 'undefined' && img instanceof ImageBitmap);
+        
+        if (!isVideo && !isCanvas && !isBitmap && !img.complete) {
             return null;
         }
         
         const k = img.src || img;
-        if (this.textures.has(k)) return this.textures.get(k);
-        const t = this.gl.createTexture();
+        let t;
+        
+        if (this.textures.has(k)) {
+            t = this.textures.get(k);
+            if (isVideo) {
+                this.gl.bindTexture(this.gl.TEXTURE_2D, t);
+                // Use texSubImage2D for faster updates if dimensions match
+                // We assume video resolution doesnt change mid-stream
+                this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0, 0, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+            }
+            return t;
+        }
+
+        t = this.gl.createTexture();
         this.gl.bindTexture(this.gl.TEXTURE_2D, t);
         
-        // Ensure proper alpha handling for text and transparent sprites
-        this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false); // Standard alpha for regular sprites
+        // Ensure proper alpha handling
+        this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
         
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
         
-        // Use Bilinear filtering and generate Mipmaps for smooth downscaling
-        this.gl.generateMipmap(this.gl.TEXTURE_2D);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
+        if (!isVideo) {
+            this.gl.generateMipmap(this.gl.TEXTURE_2D);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
+        } else {
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+        }
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
         
         this.textures.set(k, t);
@@ -597,26 +616,41 @@ export default class WebGLRenderer {
     }
 
     drawImage(img, ...args) {
-        const t = this.getTexture(img); if (!t) return;
-        let sx=0, sy=0, sw=img.width, sh=img.height, dx, dy, dw, dh;
-        if (args.length >= 8) [sx,sy,sw,sh,dx,dy,dw,dh] = args;
-        else if (args.length >= 4) [dx,dy,dw,dh] = args;
-        else { [dx,dy] = args; dw=img.width; dh=img.height; }
+        if (!img) return;
+        const t = this.getTexture(img);
+        if (!t) return;
+
+        // Get actual source dimensions
+        const srcW = img.videoWidth || img.width || (img.canvas ? img.canvas.width : 0);
+        const srcH = img.videoHeight || img.height || (img.canvas ? img.canvas.height : 0);
+        
+        if (srcW === 0 || srcH === 0) return;
+
+        let sx = 0, sy = 0, sw = srcW, sh = srcH, dx, dy, dw, dh;
+        if (args.length >= 8) {
+            [sx, sy, sw, sh, dx, dy, dw, dh] = args;
+        } else if (args.length >= 4) {
+            [dx, dy, dw, dh] = args;
+        } else {
+            [dx, dy] = args;
+            dw = srcW;
+            dh = srcH;
+        }
 
         this.gl.useProgram(this.program);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.posBuf);
         this.gl.enableVertexAttribArray(this.locs.pos);
         this.gl.vertexAttribPointer(this.locs.pos, 2, this.gl.FLOAT, false, 0, 0);
 
-        const u=sx/img.width, v=sy/img.height, w=sw/img.width, h=sh/img.height;
+        const u = sx / srcW, v = sy / srcH, w = sw / srcW, h = sh / srcH;
         
         // Use pre-allocated array
-        this.uvArray[0]=u;     this.uvArray[1]=v;
-        this.uvArray[2]=u+w;   this.uvArray[3]=v;
-        this.uvArray[4]=u;     this.uvArray[5]=v+h;
-        this.uvArray[6]=u;     this.uvArray[7]=v+h;
-        this.uvArray[8]=u+w;   this.uvArray[9]=v;
-        this.uvArray[10]=u+w;  this.uvArray[11]=v+h;
+        this.uvArray[0] = u;     this.uvArray[1] = v;
+        this.uvArray[2] = u + w; this.uvArray[3] = v;
+        this.uvArray[4] = u;     this.uvArray[5] = v + h;
+        this.uvArray[6] = u;     this.uvArray[7] = v + h;
+        this.uvArray[8] = u + w; this.uvArray[9] = v;
+        this.uvArray[10] = u + w; this.uvArray[11] = v + h;
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuf);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, this.uvArray, this.gl.DYNAMIC_DRAW);
@@ -624,19 +658,16 @@ export default class WebGLRenderer {
         this.gl.vertexAttribPointer(this.locs.uv, 2, this.gl.FLOAT, false, 0, 0);
 
         this.gl.uniform2f(this.locs.res, this.canvas.width, this.canvas.height);
-        let m = this.multiply(this.currentMatrix, [1,0,0, 0,1,0, dx,dy,1]);
-        m = this.multiply(m, [dw,0,0, 0,dh,0, 0,0,1]);
+        let m = this.multiply(this.currentMatrix, [1, 0, 0, 0, 1, 0, dx, dy, 1]);
+        m = this.multiply(m, [dw, 0, 0, 0, dh, 0, 0, 0, 1]);
         this.gl.uniformMatrix3fv(this.locs.mat, false, m);
         
-        // Use pre-parsed brightness
         const bright = this.currentState.parsedBrightness !== undefined ? this.currentState.parsedBrightness : 1.0;
-        
         this.gl.uniform1f(this.locs.brightness, bright);
         this.gl.uniform1f(this.locs.flash, this.currentState.flash || 0.0);
-
-        // For drawImage, we use the globalAlpha but default the fillStyle to white
         this.gl.uniform4fv(this.locs.color, [1, 1, 1, this.globalAlpha]);
         this.gl.uniform1i(this.locs.useTex, 1);
+
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, t);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
