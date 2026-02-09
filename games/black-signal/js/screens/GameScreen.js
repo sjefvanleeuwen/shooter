@@ -18,7 +18,7 @@ export default class GameScreen {
             speed: 400,
             jumpForce: -1200,
             onGround: false,
-            color: '#00ffcc',
+            color: '#00f2ff', // Neon Blue
             health: 10,
             maxHealth: 10,
             invuln: 0,
@@ -43,7 +43,9 @@ export default class GameScreen {
             modelPath: 'games/black-signal/3d/player.glb' 
         });
 
-        this.pulses = []; // Player projectiles
+        this.pulses = []; // Player projectiles (on foot)
+        this.lasers = []; // Player lasers (in flight)
+        this.laserParticles = []; // Laser burst particles
         this.enemies = [
             new Enemy(ctx, { x: 800, y: 908, patrolRange: 300, renderer: this.enemyRenderer }),
             new Enemy(ctx, { x: 1500, y: 908, patrolRange: 400, renderer: this.enemyRenderer }),
@@ -77,6 +79,22 @@ export default class GameScreen {
 
         this.shipImg = new Image();
         this.shipImg.src = 'games/black-signal/sprites/space-ship-1.png';
+
+        this.playerShipImg = new Image();
+        this.playerShipImg.src = 'games/black-signal/sprites/player-ship.png';
+
+        this.playerShip = {
+            x: 3500,
+            y: 400,  // Slightly adjusted height
+            w: 960,  // Scaled down slightly from 1280 (1.5x the original 640)
+            h: 480,
+            collected: false
+        };
+
+        this.isFlying = false;
+        this.isTakingOff = false;
+        this.takeoffProgress = 0; 
+        this.takeoffDuration = 2.5; // Seconds for the transition
 
         // Background Ships (Between stars and clouds)
         this.spaceships = [
@@ -235,74 +253,141 @@ export default class GameScreen {
             }
         });
 
+        // Ship Collection Check
+        if (!this.isFlying && !this.isTakingOff && !this.playerShip.collected) {
+            if (this.player.x < this.playerShip.x + this.playerShip.w &&
+                this.player.x + this.player.width > this.playerShip.x &&
+                this.player.y < this.playerShip.y + this.playerShip.h &&
+                this.player.y + this.player.height > this.playerShip.y) {
+                
+                this.isTakingOff = true;
+                this.playerShip.collected = true;
+                
+                // Align player center to ship center to prevent visual jump
+                this.player.x = this.playerShip.x + this.playerShip.w / 2 - this.player.width / 2;
+                this.player.y = this.playerShip.y + this.playerShip.h / 2 - this.player.height / 2;
+
+                this.player.vy = 0;
+                this.player.vx = 0;
+            }
+        }
+
         // Horizontal Movement
         const input = window.game?.inputManager;
         if (!input || !input.keys) return;
         
-        this.player.vx = 0;
-        if (input.keys.has('ArrowLeft') || input.keys.has('a')) this.player.vx = -this.player.speed;
-        if (input.keys.has('ArrowRight') || input.keys.has('d')) this.player.vx = this.player.speed;
+        if (this.isTakingOff) {
+            this.takeoffProgress += dt / this.takeoffDuration;
+            if (this.takeoffProgress >= 1) {
+                this.takeoffProgress = 1;
+                this.isTakingOff = false;
+                this.isFlying = true;
+            }
 
-        // Attack (Pulse)
-        if ((input.keys.has('f') || input.keys.has('j') || input.keys.has('Shift')) && this.player.attackCooldown <= 0) {
-            this.shootPulse();
-        }
-
-        // Jump
-        if ((input.keys.has('ArrowUp') || input.keys.has('w') || input.keys.has(' ')) && this.player.onGround) {
-            this.player.vy = this.player.jumpForce;
-            this.player.onGround = false;
-            this.onPlatform = null;
-        }
-
-        // Physics
-        this.player.vy += this.gravity * dt;
-        
-        // Apply platform velocity if riding
-        if (this.onPlatform) {
-            this.player.x += (this.player.vx + this.onPlatform.vx) * dt;
-            this.player.y += this.onPlatform.vy * dt;
-        } else {
+            // Continuous forward motion
+            const speed = 600 + (200 * this.takeoffProgress);
+            this.player.vx = speed;
             this.player.x += this.player.vx * dt;
-        }
-        
-        // Base vertical movement (gravity/velocity)
-        if (!this.onPlatform) {
+
+            // Vertical convergence to flying altitude (300)
+            this.player.y += (300 - this.player.y) * 2.0 * dt;
+
+            // Allow shooting while taking off
+            if (input.keys.has(' ') && this.player.attackCooldown <= 0) {
+                this.shootLaser();
+            }
+
+        } else if (this.isFlying) {
+            // Constant forward flight
+            this.player.vx = 800;
+            
+            // Vertical control
+            if (input.keys.has('ArrowUp') || input.keys.has('w')) this.player.vy = -600;
+            else if (input.keys.has('ArrowDown') || input.keys.has('s')) this.player.vy = 600;
+            else this.player.vy = 0; // No auto-drift, pure manual control
+
+            this.player.x += this.player.vx * dt;
             this.player.y += this.player.vy * dt;
+            
+            // Shooting
+            if (input.keys.has(' ') && this.player.attackCooldown <= 0) {
+                this.shootLaser();
+            }
+
+            // Bounds
+            if (this.player.y < 50) this.player.y = 50;
+            if (this.player.y > 800) this.player.y = 800;
+        } else {
+            this.player.vx = 0;
+            if (input.keys.has('ArrowLeft') || input.keys.has('a')) this.player.vx = -this.player.speed;
+            if (input.keys.has('ArrowRight') || input.keys.has('d')) this.player.vx = this.player.speed;
+
+            // Attack (Pulse)
+            if ((input.keys.has('f') || input.keys.has('j') || input.keys.has('Shift')) && this.player.attackCooldown <= 0) {
+                this.shootPulse();
+            }
+
+            // Jump
+            if ((input.keys.has('ArrowUp') || input.keys.has('w') || input.keys.has(' ')) && this.player.onGround) {
+                this.player.vy = this.player.jumpForce;
+                this.player.onGround = false;
+                this.onPlatform = null;
+            }
+
+            // Physics
+            this.player.vy += this.gravity * dt;
+            
+            // Apply platform velocity if riding
+            if (this.onPlatform) {
+                this.player.x += (this.player.vx + this.onPlatform.vx) * dt;
+                this.player.y += this.onPlatform.vy * dt;
+            } else {
+                this.player.x += this.player.vx * dt;
+            }
+            
+            // Base vertical movement (gravity/velocity)
+            if (!this.onPlatform) {
+                this.player.y += this.player.vy * dt;
+            }
         }
 
         // Collision Checks
         let wasOnGround = this.player.onGround;
-        this.player.onGround = false;
-        let currentPlatform = null;
+        if (!this.isFlying && !this.isTakingOff) {
+            this.player.onGround = false;
+            let currentPlatform = null;
 
-        // Platform Collisions (One-way: fall through from bottom)
-        if (this.player.vy >= 0) { // Only collide when falling or stationary vertically
-            for (const p of this.platforms) {
-                const px = this.player.x + this.player.width * 0.2; // Narrower collision box for player
-                const pw = this.player.width * 0.6;
-                
-                if (px < p.x + p.w &&
-                    px + pw > p.x &&
-                    this.player.y + this.player.height >= p.y &&
-                    this.player.y + this.player.height <= p.y + p.h + this.player.vy * dt + 10) {
+            // Platform Collisions (One-way: fall through from bottom)
+            if (this.player.vy >= 0) { // Only collide when falling or stationary vertically
+                for (const p of this.platforms) {
+                    const px = this.player.x + this.player.width * 0.2; // Narrower collision box for player
+                    const pw = this.player.width * 0.6;
                     
-                    this.player.y = p.y - this.player.height;
-                    this.player.vy = 0;
-                    this.player.onGround = true;
-                    currentPlatform = p;
-                    break;
+                    if (px < p.x + p.w &&
+                        px + pw > p.x &&
+                        this.player.y + this.player.height >= p.y &&
+                        this.player.y + this.player.height <= p.y + p.h + this.player.vy * dt + 10) {
+                        
+                        this.player.y = p.y - this.player.height;
+                        this.player.vy = 0;
+                        this.player.onGround = true;
+                        currentPlatform = p;
+                        break;
+                    }
                 }
             }
-        }
-        this.onPlatform = currentPlatform;
+            this.onPlatform = currentPlatform;
 
-        // World Bounds / Floor
-        if (this.player.y + this.player.height > this.groundY) {
-            this.player.y = this.groundY - this.player.height;
-            this.player.vy = 0;
-            this.player.onGround = true;
-            this.onPlatform = null;
+            // World Bounds / Floor
+            if (this.player.y + this.player.height > this.groundY) {
+                this.player.y = this.groundY - this.player.height;
+                this.player.vy = 0;
+                this.player.onGround = true;
+                this.onPlatform = null;
+            }
+        } else {
+             this.player.onGround = false;
+             this.onPlatform = null;
         }
 
         // Update Projectiles
@@ -323,6 +408,37 @@ export default class GameScreen {
                     pulse.life = 0; // Destroy pulse on hit
                 }
             });
+        });
+
+        // Update Lasers
+        this.lasers.forEach((laser, index) => {
+            laser.x += laser.vx * dt;
+            laser.life -= dt;
+            if (laser.life <= 0) {
+                this.lasers.splice(index, 1);
+                return;
+            }
+            
+            // Check hit enemies
+            this.enemies.forEach(enemy => {
+                if (!enemy.isDead && 
+                    laser.x < enemy.x + enemy.width &&
+                    laser.x + laser.w > enemy.x &&
+                    laser.y < enemy.y + enemy.height &&
+                    laser.y + laser.h > enemy.y) {
+                    
+                    enemy.takeDamage();
+                    // Don't destroy laser on hit, it pierces
+                }
+            });
+        });
+
+        // Update Laser Particles
+        this.laserParticles.forEach((p, index) => {
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            if (p.life <= 0) this.laserParticles.splice(index, 1);
         });
 
         // Update Enemies
@@ -346,7 +462,15 @@ export default class GameScreen {
 
         // Camera follow
         const targetCamX = this.player.x - this.virtualWidth / 2;
-        this.cameraX += (targetCamX - this.cameraX) * 0.1;
+        if (this.isFlying) {
+            this.cameraX = targetCamX; // Instant lock during flight
+        } else if (this.isTakingOff) {
+            // Smoothly transition from loose follow to instant lock
+            const followEase = 0.1 + (this.takeoffProgress * 0.9);
+            this.cameraX += (targetCamX - this.cameraX) * followEase;
+        } else {
+            this.cameraX += (targetCamX - this.cameraX) * 0.1;
+        }
     }
 
     shootPulse() {
@@ -358,6 +482,50 @@ export default class GameScreen {
             life: 1.5
         });
         this.player.attackCooldown = 0.3;
+    }
+
+    shootLaser() {
+        // Calculate ship nose position accurately
+        let xShift = 0;
+        let currentScale = 0.5;
+        if (this.isTakingOff) {
+            const ease = this.takeoffProgress * this.takeoffProgress * (3 - 2 * this.takeoffProgress);
+            xShift = -ease * 540;
+            currentScale = 1.0 - (ease * 0.5);
+        } else if (this.isFlying) {
+            xShift = -540;
+            currentScale = 0.5;
+        }
+
+        const drawW = this.playerShip.w * currentScale;
+        // Ship nose is at right edge of drawW
+        // drawX = this.player.x + xShift + this.player.width / 2 - drawW / 2;
+        const noseX = this.player.x + xShift + (this.player.width / 2) + (drawW / 2) - 40; 
+        const noseY = this.player.y + (this.player.height / 2);
+
+        this.lasers.push({
+            x: noseX,
+            y: noseY - 4,
+            w: 120, // Shorter laser length
+            h: 8,
+            vx: 1800,
+            life: 1.2
+        });
+        
+        // Add "cool" particles at the muzzle
+        for (let i = 0; i < 12; i++) {
+            this.laserParticles.push({
+                x: noseX,
+                y: noseY,
+                vx: 100 + Math.random() * 600,
+                vy: (Math.random() - 0.5) * 400,
+                life: 0.3 + Math.random() * 0.4,
+                size: 1 + Math.random() * 3,
+                color: '#00f2ff' // Pure neon blue particles
+            });
+        }
+        
+        this.player.attackCooldown = 0.12;
     }
 
     draw() {
@@ -382,22 +550,38 @@ export default class GameScreen {
         // Draw Mountains (behind buildings)
         this.drawMountains();
 
-        // Draw Layers (Buildings and Trees are behind)
+        // Draw Layers (Buildings)
         this.drawParallaxLayer(this.layers.find(l => l.name === 'buildings'));
-        this.drawParallaxLayer(this.layers.find(l => l.name === 'trees'));
+        
+        // Z-Index Handling
+        // We only move behind trees when we are high enough and small enough
+        // Also use a smoothing factor to prevent one-frame pop
+        const shouldDrawBehindTrees = (this.isFlying || (this.isTakingOff && this.takeoffProgress > 0.85));
+        
+        if (shouldDrawBehindTrees) {
+            this.drawPlayer();
+            this.drawLasers();
+        }
 
-        // Main World
+        this.ctx.save();
+        this.drawParallaxLayer(this.layers.find(l => l.name === 'trees'));
+        this.ctx.restore();
+
+        // Main World (Always draw this before near player)
         this.drawGround();
         this.drawGrass();
         this.drawPlatforms();
+        this.drawCollectibleShip();
         this.drawEnemies();
-        this.drawPulses();
-        this.drawPlayer();
-
-        // Foreground Grass (in front of player, smaller scale)
-        this.drawForegroundGrass();
         
-        // UI Overlay (Optional)
+        if (!shouldDrawBehindTrees) {
+            this.drawPlayer();
+            this.drawLasers();
+        }
+
+        // Projectiles and UI always foreground
+        this.drawPulses();
+        this.drawForegroundGrass();
         this.drawUI();
     }
 
@@ -410,10 +594,71 @@ export default class GameScreen {
         this.ctx.translate(-this.cameraX, 0);
         this.ctx.fillStyle = '#fff';
         this.ctx.shadowBlur = 10;
-        this.ctx.shadowColor = '#00ffcc';
+        this.ctx.shadowColor = '#00f2ff'; // Neon blue glow for pulses
         this.pulses.forEach(pulse => {
             this.ctx.fillRect(pulse.x, pulse.y, 20, 20);
         });
+        this.ctx.restore();
+    }
+
+    drawLasers() {
+        this.ctx.save();
+        this.ctx.translate(-this.cameraX, 0);
+        
+        // Draw Particles
+        this.laserParticles.forEach(p => {
+            this.ctx.fillStyle = p.color;
+            this.ctx.globalAlpha = p.life * 2;
+            this.ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+        this.ctx.globalAlpha = 1.0;
+
+        this.lasers.forEach(laser => {
+            // High-energy particle beam (Series of overlapping circles)
+            // This is effectively a "particle beam" drawn at once
+            const segments = 12;
+            const step = laser.w / segments;
+            
+            for (let i = 0; i < segments; i++) {
+                const progress = i / segments;
+                const particleX = laser.x + i * step;
+                const particleY = laser.y + laser.h / 2;
+                
+                // Pulsing size
+                const size = (laser.h * 1.5) * (0.8 + Math.sin(Date.now() * 0.02 + i) * 0.2);
+                
+                const grad = this.ctx.createRadialGradient(
+                    particleX, particleY, 0,
+                    particleX, particleY, size
+                );
+                
+                // Intense Neon Gradient
+                const alpha = 1.0 - (progress * 0.5); // Fades toward tail
+                grad.addColorStop(0, `rgba(0, 242, 255, ${alpha})`);   // Neon core (No white)
+                grad.addColorStop(0.6, `rgba(0, 100, 255, ${alpha})`); // Deeper blue edge
+                grad.addColorStop(1, 'rgba(0, 242, 255, 0)');          // Dissipating edge
+
+                this.ctx.fillStyle = grad;
+                this.ctx.beginPath();
+                this.ctx.arc(particleX, particleY, size, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Add tiny sub-particles for detail
+                if (Math.random() > 0.8) {
+                    this.ctx.fillStyle = '#00f2ff';
+                    this.ctx.fillRect(particleX + (Math.random()-0.5)*10, particleY + (Math.random()-0.5)*10, 2, 2);
+                }
+            }
+
+            // Core precision line (Piercing beam)
+            this.ctx.strokeStyle = '#00f2ff';
+            this.ctx.lineWidth = 3; // Thicker blue core
+            this.ctx.beginPath();
+            this.ctx.moveTo(laser.x, laser.y + laser.h/2);
+            this.ctx.lineTo(laser.x + laser.w, laser.y + laser.h/2);
+            this.ctx.stroke();
+        });
+        
         this.ctx.restore();
     }
 
@@ -421,21 +666,29 @@ export default class GameScreen {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Ensure Screen Space
         
-        this.ctx.fillStyle = 'white';
+        // Neon Blue Title
+        this.ctx.shadowBlur = 10;
+        this.ctx.shadowColor = '#00f2ff';
+        this.ctx.fillStyle = '#00f2ff'; 
         this.ctx.font = '32px "Press Start 2P"';
         this.ctx.textAlign = 'left';
         this.ctx.fillText('SIGNAL: STABLE', 50, 70);
         
         // Under Construction text
+        this.ctx.shadowBlur = 0;
+        this.ctx.fillStyle = 'white';
         this.ctx.textAlign = 'center';
         this.ctx.fillText('UNDER CONSTRUCTION', this.virtualWidth / 2, 120);
         
         // Health Bar UI
         this.ctx.textAlign = 'left';
         const hbWidth = 400;
-        this.ctx.fillStyle = '#333333';
+        this.ctx.fillStyle = '#1a1a1a';
         this.ctx.fillRect(50, 95, hbWidth, 25);
-        this.ctx.fillStyle = 'white'; 
+        
+        this.ctx.fillStyle = '#00f2ff'; // Neon Blue Health
+        this.ctx.shadowBlur = 15;
+        this.ctx.shadowColor = '#00f2ff';
         this.ctx.fillRect(50, 95, hbWidth * (Math.max(0, this.player.health) / this.player.maxHealth), 25);
         
         this.ctx.restore();
@@ -530,12 +783,12 @@ export default class GameScreen {
             this.ctx.fillRect(p.x, p.y, p.w, p.h);
 
             // Tech highlight
-            this.ctx.strokeStyle = '#00ffcc';
+            this.ctx.strokeStyle = '#00f2ff';
             this.ctx.lineWidth = 2;
             this.ctx.strokeRect(p.x, p.y, p.w, p.h);
             
             // "Signal" pattern on platform
-            this.ctx.fillStyle = '#00ffcc22';
+            this.ctx.fillStyle = '#00f2ff33';
             const blocks = 4;
             const blockW = p.w / blocks;
             for(let i = 0; i < blocks; i++) {
@@ -548,7 +801,66 @@ export default class GameScreen {
         this.ctx.restore();
     }
 
+    drawCollectibleShip() {
+        if (!this.playerShip.collected && this.playerShipImg.complete) {
+            this.ctx.save();
+            this.ctx.translate(-this.cameraX, 0);
+            this.ctx.drawImage(
+                this.playerShipImg, 
+                this.playerShip.x, 
+                this.playerShip.y, 
+                this.playerShip.w, 
+                this.playerShip.h
+            );
+            this.ctx.restore();
+        }
+    }
+
     drawPlayer() {
+        if (this.isTakingOff || this.isFlying) {
+            // Draw Ship instead of Player
+            if (this.playerShipImg.complete) {
+                this.ctx.save();
+                this.ctx.translate(-this.cameraX, 0);
+
+                // Animation params
+                let currentScale = 1.0;
+                let xShift = 0;
+
+                if (this.isTakingOff) {
+                    // Ease the progress
+                    const t = this.takeoffProgress;
+                    const ease = t * t * (3 - 2 * t); // Smoothstep
+
+                    // Scale from 1.0 down to 0.5 (480px)
+                    currentScale = 1.0 - (ease * 0.5);
+                    
+                    // Fall back to the left during takeoff
+                    xShift = -ease * 540; 
+                } else {
+                    currentScale = 0.5;
+                    xShift = -540;
+                }
+
+                const drawW = this.playerShip.w * currentScale;
+                const drawH = this.playerShip.h * currentScale;
+                
+                // Center relative to player position + the shift
+                const drawX = this.player.x + xShift + this.player.width / 2 - drawW / 2;
+                const drawY = this.player.y + this.player.height / 2 - drawH / 2;
+                
+                this.ctx.drawImage(
+                    this.playerShipImg,
+                    drawX,
+                    drawY,
+                    drawW,
+                    drawH
+                );
+                this.ctx.restore();
+            }
+            return;
+        }
+
         // Determine animation state
         let state = 'idle';
         if (!this.player.onGround) {
