@@ -95,6 +95,9 @@ export default class GameScreen {
         this.isTakingOff = false;
         this.takeoffProgress = 0; 
         this.takeoffDuration = 2.5; // Seconds for the transition
+        this.lockedWorldYOffset = 0; // Captured offset for fixed background
+        this.isBackgroundLocked = false; // Toggle for fixed vs dynamic background
+        this.currentWorldYOffset = 0; // The actual offset used in drawing (for smoothing)
 
         // Background Ships (Between stars and clouds)
         this.spaceships = [
@@ -275,6 +278,19 @@ export default class GameScreen {
         // Horizontal Movement
         const input = window.game?.inputManager;
         if (!input || !input.keys) return;
+
+        // Toggle Background Locking Feature
+        if (input.keys.has('b') && !this._bPressed) {
+            this.isBackgroundLocked = !this.isBackgroundLocked;
+            // If unlocking, it will jump back to dynamic. If locking, it captures current.
+            if (this.isBackgroundLocked) {
+                const startY = this.groundY - this.player.height;
+                const altitude = Math.max(0, startY - this.player.y);
+                this.lockedWorldYOffset = altitude * 0.8;
+            }
+            this._bPressed = true;
+        }
+        if (!input.keys.has('b')) this._bPressed = false;
         
         if (this.isTakingOff) {
             this.takeoffProgress += dt / this.takeoffDuration;
@@ -282,6 +298,12 @@ export default class GameScreen {
                 this.takeoffProgress = 1;
                 this.isTakingOff = false;
                 this.isFlying = true;
+                
+                // Capture the current worldYOffset to lock it for the "fixed background" feature
+                const startY = this.groundY - this.player.height;
+                const altitude = Math.max(0, startY - this.player.y);
+                this.lockedWorldYOffset = altitude * 0.8;
+                this.isBackgroundLocked = true;
             }
 
             // Continuous forward motion
@@ -471,6 +493,19 @@ export default class GameScreen {
         } else {
             this.cameraX += (targetCamX - this.cameraX) * 0.1;
         }
+
+        // --- Smooth World Vertical Offset (Parallax transition) ---
+        let targetYOffset = 0;
+        if (this.isBackgroundLocked) {
+            targetYOffset = this.lockedWorldYOffset;
+        } else if (this.isFlying || this.isTakingOff) {
+            const startY = this.groundY - this.player.height;
+            const altitude = Math.max(0, startY - this.player.y);
+            targetYOffset = altitude * 0.8;
+        }
+        
+        // Smoothly approach the target offset (0.05 factor for very gradual feel)
+        this.currentWorldYOffset += (targetYOffset - this.currentWorldYOffset) * 0.05;
     }
 
     shootPulse() {
@@ -533,6 +568,9 @@ export default class GameScreen {
         this.ctx.fillStyle = '#020408';
         this.ctx.fillRect(0, 0, this.virtualWidth, this.virtualHeight);
 
+        // Use the smoothed worldYOffset calculated in update()
+        const worldYOffset = this.currentWorldYOffset;
+
         // Draw Starfield (rendered first)
         this.drawStars();
 
@@ -541,21 +579,27 @@ export default class GameScreen {
 
         // Draw Sky Gradient from pre-rendered canvas
         if (this.skyCanvas) {
-            this.ctx.drawImage(this.skyCanvas, 0, 0, this.virtualWidth, this.groundY);
+            this.ctx.drawImage(this.skyCanvas, 0, worldYOffset * 0.2, this.virtualWidth, this.groundY);
         }
 
         // Draw Atmospheric Clouds
         this.drawAtmosphere();
 
         // Draw Mountains (behind buildings)
+        // Mountains move down significantly now
+        this.ctx.save();
+        this.ctx.translate(0, worldYOffset * 0.65);
         this.drawMountains();
+        this.ctx.restore();
 
         // Draw Layers (Buildings)
+        // Buildings move down almost as fast as ground
+        this.ctx.save();
+        this.ctx.translate(0, worldYOffset * 0.85);
         this.drawParallaxLayer(this.layers.find(l => l.name === 'buildings'));
+        this.ctx.restore();
         
         // Z-Index Handling
-        // We only move behind trees when we are high enough and small enough
-        // Also use a smoothing factor to prevent one-frame pop
         const shouldDrawBehindTrees = (this.isFlying || (this.isTakingOff && this.takeoffProgress > 0.85));
         
         if (shouldDrawBehindTrees) {
@@ -564,15 +608,21 @@ export default class GameScreen {
         }
 
         this.ctx.save();
+        // Trees move down with buildings
+        this.ctx.translate(0, worldYOffset * 0.85);
         this.drawParallaxLayer(this.layers.find(l => l.name === 'trees'));
         this.ctx.restore();
 
         // Main World (Always draw this before near player)
+        this.ctx.save();
+        this.ctx.translate(0, worldYOffset); // Ground and world objects move down the most
         this.drawGround();
         this.drawGrass();
         this.drawPlatforms();
         this.drawCollectibleShip();
         this.drawEnemies();
+        this.drawForegroundGrass();
+        this.ctx.restore();
         
         if (!shouldDrawBehindTrees) {
             this.drawPlayer();
@@ -581,7 +631,6 @@ export default class GameScreen {
 
         // Projectiles and UI always foreground
         this.drawPulses();
-        this.drawForegroundGrass();
         this.drawUI();
     }
 
@@ -679,6 +728,13 @@ export default class GameScreen {
         this.ctx.fillStyle = 'white';
         this.ctx.textAlign = 'center';
         this.ctx.fillText('UNDER CONSTRUCTION', this.virtualWidth / 2, 120);
+
+        // Background Lock Status
+        if (this.isFlying) {
+            this.ctx.font = '16px "Press Start 2P"';
+            this.ctx.textAlign = 'right';
+            this.ctx.fillText(`BG LOCK: ${this.isBackgroundLocked ? 'ON' : 'OFF'} (B)`, this.virtualWidth - 50, 70);
+        }
         
         // Health Bar UI
         this.ctx.textAlign = 'left';
