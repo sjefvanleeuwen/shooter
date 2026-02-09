@@ -110,7 +110,7 @@ async function copyAssetsForGame(gameId) {
     }
 
     const buildMode = process.env.BUILD_MODE || config?.general?.defaultMode || "modern";
-    const modeConfig = config?.modes?.[buildMode] || null;
+    const modeConfig = (gameId === "black-signal") ? null : (config?.modes?.[buildMode] || null);
 
     console.log(`Building assets for ${gameId} in ${buildMode.toUpperCase()} mode...`);
 

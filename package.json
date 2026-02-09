@@ -11,12 +11,11 @@
     "copy-assets:black-signal": "node scripts/copyAssets.js black-signal",
     "optimize": "node scripts/postProcessImages.js all",
     "optimize:xenowar": "node scripts/postProcessImages.js xenowar",
-    "optimize:black-signal": "node scripts/postProcessImages.js black-signal",
     "prebuild": "npm run clean",
     "build": "npm run copy-assets && vite build",
     "postbuild": "npm run optimize",
     "build:xenowar": "npm run clean && npm run copy-assets:xenowar && vite build && npm run optimize:xenowar",
-    "build:black-signal": "npm run clean && npm run copy-assets:black-signal && vite build && npm run optimize:black-signal",
+    "build:black-signal": "npm run clean && npm run copy-assets:black-signal && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
@@ -25,9 +24,12 @@
     "imagemin": "^8.0.1",
     "imagemin-pngquant": "^9.0.2",
     "imagemin-zopfli": "^7.0.0",
+    "rimraf": "^5.0.1",
     "sharp": "^0.32.6",
-    "vite": "^4.5.0",
-    "rimraf": "^5.0.1"
+    "vite": "^4.5.0"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "three": "^0.182.0"
+  }
 }

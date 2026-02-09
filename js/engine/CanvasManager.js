@@ -5,17 +5,13 @@ class CanvasManager {
         this.canvas = canvas;
         if (!this.canvas) throw new Error('Canvas element required');
 
-        // Force exact 1024x1024 dimensions
-        this.canvas.width = 1024;
-        this.canvas.height = 1024;
-        
         // Set up WebGL renderer
         this.renderer = new WebGLRenderer(this.canvas);
         this.ctx = this.renderer; // Use renderer as ctx
 
-        // Store virtual dimensions
-        this.virtualWidth = 1024;
-        this.virtualHeight = 1024;
+        // Store virtual dimensions from the canvas itself
+        this.virtualWidth = this.canvas.width;
+        this.virtualHeight = this.canvas.height;
     }
 
     clearScreen() {

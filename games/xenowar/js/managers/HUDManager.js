@@ -21,6 +21,7 @@ class HUDManager {
 
     draw(lives, score, highScore, boss = null) {
         this.ctx.save();
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Force Screen Space
         
         // Reset typical context state that might be modified by game objects
         this.ctx.globalAlpha = 1.0;
@@ -29,12 +30,17 @@ class HUDManager {
         this.ctx.shadowColor = 'transparent';
         this.ctx.filter = 'none';
 
-        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillStyle = 'white';
         this.ctx.font = this.font;
         this.ctx.textBaseline = 'alphabetic';
 
+        // Under Construction at top center
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('UNDER CONSTRUCTION', this.virtualWidth / 2, 40);
+
         // Lives at bottom left
         this.ctx.textAlign = 'left';
+        this.ctx.fillStyle = 'white';
         this.ctx.fillText(`LIVES: ${lives}`, 20, this.virtualHeight - 20);
 
         // High Score at bottom center

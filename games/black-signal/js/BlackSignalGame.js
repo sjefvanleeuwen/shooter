@@ -5,9 +5,9 @@ export default class BlackSignalGame extends Engine {
     constructor() {
         super({
             gameId: 'black-signal',
-            width: 1024,
-            height: 1024,
-            enableDebug: true,
+            width: 1920,
+            height: 1080,
+            enableDebug: false,
             crtConfigPath: 'games/black-signal/config/crt-effect.json',
             mobileControls: {
                 // We'll use simple colors or placeholders for now

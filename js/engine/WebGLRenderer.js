@@ -493,8 +493,17 @@ export default class WebGLRenderer {
     set fillStyle(v) {
         if (typeof v === 'string') {
             if (v.startsWith('#')) {
-                const r=parseInt(v.slice(1,3),16)/255, g=parseInt(v.slice(3,5),16)/255, b=parseInt(v.slice(5,7),16)/255;
-                this.currentState.fillStyle = [r,g,b,1];
+                let r=1, g=1, b=1;
+                if (v.length === 4) { // #RGB
+                    r = parseInt(v[1] + v[1], 16) / 255;
+                    g = parseInt(v[2] + v[2], 16) / 255;
+                    b = parseInt(v[3] + v[3], 16) / 255;
+                } else if (v.length === 7) { // #RRGGBB
+                    r = parseInt(v.slice(1, 3), 16) / 255;
+                    g = parseInt(v.slice(3, 5), 16) / 255;
+                    b = parseInt(v.slice(5, 7), 16) / 255;
+                }
+                this.currentState.fillStyle = [isNaN(r) ? 1 : r, isNaN(g) ? 1 : g, isNaN(b) ? 1 : b, 1];
             } else if (v.startsWith('rgb')) {
                 const m = v.match(/[\d.]+/g);
                 if (m) {

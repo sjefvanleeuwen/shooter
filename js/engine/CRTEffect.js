@@ -5,10 +5,10 @@ class CRTEffect {
         this.gameCanvas = targetCanvas;
         this.configPath = configPath;
 
-        // Create WebGL canvas with fixed 1024x1024 dimensions
+        // Create WebGL canvas matching the target canvas resolution
         this.glCanvas = document.createElement('canvas');
-        this.glCanvas.width = 1024;
-        this.glCanvas.height = 1024;
+        this.glCanvas.width = this.gameCanvas.width;
+        this.glCanvas.height = this.gameCanvas.height;
         
         // Initial style (will be updated by resize)
         this.glCanvas.style.display = 'block';
@@ -47,8 +47,8 @@ class CRTEffect {
     }
 
     resize() {
-        // Keep 1:1 aspect ratio
-        const aspect = 1.0; 
+        // Use the native aspect ratio of the internal buffer
+        const aspect = this.glCanvas.width / this.glCanvas.height; 
         const availableWidth = window.innerWidth - (this.padding.left + this.padding.right);
         const availableHeight = window.innerHeight - (this.padding.top + this.padding.bottom);
         
@@ -95,11 +95,12 @@ class CRTEffect {
             console.error('Failed to load CRT config:', err);
             // Fallback to default values
             this.config = {
-                scanline: { intensity: 0.18, count: 1024.0, rollingSpeed: 0.3 },
-                screenEffects: { vignetteStrength: 0.22, brightness: 1.1, curvature: 0.1 },
-                colorEffects: { rgbShift: 0.0015 },
+                scanline: { intensity: 0.23, count: 1024.0, rollingSpeed: 0.3 },
+                screenEffects: { vignetteStrength: 0.22, brightness: 1.4, curvature: 0.05 },
+                colorEffects: { rgbShift: 0.001, saturation: 1.45 },
                 blur: { horizontal: 0.4 },
-                distortion: { flickerSpeed: 8.0, flickerIntensity: 0.03 }
+                distortion: { flickerSpeed: 8.0, flickerIntensity: 0.03, noiseAmount: 0.07 },
+                saturation: 1.45
             };
         }
     }
@@ -132,12 +133,18 @@ class CRTEffect {
             uniform float u_flickerSpeed;
             uniform float u_flickerIntensity;
             uniform float u_noiseAmount;
+            uniform float u_saturation;
             
             in vec2 v_texCoord;
             out vec4 outColor;
             
             float rand(vec2 co) {
                 return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+            }
+
+            vec3 applySaturation(vec3 color, float saturation) {
+                float intensity = dot(color, vec3(0.299, 0.587, 0.114));
+                return mix(vec3(intensity), color, saturation);
             }
 
             vec3 sampleWithBlur(sampler2D tex, vec2 uv, float blur) {
@@ -189,6 +196,7 @@ class CRTEffect {
                 color.b = sampleWithBlur(u_image, bUV, u_horizontalBlur).b;
 
                 // Apply effects
+                color = applySaturation(color, u_saturation);
                 color *= u_brightness;
                 color *= 1.0 - (scanline * u_scanlineIntensity);
                 color *= 1.0 - length(curve_uv) * u_vignetteStrength;
@@ -224,7 +232,8 @@ class CRTEffect {
             horizontalBlur: this.gl.getUniformLocation(this.program, 'u_horizontalBlur'),
             flickerSpeed: this.gl.getUniformLocation(this.program, 'u_flickerSpeed'),
             flickerIntensity: this.gl.getUniformLocation(this.program, 'u_flickerIntensity'),
-            noiseAmount: this.gl.getUniformLocation(this.program, 'u_noiseAmount')
+            noiseAmount: this.gl.getUniformLocation(this.program, 'u_noiseAmount'),
+            saturation: this.gl.getUniformLocation(this.program, 'u_saturation')
         };
     }
 
@@ -293,8 +302,8 @@ class CRTEffect {
         const gl = this.gl;
         if (!this.program || !this.config) return; // Wait for initialization
 
-        // Ensure viewport matches fixed canvas size
-        gl.viewport(0, 0, 1024, 1024);
+        // Ensure viewport matches canvas size
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -312,9 +321,12 @@ class CRTEffect {
         if (this.config) {
             const s = this.config.scanline || { intensity: 0, count: 0, rollingSpeed: 0 };
             const e = this.config.screenEffects || { vignetteStrength: 0, brightness: 1, curvature: 0 };
-            const c = this.config.colorEffects || { rgbShift: 0 };
+            const c = this.config.colorEffects || { rgbShift: 0, saturation: 1.0 };
             const b = this.config.blur || { horizontal: 0 };
             const d = this.config.distortion || { flickerSpeed: 0, flickerIntensity: 0, noiseAmount: 0 };
+            
+            // Allow saturation from either top level or colorEffects
+            const sat = this.config.saturation !== undefined ? this.config.saturation : (c.saturation !== undefined ? c.saturation : 1.0);
 
             gl.uniform1f(this.uniformLocations.scanlineIntensity, s.intensity);
             gl.uniform1f(this.uniformLocations.scanlineCount, s.count);
@@ -327,6 +339,7 @@ class CRTEffect {
             gl.uniform1f(this.uniformLocations.flickerSpeed, d.flickerSpeed);
             gl.uniform1f(this.uniformLocations.flickerIntensity, d.flickerIntensity);
             gl.uniform1f(this.uniformLocations.noiseAmount, d.noiseAmount);
+            gl.uniform1f(this.uniformLocations.saturation, sat);
         }
 
         // Set attributes

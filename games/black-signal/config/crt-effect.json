@@ -1,18 +1,18 @@
 {
   "scanline": {
-    "intensity": 0.3,
-    "count": 1024.0,
+    "intensity": 0.23,
+    "count": 1080.0,
     "rollingSpeed": 8.0
   },
   "screenEffects": {
     "vignetteStrength": 0.3,
-    "brightness": 1.0,
-    "curvature": 0.08,
+    "brightness": 1.4,
+    "curvature": 0.05,
     "gamma": 1.0
   },
   "colorEffects": {
-    "rgbShift": 0.002,
-    "saturation": 0.8,
+    "rgbShift": 0.001,
+    "saturation": 1.45,
     "contrast": 1.1
   },
   "blur": {
@@ -22,7 +22,7 @@
   "distortion": {
     "flickerSpeed": 4.0,
     "flickerIntensity": 0.02,
-    "noiseAmount": 0.04,
+    "noiseAmount": 0.07,
     "ghosting": 0.1
   }
 }

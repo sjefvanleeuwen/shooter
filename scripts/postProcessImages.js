@@ -66,12 +66,18 @@ async function optimizeGame(gameId) {
 async function main() {
     const gameIdArg = process.argv[2];
     if (gameIdArg && gameIdArg !== "all") {
+        if (gameIdArg === "black-signal") {
+            console.log("Skipping optimization for black-signal as requested.");
+            return;
+        }
         await optimizeGame(gameIdArg);
     } else {
         const gamesDir = path.join(projectRoot, "games");
         const items = await fs.readdir(gamesDir, { withFileTypes: true });
         for (const i of items) {
-            if (i.isDirectory()) await optimizeGame(i.name);
+            if (i.isDirectory() && i.name !== "black-signal") {
+                await optimizeGame(i.name);
+            }
         }
     }
     console.log("Optimization complete!");
