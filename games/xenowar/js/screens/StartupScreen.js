@@ -1,11 +1,11 @@
 import AssetPreloader from '../../../../js/engine/AssetPreloader.js';
-import assets from '../config/assetManifest.js';
 
 class StartupScreen {
     constructor(ctx, options = {}) {
         this.ctx = ctx;
         this.virtualWidth = options.virtualWidth;
         this.virtualHeight = options.virtualHeight;
+        this.assets = options.assets;
         this.alpha = 0;
         this.fadeIn = true;
         this.fadeSpeed = 0.8;
@@ -37,7 +37,7 @@ class StartupScreen {
             this.preloadCurrentFile = url.split('/').pop();
         };
 
-        preloader.checkAll(assets).then(result => {
+        preloader.checkAll(this.assets).then(result => {
             this.preloadDone = true;
             this.preloadMissing = result.missing;
 

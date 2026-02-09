@@ -1,3 +1,5 @@
+import AssetResolver from '../../../../js/engine/AssetResolver.js';
+
 // Shared asset cache
 const spriteCache = {};
 const shadowCache = {};
@@ -48,7 +50,7 @@ class Alien {
         const src = 'games/xenowar/sprites/alien1.png';
         if (!spriteCache[src]) {
             const img = new Image();
-            img.src = src;
+            img.src = AssetResolver.resolve(src);
             spriteCache[src] = img;
             
             // Generate shadow when image loads
@@ -58,13 +60,6 @@ class Alien {
         }
         this.img = spriteCache[src];
         this.shadowKey = src; // Key to access shadowCache
-        
-        // Use root-relative path for Vite
-        if (src.startsWith('./')) {
-            this.img.src = src.substring(2);
-        } else {
-            this.img.src = src;
-        }
     }
 
     generateShadow(key, img) {

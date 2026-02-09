@@ -1,4 +1,5 @@
 import AudioManager from './AudioManager.js';
+import AssetResolver from './AssetResolver.js';
 
 class MusicPlayer {
     constructor(tracks = []) {
@@ -52,7 +53,7 @@ class MusicPlayer {
         }
 
         try {
-            const response = await fetch(url);
+            const response = await AssetResolver.fetch(url);
             const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
             this.loadedBuffers.set(url, audioBuffer); // Cache the buffer
@@ -89,6 +90,8 @@ class MusicPlayer {
                 console.log('Now playing:', trackPath.split('/').pop());
             } catch (error) {
                 console.error('Error playing track:', error);
+                // Try next track after a short delay to prevent infinite loop of death
+                setTimeout(() => this.playNext(), 100);
             }
         }
     }

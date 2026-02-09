@@ -5,21 +5,60 @@ import GameScreen from './screens/GameScreen.js';
 import GameStateManager from './managers/GameStateManager.js';
 import HUDManager from './managers/HUDManager.js';
 import ImageBackgroundScroller from './imageBackgroundScroller.js';
-import { assets } from './config/assetManifest.js';
+import { assets as manifest } from './config/assetManifest.js';
 
 export default class ShooterGame extends Engine {
     constructor() {
+        // Domain and SSL verification hook
+        const _0xf2 = () => {
+             const h = atob('eGVub3dhci5zamVmLnZhbi5sZWV1d2VuLnNpdGU=');
+             const p = atob('aHR0cHM6');
+             if (window.location.hostname !== h || window.location.protocol !== p) {
+                 // Wipe body and stall engine
+                 document.body.innerHTML = '<div style="color:red;font-family:monospace;padding:20px">ERROR: SECURE LINK REQUIRED</div>';
+                 throw new Error('Unauthorized Deployment');
+             }
+        };
+        
+        // Only run check in production builds (where obfuscation is active)
+        if (import.meta.env.PROD && import.meta.env.VITE_OBFUSCATE === 'true') {
+            _0xf2();
+        }
+
+        // If we have bundleData, filter the manifest to only include what's actually bundled
+        // This avoids 404s/warnings for music tracks we skipped to save space.
+        const runtimeAssets = JSON.parse(JSON.stringify(manifest)); // Deep copy
+        if (window.gameBundleData) {
+            const bundledPaths = Object.keys(window.gameBundleData);
+            
+            // Filter music
+            runtimeAssets.music = runtimeAssets.music.filter(track => {
+                const relative = track.replace(/^\//, '');
+                return bundledPaths.includes(track) || bundledPaths.includes(relative);
+            });
+
+            // Filter sfx (objects)
+            for (const [key, url] of Object.entries(runtimeAssets.sfx)) {
+                const relative = url.replace(/^\//, '');
+                if (!bundledPaths.includes(url) && !bundledPaths.includes(relative)) {
+                    delete runtimeAssets.sfx[key];
+                }
+            }
+        }
+
         super({
             width: 1024,
             height: 1024,
             enableDebug: false,
-            musicTracks: assets.music,
+            musicTracks: runtimeAssets.music,
             crtConfigPath: 'games/xenowar/config/crt-effect.json',
             mobileControls: {
                 buttonBlueUrl: 'games/xenowar/sprites/ui/button-blue.png',
                 buttonRedUrl: 'games/xenowar/sprites/ui/button-red.png'
             }
         });
+
+        this.assets = runtimeAssets; // Store for other managers
 
         this.bossVoiceKeys = [
             'boss_hope', 'boss_mistake', 'boss_devour', 'boss_erase', 
@@ -30,7 +69,7 @@ export default class ShooterGame extends Engine {
         this.hudManager = new HUDManager(this.ctx, this.virtualWidth, this.virtualHeight);
 
         // Preload sounds
-        this.audioManager.preloadGameSounds(assets.sfx).catch(err => {
+        this.audioManager.preloadGameSounds(runtimeAssets.sfx).catch(err => {
             console.error('Failed to preload shooter sounds:', err);
         });
 
@@ -45,7 +84,8 @@ export default class ShooterGame extends Engine {
         this.registerScreens({
             startup: new StartupScreen(this.ctx, {
                 virtualWidth: this.virtualWidth,
-                virtualHeight: this.virtualHeight
+                virtualHeight: this.virtualHeight,
+                assets: runtimeAssets
             }),
             intro: new IntroScreen(this.ctx, {
                 virtualWidth: this.virtualWidth,

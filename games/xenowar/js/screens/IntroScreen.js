@@ -1,3 +1,5 @@
+import AssetResolver from '../../../../js/engine/AssetResolver.js';
+
 class IntroScreen {
     constructor(ctx, options = {}) {
         this.ctx = ctx;
@@ -7,7 +9,7 @@ class IntroScreen {
         
         // Load logo
         this.logo = new Image();
-        this.logo.src = 'games/xenowar/sprites/xenowar.png';
+        this.logo.src = AssetResolver.resolve('games/xenowar/sprites/xenowar.png');
         
         // Add some animation properties
         this.alpha = 0;

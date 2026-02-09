@@ -1,4 +1,5 @@
 import VideoRecorder from './VideoRecorder.js';
+import AssetResolver from './AssetResolver.js';
 
 class CRTEffect {
     constructor(targetCanvas, container, audioManager = null, configPath = null) {
@@ -81,16 +82,16 @@ class CRTEffect {
         try {
             let response;
             if (this.configPath) {
-                response = await fetch(this.configPath);
+                response = await AssetResolver.fetch(this.configPath);
             }
             
             if (!response || !response.ok) {
                 // Try local fallback if specific path failed or wasn't provided
-                response = await fetch('/config/crt-effect.json');
+                response = await AssetResolver.fetch('/config/crt-effect.json');
             }
-            if (!response.ok) {
+            if (!response || !response.ok) {
                 // Try relative path as secondary fallback
-                response = await fetch('./config/crt-effect.json');
+                response = await AssetResolver.fetch('./config/crt-effect.json');
             }
             
             if (!response.ok) {

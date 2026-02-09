@@ -1,11 +1,13 @@
+import AssetResolver from './AssetResolver.js';
+
 export default class MobileControls {
     constructor(options = {}) {
         // Simple touch detection
         this.isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         if (!this.isMobile) return;
 
-        this.buttonBlueUrl = options.buttonBlueUrl || '';
-        this.buttonRedUrl = options.buttonRedUrl || '';
+        this.buttonBlueUrl = AssetResolver.resolve(options.buttonBlueUrl || '');
+        this.buttonRedUrl = AssetResolver.resolve(options.buttonRedUrl || '');
 
         console.log("Mobile device detected. Initializing touch controls.");
 

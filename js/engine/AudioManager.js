@@ -1,3 +1,5 @@
+import AssetResolver from './AssetResolver.js';
+
 class AudioManager {
     static instance = null;
 
@@ -76,14 +78,14 @@ class AudioManager {
     }
 
     async loadSound(key, url) {
-        const response = await fetch(url);
+        const response = await AssetResolver.fetch(url);
         const arrayBuffer = await response.arrayBuffer();
         const audioBuffer = await this.context.decodeAudioData(arrayBuffer);
         this.sounds.set(key, audioBuffer);
     }
 
     async loadMusic(key, url) {
-        const response = await fetch(url);
+        const response = await AssetResolver.fetch(url);
         const arrayBuffer = await response.arrayBuffer();
         const audioBuffer = await this.context.decodeAudioData(arrayBuffer);
         this.music.set(key, audioBuffer);

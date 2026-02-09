@@ -74,7 +74,15 @@ export default class AssetPreloader {
      * • Images (.png, .jpg, .webp) → load via Image element (catches decode errors)
      * • Everything else → HEAD fetch (just checks HTTP 200)
      */
-    async _checkOne(url) {
+    async _checkOne(url) {        // Check if we have this asset in our bundleData first
+        const bundleData = window.gameBundleData;
+        if (bundleData) {
+            // Match against relative path or full URL
+            const relativePath = url.replace(/^(?:https?:\/\/[^\/]+)?\//, '');
+            if (bundleData[url] || bundleData[relativePath]) {
+                return true;
+            }
+        }
         try {
             const safeUrl = this._encodeURL(url);
             if (/\.(png|jpe?g|webp|gif|svg)$/i.test(url)) {

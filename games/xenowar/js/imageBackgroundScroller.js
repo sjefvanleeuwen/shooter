@@ -1,3 +1,5 @@
+import AssetResolver from '../../../js/engine/AssetResolver.js';
+
 export default class ImageBackgroundScroller {
     constructor(ctx, options = {}) {
         this.ctx = ctx;
@@ -25,7 +27,8 @@ export default class ImageBackgroundScroller {
         
         for (let i = 0; i < 21; i++) {
             const img = new Image();
-            img.src = `games/xenowar/backgrounds/level0/${indices[i]}.png`;
+            const rawUrl = `games/xenowar/backgrounds/level0/${indices[i]}.png`;
+            img.src = AssetResolver.resolve(rawUrl);
             
             const layerObj = {
                 image: img,

@@ -20,7 +20,6 @@ export const assets = {
     /* ── 3-D models (GLB) ─────────────────────────────────── */
     models: [
         'games/xenowar/3d/shield_s.glb',
-        'games/xenowar/3d/meteor1.glb',
     ],
 
     /* ── Sound-effects (loaded by AudioManager) ───────────── */

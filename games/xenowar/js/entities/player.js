@@ -1,3 +1,5 @@
+import AssetResolver from '../../../../js/engine/AssetResolver.js';
+
 class Player {
     constructor(ctx, options = {}) {
         this.ctx = ctx;
@@ -16,7 +18,7 @@ class Player {
 
         // Load sprite image.
         this.img = new Image();
-        this.img.src = 'games/xenowar/sprites/player.png';
+        this.img.src = AssetResolver.resolve('games/xenowar/sprites/player.png');
 
         this.setupInput();
 

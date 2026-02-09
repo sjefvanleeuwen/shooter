@@ -1,20 +1,34 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import fs from 'fs-extra';
+import obfuscator from 'vite-plugin-javascript-obfuscator';
+import { viteSingleFile } from "vite-plugin-singlefile";
 
 const selectedGame = process.env.VITE_GAME;
-const inputs = {
+const shouldObfuscate = process.env.VITE_OBFUSCATE === 'true';
+const isSingleFile = process.env.VITE_SINGLE_FILE === 'true';
+
+let inputs = {
   main: '/index.html',
   xenowar: '/xenowar.html',
   blackSignal: '/black-signal.html'
 };
 
-// If building a single game, only include launcher + that game.
-if (selectedGame === 'xenowar') {
-  delete inputs.blackSignal;
-}
-if (selectedGame === 'black-signal') {
-  delete inputs.xenowar;
+// If building a single file, we ONLY want one entry point.
+if (isSingleFile) {
+  if (selectedGame === 'xenowar') {
+    inputs = { main: '/xenowar.html' }; // SingleFile plugin likes 'main' or just one entry
+  } else if (selectedGame === 'black-signal') {
+    inputs = { main: '/black-signal.html' };
+  }
+} else {
+  // If building a single game, only include launcher + that game.
+  if (selectedGame === 'xenowar') {
+    delete inputs.blackSignal;
+  }
+  if (selectedGame === 'black-signal') {
+    delete inputs.xenowar;
+  }
 }
 
 export default defineConfig({
@@ -51,9 +65,37 @@ export default defineConfig({
     }
   },
   publicDir: 'public',
-  plugins: [{
-    name: 'copy-config',
-    closeBundle: async () => {
+  plugins: [
+    isSingleFile ? viteSingleFile() : null,
+    shouldObfuscate ? obfuscator({
+      options: {
+        compact: true,
+        controlFlowFlattening: true,
+        controlFlowFlatteningThreshold: 0.75,
+        deadCodeInjection: true,
+        deadCodeInjectionThreshold: 0.4,
+        debugProtection: true,
+        debugProtectionInterval: 0,
+        disableConsoleOutput: true,
+        identifierNamesGenerator: 'hexadecimal',
+        log: false,
+        numbersToExpressions: true,
+        renameGlobals: false,
+        selfDefending: true,
+        simplify: true,
+        splitStrings: true,
+        splitStringsChunkLength: 10,
+        stringArray: true,
+        stringArrayCallsTransform: true,
+        stringArrayCallsTransformThreshold: 0.75,
+        stringArrayEncoding: ['base64'],
+        stringArrayThreshold: 0.75,
+        unicodeEscapeSequence: false
+      }
+    }) : null,
+    {
+      name: 'copy-config',
+      closeBundle: async () => {
       // Ensure config directory exists in dist
       await fs.ensureDir('dist/config');
       // Copy default CRT config if it exists (for base engine)

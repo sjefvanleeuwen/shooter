@@ -1,10 +1,12 @@
+import AssetResolver from './AssetResolver.js';
+
 export class GLBLoader {
     static async loadVideo(url) {
         throw new Error("Not implemented");
     }
 
     static async load(url) {
-        const response = await fetch(url);
+        const response = await AssetResolver.fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to load GLB from ${url}: ${response.status} ${response.statusText}`);
         }
